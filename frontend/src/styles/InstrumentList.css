@@ -1,0 +1,9 @@
+.instrument-list-page {
+  padding: 20px;
+}
+
+.instrument-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}

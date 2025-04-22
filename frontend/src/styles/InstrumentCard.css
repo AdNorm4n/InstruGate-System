@@ -1,0 +1,19 @@
+.instrument-card {
+  border: 1px solid #ccc;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 12px;
+  width: 280px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+}
+
+.instrument-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.instrument-card h3 {
+  margin-top: 8px;
+}
