@@ -1,8 +1,21 @@
+import React from "react";
 import Form from "../components/Form";
+import { Stack, Box, Paper } from "@mui/material";
 import "../styles/Login.css";
+import logo from "../assets/instrugate.png"; // make sure the logo is in this path
 
 function Login() {
-  return <Form route="/api/token/" method="login" />;
+  return (
+    <Stack direction="row" justifyContent="center">
+      <Box className="logo">
+        <img src={logo} alt="Logo" style={{ height: 200, width: 200 }} />
+      </Box>
+
+      <Paper elevation={3} className="border-box">
+        <Form route="/api/token/" method="login" />
+      </Paper>
+    </Stack>
+  );
 }
 
 export default Login;

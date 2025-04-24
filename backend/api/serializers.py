@@ -5,6 +5,8 @@ from .models import (
     Instrument,
     ConfigurableField,
     FieldOption,
+    AddOn,
+    AddOnType,
 )
 
 
@@ -51,3 +53,17 @@ class InstrumentConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = Instrument
         fields = ['id', 'name', 'description', 'fields']
+
+
+class AddOnTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AddOnType
+        fields = ['id', 'name']
+
+
+class AddOnSerializer(serializers.ModelSerializer):
+    addon_type = AddOnTypeSerializer()
+
+    class Meta:
+        model = AddOn
+        fields = ['id', 'label', 'code', 'addon_type']

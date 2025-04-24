@@ -76,12 +76,18 @@ class FieldOption(models.Model):
         return f"[{self.code}] {self.label}"
 
 
-# Optional Add-on model
-class AddOn(models.Model):
-    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE, related_name="addons")
-    label = models.CharField(max_length=255)
-    code = models.CharField(max_length=10)
+class AddOnType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    instruments = models.ManyToManyField(Instrument, related_name="addon_types")
 
     def __str__(self):
-        return f"[{self.code}] {self.label} - {self.instrument.name}"
+        return self.name
 
+
+class AddOn(models.Model):
+    addon_type = models.ForeignKey(AddOnType, on_delete=models.CASCADE, related_name="addons")
+    label = models.CharField(max_length=200)  # e.g., "Stainless Steel Tags"
+    code = models.CharField(max_length=20)    # e.g., "NH"
+
+    def __str__(self):
+        return f"[{self.code}] {self.label} ({self.addon_type.name})"

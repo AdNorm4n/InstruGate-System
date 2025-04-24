@@ -1,60 +1,78 @@
+/* Login layout styling */
 .login {
-  background: var(--darkened-bg);
-  height: auto;
-}
-
-.login #header {
-  height: auto;
-  padding: 15px 16px;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f3f3f3;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.login #header h1 {
-  font-size: 1.125rem;
-  margin: 0;
+/* Logo panel */
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  background-color: #033f63;
+  color: #ffffff;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border: 1px solid #033f63;
+  min-height: 400px;
+  margin-top: 10%;
 }
 
-.login #header h1 a {
-  color: var(--header-link-color);
+/* Form container beside logo */
+.border-box {
+  display: flex;
+  justify-content: center;
+  width: 400px;
+  background-color: white;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border: 1px solid #033f63;
+  padding: 2rem;
+  margin-top: 10%;
 }
 
-.login #content {
-  padding: 20px 20px 0;
+/* Username & password input wrapper */
+.input-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.login #container {
-  background: var(--body-bg);
-  border: 1px solid var(--hairline-color);
-  border-radius: 4px;
-  overflow: hidden;
-  width: 28em;
-  min-width: 300px;
-  margin: 100px auto;
-  height: auto;
-}
-
-.login .form-row {
-  padding: 4px 0;
-}
-
-.login .form-row label {
-  display: block;
-  line-height: 2em;
-}
-
-.login .form-row #id_username,
-.login .form-row #id_password {
-  padding: 8px;
+/* Each input row with icon + field */
+.input-container {
+  display: flex;
+  align-items: flex-end;
   width: 100%;
-  box-sizing: border-box;
 }
 
-.login .submit-row {
-  padding: 1em 0 0 0;
-  margin: 0;
+/* Input field focus override */
+.input-field:focus {
+  color: #28666e;
+}
+
+/* Icon color */
+.eye-icon,
+.MuiSvgIcon-root {
+  color: #033f63;
+}
+
+/* Register link styling (optional if needed) */
+.register-link {
+  margin-top: 1rem;
   text-align: center;
 }
 
-.login .password-reset-link {
-  text-align: center;
+.register-link a {
+  color: #033f63;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.register-link a:hover {
+  color: #28666e;
 }

@@ -1,4 +1,4 @@
-// ✅ src/components/InstrumentCard.jsx
+// src/components/InstrumentCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/InstrumentCard.css";

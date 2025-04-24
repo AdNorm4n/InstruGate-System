@@ -8,5 +8,5 @@ from .views import (
 urlpatterns = [
     path("instruments/", InstrumentListView.as_view(), name="instrument-list"),
     path("instruments/<int:pk>/config/", InstrumentConfigView.as_view(), name="instrument-config"),
-    path("instruments/<int:pk>/options/", InstrumentOptionListView.as_view(), name="instrument-options"),
+    path("instruments/<int:pk>/addons/", InstrumentOptionListView.as_view(), name="instrument-addons"),
 ]

@@ -1,5 +1,9 @@
 from django.contrib import admin
-from .models import Category, InstrumentType, Instrument, ConfigurableField, FieldOption, AddOn
+from .models import (
+    Category, InstrumentType, Instrument,
+    ConfigurableField, FieldOption,
+    AddOn, AddOnType
+)
 
 
 @admin.register(Category)
@@ -53,8 +57,23 @@ class InstrumentAdmin(admin.ModelAdmin):
         }),
     )
 
+
+class AddOnInline(admin.TabularInline):
+    model = AddOn
+    extra = 1
+    fields = ["label", "code"]
+
+
+@admin.register(AddOnType)
+class AddOnTypeAdmin(admin.ModelAdmin):
+    list_display = ["name"]
+    search_fields = ["name"]
+    filter_horizontal = ["instruments"]
+    inlines = [AddOnInline]
+
+
 @admin.register(AddOn)
 class AddOnAdmin(admin.ModelAdmin):
-    list_display = ["label", "code", "instrument"]
-    list_filter = ["instrument"]
+    list_display = ["label", "code", "addon_type"]
+    list_filter = ["addon_type"]
     search_fields = ["label", "code"]

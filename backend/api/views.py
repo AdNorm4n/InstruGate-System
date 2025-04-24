@@ -1,11 +1,11 @@
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Category, InstrumentType, Instrument, FieldOption
+from .models import Category, InstrumentType, Instrument, AddOn
 from .serializers import (
     InstrumentSerializer,
     InstrumentConfigSerializer,
-    FieldOptionSerializer,
+    AddOnSerializer,
 )
 
 
@@ -37,12 +37,8 @@ class InstrumentConfigView(APIView):
 
 
 class InstrumentOptionListView(generics.ListAPIView):
-    serializer_class = FieldOptionSerializer
+    serializer_class = AddOnSerializer
 
     def get_queryset(self):
         instrument_id = self.kwargs["pk"]
-        return FieldOption.objects.filter(
-            field__instrument__id=instrument_id,
-            field__parent_field__isnull=True,
-            field__name__icontains="option"
-        )
+        return AddOn.objects.filter(addon_type__instruments__id=instrument_id)

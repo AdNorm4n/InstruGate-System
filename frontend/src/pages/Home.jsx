@@ -8,13 +8,11 @@ function Home() {
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    // Fetch instruments
     api
       .get("/api/instruments/")
       .then((res) => setInstruments(res.data))
       .catch(() => alert("Failed to load instruments"));
 
-    // Fetch user role
     api
       .get("/api/users/me/")
       .then((res) => setUserRole(res.data.role))
@@ -26,45 +24,43 @@ function Home() {
 
   return (
     <div className="home-wrapper">
-      {/* ✅ NAVIGATION BAR */}
-      <nav className="navbar">
-        <div className="navbar-logo">InstruGate</div>
-        <ul className="navbar-links">
-          <li>
+      {/* 🧭 Top Nav Bar */}
+      <header className="ashcroft-header">
+        <div className="container">
+          <div className="logo">InstruGate</div>
+          <nav className="nav-links">
             <a href="/">Home</a>
-          </li>
-
-          {userRole !== "admin" && (
-            <>
-              <li className="dropdown">
-                <a href="#">Products</a>
-                <div className="dropdown-content">
-                  {instruments.map((inst) => (
-                    <a key={inst.id} href={`/instruments#${inst.id}`}>
-                      {inst.name}
-                    </a>
-                  ))}
+            {userRole !== "admin" && (
+              <>
+                <div className="dropdown">
+                  <a href="#">Products</a>
+                  <div className="dropdown-content">
+                    {instruments.map((inst) => (
+                      <a key={inst.id} href={`/instruments#${inst.id}`}>
+                        {inst.name}
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </li>
-              <li>
                 <a href="/instruments">Browse</a>
-              </li>
-              <li>
                 <a href="#">About</a>
-              </li>
-            </>
-          )}
-
-          <li>
+              </>
+            )}
             <a href="/logout">Logout</a>
-          </li>
-        </ul>
-      </nav>
+          </nav>
+        </div>
+      </header>
 
-      {/* ✅ HOMEPAGE CONTENT */}
-      <div className="home-content">
-        <h2>Welcome to InstruGate</h2>
+      {/* 🏠 Home Section */}
+      <section className="home-hero">
+        <div className="hero-text">
+          <h1>Welcome to InstruGate</h1>
+          <p>Your gateway to precision instruments.</p>
+        </div>
+      </section>
 
+      {/* 💼 Role-Based Section */}
+      <section className="home-content container">
         {userRole === "admin" && (
           <div className="role-section admin">
             <p>
@@ -106,7 +102,7 @@ function Home() {
             </a>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
