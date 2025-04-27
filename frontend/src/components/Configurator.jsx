@@ -1,10 +1,12 @@
+// src/pages/Configurator.jsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
 import "../styles/Configurator.css";
 
 function Configurator() {
   const { instrumentId } = useParams();
+  const navigate = useNavigate();
   const [instrument, setInstrument] = useState(null);
   const [fields, setFields] = useState([]);
   const [addons, setAddons] = useState([]);
@@ -13,7 +15,6 @@ function Configurator() {
   const [showAddOns, setShowAddOns] = useState(false);
   const [codeSegments, setCodeSegments] = useState([]);
 
-  // Step 1: Load instrument + fields
   useEffect(() => {
     api
       .get(`/api/instruments/${instrumentId}/config/`)
@@ -24,7 +25,6 @@ function Configurator() {
       .catch(() => alert("Failed to load configurator"));
   }, [instrumentId]);
 
-  // Step 2: If next clicked → showAddOns = true → fetch add-ons
   useEffect(() => {
     if (showAddOns) {
       api
@@ -50,7 +50,6 @@ function Configurator() {
     return selected?.code === field.trigger_value;
   };
 
-  // Update product code when selection changes
   useEffect(() => {
     const codes = fields.filter(shouldShowField).map((f) => {
       const selected = selections[f.id];
@@ -61,8 +60,7 @@ function Configurator() {
     setCodeSegments(codes);
   }, [fields, selections, selectedAddOns]);
 
-  // 🔐 SAFETY CHECK for instrument before rendering
-  if (!instrument) return <p>Loading configurator...</p>;
+  if (!instrument) return <p>Loading...</p>;
 
   return (
     <div className="configurator-page">
@@ -100,7 +98,6 @@ function Configurator() {
                 </select>
               </div>
             ))}
-
           <button className="next-button" onClick={() => setShowAddOns(true)}>
             Next
           </button>
@@ -108,7 +105,6 @@ function Configurator() {
       ) : (
         <div className="addons-section">
           <h3>Optional Add-Ons</h3>
-
           {addons.length > 0 ? (
             addons.map((addon) => (
               <label key={addon.id} className="addon-checkbox">
@@ -124,8 +120,21 @@ function Configurator() {
           ) : (
             <p>No add-ons available for this instrument.</p>
           )}
-
-          <button className="next-button">Finish Configuration</button>
+          <button
+            className="next-button"
+            onClick={() =>
+              navigate(`/instruments/${instrumentId}/review`, {
+                state: {
+                  instrument,
+                  selections,
+                  selectedAddOns,
+                  productCode: codeSegments.join(""),
+                },
+              })
+            }
+          >
+            Next - Review
+          </button>
         </div>
       )}
     </div>

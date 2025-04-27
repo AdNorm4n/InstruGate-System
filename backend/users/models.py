@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
-
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -18,7 +17,7 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("role", "admin")  # 👈 Force admin role
+        extra_fields.setdefault("role", "admin")  # Force admin role
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
@@ -27,7 +26,6 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(username, email, password, **extra_fields)
 
-
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
         ("admin", "Admin"),
@@ -35,10 +33,11 @@ class CustomUser(AbstractUser):
         ("client", "Client"),
     )
 
-    email = models.EmailField(unique=True, blank=True, null=True)  # ✅
+    email = models.EmailField(unique=True, blank=True, null=True)
+    company = models.CharField(max_length=255, blank=True, null=True)  # ✅ Added Company
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="client")
 
-    objects = CustomUserManager()  # 👈 Plug in the custom manager
+    objects = CustomUserManager()
 
     def __str__(self):
         return f"{self.username} ({self.role})"

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // added Link
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -12,6 +12,8 @@ import {
   Stack,
   TextField,
   Typography,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -24,8 +26,12 @@ function Form({ route, method }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [company, setCompany] = useState(""); // new field
+  const [firstName, setFirstName] = useState(""); // new field
+  const [lastName, setLastName] = useState(""); // new field
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // for login remember me
   const navigate = useNavigate();
 
   const name = method === "login" ? "Login" : "Register";
@@ -35,12 +41,19 @@ function Form({ route, method }) {
     setLoading(true);
 
     try {
-      const payload =
-        method === "login"
-          ? { username, password }
-          : email
-          ? { username, password, email }
-          : { username, password };
+      let payload;
+      if (method === "login") {
+        payload = { username, password };
+      } else {
+        payload = {
+          username,
+          password,
+          email,
+          company,
+          first_name: firstName,
+          last_name: lastName,
+        };
+      }
 
       const res = await api.post(route, payload);
 
@@ -48,8 +61,13 @@ function Form({ route, method }) {
         const access = res.data.access;
         const refresh = res.data.refresh;
 
-        localStorage.setItem(ACCESS_TOKEN, access);
-        localStorage.setItem(REFRESH_TOKEN, refresh);
+        if (rememberMe) {
+          localStorage.setItem(ACCESS_TOKEN, access);
+          localStorage.setItem(REFRESH_TOKEN, refresh);
+        } else {
+          sessionStorage.setItem(ACCESS_TOKEN, access);
+          sessionStorage.setItem(REFRESH_TOKEN, refresh);
+        }
 
         const decoded = jwtDecode(access);
         const role = decoded?.role;
@@ -85,7 +103,7 @@ function Form({ route, method }) {
       </Typography>
 
       <Stack spacing={4}>
-        {/* Username field with icon */}
+        {/* Username field */}
         <TextField
           label="Username"
           variant="standard"
@@ -102,19 +120,42 @@ function Form({ route, method }) {
           required
         />
 
-        {/* Email for registration */}
+        {/* Email only for registration */}
         {method === "register" && (
-          <TextField
-            label="Email (optional)"
-            type="email"
-            variant="standard"
-            fullWidth
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <>
+            <TextField
+              label="Email"
+              type="email"
+              variant="standard"
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              label="First Name"
+              variant="standard"
+              fullWidth
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <TextField
+              label="Last Name"
+              variant="standard"
+              fullWidth
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <TextField
+              label="Company"
+              variant="standard"
+              fullWidth
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+            />
+          </>
         )}
 
-        {/* Password field with visibility toggle */}
+        {/* Password field */}
         <TextField
           label="Password"
           type={showPassword ? "text" : "password"}
@@ -143,6 +184,19 @@ function Form({ route, method }) {
           }}
         />
 
+        {/* Remember Me checkbox for login */}
+        {method === "login" && (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+            }
+            label="Remember me"
+          />
+        )}
+
         {/* Loading spinner */}
         {loading && (
           <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -166,6 +220,27 @@ function Form({ route, method }) {
         >
           {name}
         </Button>
+
+        {/* Link to switch between Login/Register */}
+        {method === "register" ? (
+          <div className="register-link">
+            <p>
+              Already have an account?{" "}
+              <Link to="/login" className="register-link">
+                Login
+              </Link>
+            </p>
+          </div>
+        ) : (
+          <div className="register-link">
+            <p>
+              Don't have an account?{" "}
+              <Link to="/register" className="register-link">
+                Register
+              </Link>
+            </p>
+          </div>
+        )}
       </Stack>
     </Box>
   );

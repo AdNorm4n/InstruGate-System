@@ -2,7 +2,7 @@ import React from "react";
 import Form from "../components/Form";
 import { Stack, Box, Paper } from "@mui/material";
 import "../styles/Login.css";
-import logo from "../assets/instrugate.png"; // make sure the logo is in this path
+import logo from "../assets/instrugate.png";
 
 function Login() {
   return (

@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
@@ -6,6 +7,8 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import InstrumentList from "./pages/InstrumentList";
 import Configurator from "./components/Configurator";
+import Review from "./components/Review";
+import SelectedInstruments from "./components/SelectedInstruments"; // ✅ NEW PAGE
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Logout() {
@@ -43,6 +46,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Configurator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/instruments/:instrumentId/review"
+          element={
+            <ProtectedRoute>
+              <Review />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/selected-instruments"
+          element={
+            <ProtectedRoute>
+              <SelectedInstruments />
             </ProtectedRoute>
           }
         />
