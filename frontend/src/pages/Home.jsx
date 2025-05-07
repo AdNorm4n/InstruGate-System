@@ -1,18 +1,19 @@
+// Home.jsx
 import { useEffect, useState } from "react";
 import api from "../api";
+import Navbar from "../components/NavBar";
 import "../styles/Home.css";
-import "../styles/Navbar.css";
+import { styled } from "@mui/material/styles"; // ✅ important
+
+// Copy from NavBar.jsx DrawerHeader
+const DrawerHeader = styled("div")(({ theme }) => ({
+  ...theme.mixins.toolbar,
+}));
 
 function Home() {
-  const [instruments, setInstruments] = useState([]);
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
-    api
-      .get("/api/instruments/")
-      .then((res) => setInstruments(res.data))
-      .catch(() => alert("Failed to load instruments"));
-
     api
       .get("/api/users/me/")
       .then((res) => setUserRole(res.data.role))
@@ -22,35 +23,14 @@ function Home() {
       });
   }, []);
 
+  if (userRole === null) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="home-wrapper">
-      {/* 🧭 Top Nav Bar */}
-      <header className="ashcroft-header">
-        <div className="container">
-          <div className="logo">InstruGate</div>
-          <nav className="nav-links">
-            <a href="/">Home</a>
-            {userRole !== "admin" && (
-              <>
-                <div className="dropdown">
-                  <a href="#">Products</a>
-                  <div className="dropdown-content">
-                    {instruments.map((inst) => (
-                      <a key={inst.id} href={`/instruments#${inst.id}`}>
-                        {inst.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-                <a href="/instruments">Browse</a>
-                <a href="#">About</a>
-              </>
-            )}
-            <a href="/logout">Logout</a>
-          </nav>
-        </div>
-      </header>
-
+      <Navbar userRole={userRole} />
+      <DrawerHeader /> {/* ✅ This pushes everything below AppBar */}
       {/* 🏠 Home Section */}
       <section className="home-hero">
         <div className="hero-text">
@@ -58,7 +38,6 @@ function Home() {
           <p>Your gateway to precision instruments.</p>
         </div>
       </section>
-
       {/* 💼 Role-Based Section */}
       <section className="home-content container">
         {userRole === "admin" && (
@@ -75,7 +54,6 @@ function Home() {
             </a>
           </div>
         )}
-
         {userRole === "proposal_engineer" && (
           <div className="role-section engineer">
             <p>
@@ -87,7 +65,6 @@ function Home() {
             </a>
           </div>
         )}
-
         {userRole === "client" && (
           <div className="role-section client">
             <p>

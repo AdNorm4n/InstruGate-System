@@ -1,5 +1,7 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class Category(models.Model):
     CATEGORY_CHOICES = [
@@ -11,7 +13,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class InstrumentType(models.Model):
     TYPE_CHOICES = [
@@ -40,7 +41,6 @@ class InstrumentType(models.Model):
     def __str__(self):
         return f"{self.name} ({self.category.name})"
 
-
 class Instrument(models.Model):
     type = models.ForeignKey(InstrumentType, on_delete=models.CASCADE, related_name='instruments')
     name = models.CharField(max_length=100)
@@ -53,19 +53,15 @@ class Instrument(models.Model):
     def __str__(self):
         return self.name
 
-
 class ConfigurableField(models.Model):
     instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE, related_name="fields")
     name = models.CharField(max_length=100)
     order = models.PositiveIntegerField(default=0)
-    parent_field = models.ForeignKey(
-        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="dependent_fields"
-    )
+    parent_field = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="dependent_fields")
     trigger_value = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.instrument.name} - {self.name}"
-
 
 class FieldOption(models.Model):
     field = models.ForeignKey(ConfigurableField, on_delete=models.CASCADE, related_name="options")
@@ -75,7 +71,6 @@ class FieldOption(models.Model):
     def __str__(self):
         return f"[{self.code}] {self.label}"
 
-
 class AddOnType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     instruments = models.ManyToManyField(Instrument, related_name="addon_types")
@@ -83,11 +78,32 @@ class AddOnType(models.Model):
     def __str__(self):
         return self.name
 
-
 class AddOn(models.Model):
     addon_type = models.ForeignKey(AddOnType, on_delete=models.CASCADE, related_name="addons")
-    label = models.CharField(max_length=200)  # e.g., "Stainless Steel Tags"
-    code = models.CharField(max_length=20)    # e.g., "NH"
+    label = models.CharField(max_length=200)
+    code = models.CharField(max_length=20)
 
     def __str__(self):
         return f"[{self.code}] {self.label} ({self.addon_type.name})"
+
+# NEW MODELS FOR QUOTATION & CONFIGURATION
+
+class SubmittedConfiguration(models.Model):
+    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
+    selected_fields = models.JSONField()
+    selected_addons = models.JSONField(blank=True, null=True)
+    product_code = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.instrument.name} - {self.product_code}"
+
+class Quotation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=50, choices=[('draft', 'Draft'), ('submitted', 'Submitted')], default='draft')
+    configurations = models.ManyToManyField(SubmittedConfiguration, related_name='quotations')
+    remarks = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Quotation #{self.id} - {self.status}"

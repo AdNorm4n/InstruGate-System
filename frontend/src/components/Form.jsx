@@ -1,6 +1,7 @@
+// src/components/Form.jsx
 import { useState } from "react";
 import api from "../api";
-import { useNavigate, Link } from "react-router-dom"; // added Link
+import { useNavigate, Link } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -26,12 +27,12 @@ function Form({ route, method }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [company, setCompany] = useState(""); // new field
-  const [firstName, setFirstName] = useState(""); // new field
-  const [lastName, setLastName] = useState(""); // new field
+  const [company, setCompany] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // for login remember me
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const name = method === "login" ? "Login" : "Register";
@@ -72,6 +73,12 @@ function Form({ route, method }) {
         const decoded = jwtDecode(access);
         const role = decoded?.role;
 
+        // 🛠 Fetch full user profile
+        const userProfileRes = await api.get("/api/users/me/");
+        const userProfile = userProfileRes.data;
+
+        localStorage.setItem("user", JSON.stringify(userProfile)); // ✅ Save user to localStorage
+
         if (role === "admin") {
           window.location.href = "/admin";
         } else {
@@ -82,11 +89,7 @@ function Form({ route, method }) {
         navigate("/login");
       }
     } catch (error) {
-      alert(
-        method === "login"
-          ? "Login failed. Please check your credentials."
-          : "Registration failed. Please check your input."
-      );
+      alert(method === "login" ? "Login failed." : "Registration failed.");
       console.error("Auth error:", error);
     } finally {
       setLoading(false);
@@ -103,7 +106,6 @@ function Form({ route, method }) {
       </Typography>
 
       <Stack spacing={4}>
-        {/* Username field */}
         <TextField
           label="Username"
           variant="standard"
@@ -120,7 +122,6 @@ function Form({ route, method }) {
           required
         />
 
-        {/* Email only for registration */}
         {method === "register" && (
           <>
             <TextField
@@ -155,7 +156,6 @@ function Form({ route, method }) {
           </>
         )}
 
-        {/* Password field */}
         <TextField
           label="Password"
           type={showPassword ? "text" : "password"}
@@ -184,7 +184,6 @@ function Form({ route, method }) {
           }}
         />
 
-        {/* Remember Me checkbox for login */}
         {method === "login" && (
           <FormControlLabel
             control={
@@ -197,14 +196,12 @@ function Form({ route, method }) {
           />
         )}
 
-        {/* Loading spinner */}
         {loading && (
           <Box sx={{ display: "flex", justifyContent: "center" }}>
             <CircularProgress />
           </Box>
         )}
 
-        {/* Submit button */}
         <Button
           variant="contained"
           type="submit"
@@ -221,23 +218,16 @@ function Form({ route, method }) {
           {name}
         </Button>
 
-        {/* Link to switch between Login/Register */}
         {method === "register" ? (
           <div className="register-link">
             <p>
-              Already have an account?{" "}
-              <Link to="/login" className="register-link">
-                Login
-              </Link>
+              Already have an account? <Link to="/login">Login</Link>
             </p>
           </div>
         ) : (
           <div className="register-link">
             <p>
-              Don't have an account?{" "}
-              <Link to="/register" className="register-link">
-                Register
-              </Link>
+              Don't have an account? <Link to="/register">Register</Link>
             </p>
           </div>
         )}

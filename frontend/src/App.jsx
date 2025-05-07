@@ -8,7 +8,8 @@ import NotFound from "./pages/NotFound";
 import InstrumentList from "./pages/InstrumentList";
 import Configurator from "./components/Configurator";
 import Review from "./components/Review";
-import SelectedInstruments from "./components/SelectedInstruments"; // ✅ NEW PAGE
+import SelectedInstruments from "./components/SelectedInstruments";
+import QuotationForm from "./components/QuotationForm"; // ✅ New
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Logout() {
@@ -62,6 +63,14 @@ function App() {
           element={
             <ProtectedRoute>
               <SelectedInstruments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quotation-form"
+          element={
+            <ProtectedRoute>
+              <QuotationForm />
             </ProtectedRoute>
           }
         />
