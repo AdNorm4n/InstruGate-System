@@ -101,4 +101,4 @@ class QuotationItem(models.Model):
     instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.instrument.name} - {self.product_code} (Quotation {self.quotation.id})"
+        return f"(Quotation {self.quotation.id})"

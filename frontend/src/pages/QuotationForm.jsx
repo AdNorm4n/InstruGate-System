@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api";
 import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
@@ -22,7 +22,7 @@ function QuotationForm() {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get("/api/users/me/", {
+      const response = await api.get("/api/users/me/", {
         headers: {
           Authorization: `Bearer ${getToken()}`, // Get JWT token
         },
@@ -51,7 +51,7 @@ function QuotationForm() {
       const now = Date.now() / 1000;
 
       if (decoded.exp < now) {
-        const res = await axios.post("/api/token/refresh/", { refresh });
+        const res = await api.post("/api/token/refresh/", { refresh });
         access = res.data.access;
         localStorage.setItem(ACCESS_TOKEN, access);
       }
@@ -64,12 +64,15 @@ function QuotationForm() {
         company: userData.company,
       };
 
-      await axios.post("/api/quotations/", payload, {
+      await api.post("/api/quotations/", payload, {
         headers: {
           Authorization: `Bearer ${access}`,
           "Content-Type": "application/json",
         },
       });
+
+      // ✅ Clear selected instruments after successful submission
+      localStorage.removeItem("selectedInstruments");
 
       alert("Quotation submitted successfully!");
       navigate("/");

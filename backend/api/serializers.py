@@ -63,8 +63,7 @@ class QuotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Quotation
-        fields = ['id', 'created_by', 'submitted_at', 'items']
-        read_only_fields = ['created_by', 'submitted_at']
+        fields = ['items']
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')

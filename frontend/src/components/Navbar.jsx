@@ -18,13 +18,14 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import HomeIcon from "@mui/icons-material/Home";
-import CategoryIcon from "@mui/icons-material/Category";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import InfoIcon from "@mui/icons-material/Info";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import logo from "../assets/companylogo.png";
 
 const drawerWidth = 240;
 
@@ -122,9 +123,14 @@ export default function Navbar({ userRole }) {
     ...(userRole !== "admin"
       ? [
           {
-            text: "Browse Instruments",
+            text: "Browse Instrument",
             icon: <StorefrontIcon style={{ color: "white" }} />,
             path: "/instruments",
+          },
+          {
+            text: "Submitted Quotation",
+            icon: <ArchiveIcon style={{ color: "white" }} />,
+            path: "/submitted",
           },
           {
             text: "About",
@@ -154,7 +160,7 @@ export default function Navbar({ userRole }) {
       <AppBar
         position="fixed"
         open={open}
-        sx={{ backgroundColor: "#2e3a59", color: "#ffffff" }}
+        sx={{ backgroundColor: "#ffffff", color: "#2e3a59" }}
       >
         <Toolbar>
           <IconButton
@@ -170,10 +176,17 @@ export default function Navbar({ userRole }) {
             <MenuIcon />
           </IconButton>
 
-          <Typography variant="h6" noWrap component="div">
-            InstruGate : Instrument System for RUEGER an Ashcroft Company
-            Malaysia
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <img
+              src={logo}
+              alt="companylogo"
+              style={{ height: 40, marginRight: 12 }}
+            />
+            <Typography variant="h5" noWrap component="div">
+              InstruGate : Instrument System for RÜEGER an Ashcroft Company
+              Malaysia
+            </Typography>
+          </Box>
         </Toolbar>
       </AppBar>
 

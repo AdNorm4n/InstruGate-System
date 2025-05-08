@@ -1,7 +1,7 @@
 // Home.jsx
 import { useEffect, useState } from "react";
 import api from "../api";
-import Navbar from "../components/NavBar";
+import Navbar from "../components/Navbar";
 import "../styles/Home.css";
 import { styled } from "@mui/material/styles"; // ✅ important
 
