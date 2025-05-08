@@ -2,8 +2,7 @@ from rest_framework import serializers
 from .models import (
     Category, InstrumentType, Instrument,
     ConfigurableField, FieldOption,
-    AddOn, AddOnType,
-    SubmittedConfiguration, Quotation,
+    AddOn, AddOnType, Quotation, QuotationItem
 )
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -54,14 +53,23 @@ class AddOnSerializer(serializers.ModelSerializer):
 
 # NEW SERIALIZERS
 
-class SubmittedConfigurationSerializer(serializers.ModelSerializer):
+class QuotationItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SubmittedConfiguration
-        fields = '__all__'
+        model = QuotationItem
+        fields = ['product_code', 'instrument']
 
 class QuotationSerializer(serializers.ModelSerializer):
-    configurations = SubmittedConfigurationSerializer(many=True)
+    items = QuotationItemSerializer(many=True)
 
     class Meta:
         model = Quotation
-        fields = ['id', 'user', 'status', 'remarks', 'configurations', 'created_at']
+        fields = ['id', 'created_by', 'submitted_at', 'items']
+        read_only_fields = ['created_by', 'submitted_at']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        user = self.context['request'].user
+        quotation = Quotation.objects.create(created_by=user, **validated_data)
+        for item in items_data:
+            QuotationItem.objects.create(quotation=quotation, **item)
+        return quotation

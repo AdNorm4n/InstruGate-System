@@ -40,7 +40,7 @@ function SelectedInstruments() {
   };
 
   const handleProceedToQuotation = () => {
-    navigate("/quotation-form", { state: { selectedInstruments, userData } });
+    navigate("/quotation", { state: { selectedInstruments, userData } }); // ✅ Fixed path
   };
 
   if (selectedInstruments.length === 0) {

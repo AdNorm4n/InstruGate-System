@@ -88,22 +88,17 @@ class AddOn(models.Model):
 
 # NEW MODELS FOR QUOTATION & CONFIGURATION
 
-class SubmittedConfiguration(models.Model):
-    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
-    selected_fields = models.JSONField()
-    selected_addons = models.JSONField(blank=True, null=True)
-    product_code = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.instrument.name} - {self.product_code}"
-
 class Quotation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=50, choices=[('draft', 'Draft'), ('submitted', 'Submitted')], default='draft')
-    configurations = models.ManyToManyField(SubmittedConfiguration, related_name='quotations')
-    remarks = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quotations')
+    submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Quotation #{self.id} - {self.status}"
+        return f"Quotation {self.id} by {self.created_by.username}"
+
+class QuotationItem(models.Model):
+    quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='items')
+    product_code = models.CharField(max_length=100)
+    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.instrument.name} - {self.product_code} (Quotation {self.quotation.id})"

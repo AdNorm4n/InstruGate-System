@@ -10,5 +10,5 @@ urlpatterns = [
     
     # ✅ Your app routes
     path("api/", include("api.urls")),        # Instruments
-    path("api/users/", include("users.urls")), # Custom user auth & profile
+    path("api/users/", include("users.urls")), # Custom user auth & profile     
 ]

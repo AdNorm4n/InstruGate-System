@@ -2,8 +2,7 @@ from django.contrib import admin
 from .models import (
     Category, InstrumentType, Instrument,
     ConfigurableField, FieldOption,
-    AddOn, AddOnType,
-    Quotation, SubmittedConfiguration,
+    AddOn, AddOnType, Quotation, QuotationItem
 )
 
 @admin.register(Category)
@@ -70,22 +69,13 @@ class AddOnAdmin(admin.ModelAdmin):
     list_filter = ["addon_type"]
     search_fields = ["label", "code"]
 
-@admin.register(SubmittedConfiguration)
-class SubmittedConfigurationAdmin(admin.ModelAdmin):
-    list_display = ['instrument', 'product_code', 'created_at']
-    readonly_fields = ['created_at']
+class QuotationItemInline(admin.TabularInline):
+    model = QuotationItem
+    extra = 0
+    fields = ['product_code', 'instrument']
+    readonly_fields = ['product_code', 'instrument']
 
 @admin.register(Quotation)
 class QuotationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'username', 'status', 'created_at', 'configuration_count']
-    readonly_fields = ['created_at']
-    list_filter = ['status', 'user']
-    search_fields = ['user__username', 'remarks']
-
-    def username(self, obj):
-        return obj.user.username
-    username.short_description = 'Username'
-
-    def configuration_count(self, obj):
-        return obj.configurations.count()
-    configuration_count.short_description = 'Configurations'
+    list_display = ['id', 'created_by', 'submitted_at']
+    inlines = [QuotationItemInline]

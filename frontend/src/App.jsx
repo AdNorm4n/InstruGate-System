@@ -9,8 +9,8 @@ import InstrumentList from "./pages/InstrumentList";
 import Configurator from "./components/Configurator";
 import Review from "./components/Review";
 import SelectedInstruments from "./components/SelectedInstruments";
-import QuotationForm from "./components/QuotationForm"; // ✅ New
 import ProtectedRoute from "./components/ProtectedRoute";
+import QuotationForm from "./pages/QuotationForm";
 
 function Logout() {
   localStorage.clear();
@@ -67,10 +67,11 @@ function App() {
           }
         />
         <Route
-          path="/quotation-form"
+          path="/quotation"
           element={
             <ProtectedRoute>
-              <QuotationForm />
+              <QuotationForm instruments={[]} />{" "}
+              {/* You can fetch instruments dynamically inside the component or pass them as props */}
             </ProtectedRoute>
           }
         />

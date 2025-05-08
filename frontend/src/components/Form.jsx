@@ -13,8 +13,6 @@ import {
   Stack,
   TextField,
   Typography,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -32,7 +30,6 @@ function Form({ route, method }) {
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const name = method === "login" ? "Login" : "Register";
@@ -62,22 +59,16 @@ function Form({ route, method }) {
         const access = res.data.access;
         const refresh = res.data.refresh;
 
-        if (rememberMe) {
-          localStorage.setItem(ACCESS_TOKEN, access);
-          localStorage.setItem(REFRESH_TOKEN, refresh);
-        } else {
-          sessionStorage.setItem(ACCESS_TOKEN, access);
-          sessionStorage.setItem(REFRESH_TOKEN, refresh);
-        }
+        localStorage.setItem(ACCESS_TOKEN, access);
+        localStorage.setItem(REFRESH_TOKEN, refresh);
 
         const decoded = jwtDecode(access);
         const role = decoded?.role;
 
-        // 🛠 Fetch full user profile
         const userProfileRes = await api.get("/api/users/me/");
         const userProfile = userProfileRes.data;
 
-        localStorage.setItem("user", JSON.stringify(userProfile)); // ✅ Save user to localStorage
+        localStorage.setItem("user", JSON.stringify(userProfile));
 
         if (role === "admin") {
           window.location.href = "/admin";
@@ -183,18 +174,6 @@ function Form({ route, method }) {
             ),
           }}
         />
-
-        {method === "login" && (
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-            }
-            label="Remember me"
-          />
-        )}
 
         {loading && (
           <Box sx={{ display: "flex", justifyContent: "center" }}>

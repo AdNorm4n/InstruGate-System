@@ -1,11 +1,9 @@
-from rest_framework import generics, status
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
-from .models import Instrument, AddOn, SubmittedConfiguration, Quotation
+from .models import Instrument, AddOn
 from .serializers import (
     InstrumentSerializer, InstrumentConfigSerializer,
-    AddOnSerializer, SubmittedConfigurationSerializer, QuotationSerializer
+    AddOnSerializer, QuotationSerializer
 )
 
 class InstrumentListView(generics.ListAPIView):
@@ -22,14 +20,10 @@ class InstrumentListView(generics.ListAPIView):
             queryset = queryset.filter(type__id=type_id)
         return queryset
 
-class InstrumentConfigView(APIView):
-    def get(self, request, pk):
-        try:
-            instrument = Instrument.objects.get(pk=pk)
-            serializer = InstrumentConfigSerializer(instrument)
-            return Response(serializer.data)
-        except Instrument.DoesNotExist:
-            return Response({"error": "Instrument not found"}, status=404)
+class InstrumentConfigView(generics.RetrieveAPIView):
+    queryset = Instrument.objects.all()
+    serializer_class = InstrumentConfigSerializer
+    lookup_field = "pk"
 
 class InstrumentOptionListView(generics.ListAPIView):
     serializer_class = AddOnSerializer
@@ -38,34 +32,10 @@ class InstrumentOptionListView(generics.ListAPIView):
         instrument_id = self.kwargs["pk"]
         return AddOn.objects.filter(addon_type__instruments__id=instrument_id)
 
-# NEW API TO SUBMIT CONFIGURATION AND QUOTATION
-
-class SubmitQuotationView(APIView):
+# ✅ FIXED VIEW
+class QuotationCreateView(generics.CreateAPIView):
+    serializer_class = QuotationSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
-        user = request.user
-        data = request.data
-        configs = data.get('configurations', [])
-        status_val = data.get('status', 'draft')
-        remarks = data.get('remarks', '')
-
-        config_objs = []
-        for config in configs:
-            obj = SubmittedConfiguration.objects.create(
-                instrument_id=config['instrument_id'],
-                selected_fields=config['selected_fields'],
-                selected_addons=config.get('selected_addons', []),
-                product_code=config['product_code']
-            )
-            config_objs.append(obj)
-
-        quotation = Quotation.objects.create(
-            user=user,
-            status=status_val,
-            remarks=remarks
-        )
-        quotation.configurations.set(config_objs)
-
-        serializer = QuotationSerializer(quotation)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
