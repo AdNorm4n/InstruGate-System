@@ -1,111 +1,20 @@
-// Navbar.jsx
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { styled, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
-import MuiDrawer from "@mui/material/Drawer";
-import MuiAppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import List from "@mui/material/List";
-import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import { Box, AppBar, Toolbar, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import InfoIcon from "@mui/icons-material/Info";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import { useNavigate } from "react-router-dom";
-import api from "../api";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import logo from "../assets/companylogo.png";
-
-const drawerWidth = 240;
-
-const openedMixin = (theme) => ({
-  width: drawerWidth,
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: "hidden",
-});
-
-const closedMixin = (theme) => ({
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: "hidden",
-  width: `calc(${theme.spacing(7)} + 1px)`,
-  [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(9)} + 1px)`,
-  },
-});
-
-const DrawerHeader = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  ...theme.mixins.toolbar, // <- This automatically uses AppBar height (64px or 56px)
-}));
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(["width", "margin"], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
-  }),
-}));
+import api from "../api";
+import headerBanner from "../assets/menu.png";
+import logo from "../assets/ashcroft.png";
 
 export default function Navbar({ userRole }) {
-  const theme = useTheme();
-  const [open, setOpen] = useState(false);
   const [instruments, setInstruments] = useState([]);
   const navigate = useNavigate();
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
-  };
 
   useEffect(() => {
     api
@@ -115,27 +24,19 @@ export default function Navbar({ userRole }) {
   }, []);
 
   const menuItems = [
-    {
-      text: "Home",
-      icon: <HomeIcon style={{ color: "white" }} />,
-      path: "/",
-    },
+    { text: "Home", icon: <HomeIcon />, path: "/" },
     ...(userRole !== "admin"
       ? [
+          { text: "About", icon: <InfoIcon />, path: "/about" },
           {
-            text: "Browse Instrument",
-            icon: <StorefrontIcon style={{ color: "white" }} />,
+            text: "Products",
+            icon: <StorefrontIcon />,
             path: "/instruments",
           },
           {
-            text: "Submitted Quotation",
-            icon: <ArchiveIcon style={{ color: "white" }} />,
-            path: "/submitted",
-          },
-          {
-            text: "About",
-            icon: <InfoIcon style={{ color: "white" }} />,
-            path: "/about",
+            text: "Quotations",
+            icon: <ArchiveIcon />,
+            path: "/quotations/submitted/",
           },
         ]
       : []),
@@ -143,98 +44,85 @@ export default function Navbar({ userRole }) {
       ? [
           {
             text: "Admin Panel",
-            icon: <AdminPanelSettingsIcon style={{ color: "white" }} />,
+            icon: <AdminPanelSettingsIcon />,
             path: "/admin",
           },
         ]
       : []),
-    {
-      text: "Logout",
-      icon: <ExitToAppIcon style={{ color: "white" }} />,
-      path: "/logout",
-    },
-  ].filter((item) => item !== null);
+  ];
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <AppBar
-        position="fixed"
-        open={open}
-        sx={{ backgroundColor: "#ffffff", color: "#2e3a59" }}
+    <AppBar position="fixed" sx={{ backgroundColor: "#ffffff", boxShadow: 3 }}>
+      {/* Top Banner Section with Logout */}
+      <Toolbar
+        sx={{
+          minHeight: 100,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={{
-              marginRight: 2,
-              ...(open && { display: "none" }),
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+        {/* Box for logos */}
+        <Box sx={{}}>
+          {/* First Logo */}
+          <img
+            src={logo}
+            alt="New Logo"
+            style={{ height: "30px", paddingBottom: "7px" }}
+          />
 
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <img
-              src={logo}
-              alt="companylogo"
-              style={{ height: 40, marginRight: 12 }}
-            />
-            <Typography variant="h5" noWrap component="div">
-              InstruGate : Instrument System for RÜEGER an Ashcroft Company
-              Malaysia
-            </Typography>
-          </Box>
-        </Toolbar>
-      </AppBar>
+          {/* Second Logo */}
+          <img
+            src={headerBanner}
+            alt="Header Banner"
+            style={{ height: "50px" }}
+          />
+        </Box>
 
-      <Drawer
-        variant="permanent"
-        open={open}
-        PaperProps={{ sx: { backgroundColor: "#2e3a59", color: "#ffffff" } }}
+        {/* Logout Button */}
+        <Button
+          startIcon={<ExitToAppIcon sx={{ color: "#e4332b" }} />}
+          onClick={() => navigate("/logout")}
+          sx={{
+            color: "#e4332b",
+            textTransform: "none",
+            fontWeight: 500,
+            bgcolor: "#ffffff",
+            "&:hover": { bgcolor: "#f5f5f5" },
+          }}
+        >
+          Logout
+        </Button>
+      </Toolbar>
+
+      {/* Bottom Menu Section */}
+      <Toolbar
+        sx={{
+          minHeight: 64,
+          display: "flex",
+          justifyContent: "center",
+          backgroundColor: "#e4332b",
+        }}
       >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon style={{ color: "white" }} />
-            )}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
+        <Box sx={{ display: "flex", gap: 3 }}>
           {menuItems.map((item) => (
-            <ListItem key={item.text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                }}
-                onClick={() => navigate(item.path)}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                    color: "white",
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
+            <Button
+              key={item.text}
+              startIcon={React.cloneElement(item.icon, {
+                sx: { color: "#ffffff" },
+              })}
+              onClick={() => navigate(item.path)}
+              sx={{
+                color: "#ffffff",
+                textTransform: "none",
+                fontWeight: 500,
+              }}
+            >
+              {item.text}
+            </Button>
           ))}
-        </List>
-      </Drawer>
-    </Box>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }

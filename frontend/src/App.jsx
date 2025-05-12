@@ -11,6 +11,7 @@ import Review from "./components/Review";
 import SelectedInstruments from "./components/SelectedInstruments";
 import ProtectedRoute from "./components/ProtectedRoute";
 import QuotationForm from "./pages/QuotationForm";
+import SubmittedQuotations from "./pages/SubmittedQuotations";
 
 function Logout() {
   localStorage.clear();
@@ -70,8 +71,15 @@ function App() {
           path="/quotation"
           element={
             <ProtectedRoute>
-              <QuotationForm instruments={[]} />{" "}
-              {/* You can fetch instruments dynamically inside the component or pass them as props */}
+              <QuotationForm instruments={[]} /> {}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/quotations/submitted/"
+          element={
+            <ProtectedRoute>
+              <SubmittedQuotations />
             </ProtectedRoute>
           }
         />

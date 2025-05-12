@@ -1,6 +1,6 @@
 from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticated
-from .models import Instrument, AddOn
+from .models import Instrument, AddOn,  Quotation
 from .serializers import (
     InstrumentSerializer, InstrumentConfigSerializer,
     AddOnSerializer, QuotationSerializer
@@ -32,10 +32,16 @@ class InstrumentOptionListView(generics.ListAPIView):
         instrument_id = self.kwargs["pk"]
         return AddOn.objects.filter(addon_type__instruments__id=instrument_id)
 
-# ✅ FIXED VIEW
 class QuotationCreateView(generics.CreateAPIView):
     serializer_class = QuotationSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save()
+
+class SubmittedQuotationView(generics.ListAPIView):
+    serializer_class = QuotationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Quotation.objects.filter(created_by=self.request.user).order_by('-submitted_at')

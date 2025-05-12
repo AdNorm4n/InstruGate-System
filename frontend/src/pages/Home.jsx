@@ -3,9 +3,8 @@ import { useEffect, useState } from "react";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import "../styles/Home.css";
-import { styled } from "@mui/material/styles"; // ✅ important
+import { styled } from "@mui/material/styles";
 
-// Copy from NavBar.jsx DrawerHeader
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
@@ -30,14 +29,19 @@ function Home() {
   return (
     <div className="home-wrapper">
       <Navbar userRole={userRole} />
-      <DrawerHeader /> {/* ✅ This pushes everything below AppBar */}
-      {/* 🏠 Home Section */}
+      <DrawerHeader />
+
+      {/* 🏠 Hero Section */}
       <section className="home-hero">
         <div className="hero-text">
           <h1>Welcome to InstruGate</h1>
-          <p>Your gateway to precision instruments.</p>
+          <p>
+            Keep your business running with reliable pressure & temperature
+            instruments
+          </p>
         </div>
       </section>
+
       {/* 💼 Role-Based Section */}
       <section className="home-content container">
         {userRole === "admin" && (
