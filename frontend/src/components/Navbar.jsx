@@ -24,17 +24,24 @@ export default function Navbar({ userRole }) {
   }, []);
 
   const menuItems = [
-    { text: "Home", icon: <HomeIcon />, path: "/" },
+    { text: "Home", fontWeight: "bold", icon: <HomeIcon />, path: "/" },
     ...(userRole !== "admin"
       ? [
-          { text: "About", icon: <InfoIcon />, path: "/about" },
+          {
+            text: "About",
+            fontWeight: "bold",
+            icon: <InfoIcon />,
+            path: "/about",
+          },
           {
             text: "Products",
+            fontWeight: "bold",
             icon: <StorefrontIcon />,
             path: "/instruments",
           },
           {
             text: "Quotations",
+            fontWeight: "bold",
             icon: <ArchiveIcon />,
             path: "/quotations/submitted/",
           },
@@ -44,6 +51,7 @@ export default function Navbar({ userRole }) {
       ? [
           {
             text: "Admin Panel",
+            fontWeight: "bold",
             icon: <AdminPanelSettingsIcon />,
             path: "/admin",
           },
@@ -81,12 +89,12 @@ export default function Navbar({ userRole }) {
 
         {/* Logout Button */}
         <Button
-          startIcon={<ExitToAppIcon sx={{ color: "#e4332b" }} />}
+          startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
           onClick={() => navigate("/logout")}
           sx={{
-            color: "#e4332b",
+            color: "#d6393a",
             textTransform: "none",
-            fontWeight: 500,
+            fontWeight: "bold",
             bgcolor: "#ffffff",
             "&:hover": { bgcolor: "#f5f5f5" },
           }}
@@ -101,7 +109,7 @@ export default function Navbar({ userRole }) {
           minHeight: 64,
           display: "flex",
           justifyContent: "center",
-          backgroundColor: "#e4332b",
+          backgroundColor: "#d6393a",
         }}
       >
         <Box sx={{ display: "flex", gap: 3 }}>

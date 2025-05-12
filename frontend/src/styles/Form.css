@@ -1,51 +1,115 @@
-/* Center the form on screen */
-.form-container {
+/* Shared styles for both login and register */
+.auth-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 8%;
-}
-
-/* Typography and layout adjustments */
-form {
+  min-height: 85vh;
   background-color: #ffffff;
-  border-radius: 20px;
-  border: 1px solid #e43228;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 2rem;
+}
+
+.auth-container {
+  width: 850px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 4px 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Shared logo style */
+.logo-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 500px;
+  position: relative;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border: 1px solid #ffffff;
+  padding: 3rem;
+  gap: 1.5rem;
+  overflow: hidden;
+
+  /* Remove fixed height and allow it to grow */
+  height: auto;
+  min-height: 100%;
+
+  /* Background image handling */
+  background-image: url("../assets/form.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Background image */
+  background-image: url("../assets/form.jpg"); /* Replace with your image path */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* Optional dark overlay for better contrast */
+  background-color: rgba(217, 217, 217, 0.95); /* #D9D9D9 with 85% opacity */
+  background-blend-mode: overlay;
+}
+
+.partner-logo {
+  width: 250px;
+  height: auto;
+}
+
+.logo-img {
+  width: 250px;
+  height: auto;
+}
+
+/* Shared form container */
+.form-panel {
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0px 0px 10px rgba(3, 63, 99, 0.1);
+  padding: 2.5rem;
+  background-color: #d6393a;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border-left: 1px solid #ffffff;
 }
 
-/* Input styling inherited from MUI so minimal custom work needed */
-input:focus,
-.MuiInputBase-root:focus-within {
-  border-color: #28666e !important;
-  box-shadow: none;
+/* Username & password input wrapper */
+.input-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-/* Button styling (enhanced) */
-.form-button {
-  background-color: #033f63;
-  color: white;
-  padding: 10px;
+/* Each input row with icon + field */
+.input-container {
+  display: flex;
+  align-items: flex-end;
   width: 100%;
-  border-radius: 4px;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1.5rem;
-  transition: all 0.3s ease;
 }
 
-.form-button:hover {
-  background-color: #ffffff;
-  color: #033f63;
-  border: 1px solid #033f63;
+/* Input field focus override */
+.input-field:focus {
+  color: #d6393a;
 }
 
-/* Center loading spinner */
-form .MuiCircularProgress-root {
-  margin: 10px auto;
+/* Icon color */
+.eye-icon,
+.MuiSvgIcon-root {
+  color: #d6393a;
+}
+
+/* Register link styling */
+.register-link {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.register-link a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.register-link a:hover {
+  color: #28666e;
 }

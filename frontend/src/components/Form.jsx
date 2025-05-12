@@ -92,11 +92,24 @@ function Form({ route, method }) {
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
-      <Typography variant="h4" align="center" gutterBottom>
+      <Typography
+        variant="h5"
+        align="center"
+        gutterBottom
+        sx={{
+          fontWeight: "bold",
+          color: "#000000",
+          fontFamily: "Helvetica, sans-serif",
+          textTransform: "uppercase",
+          letterSpacing: 0,
+          mb: 4,
+          textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+        }}
+      >
         {name}
       </Typography>
 
-      <Stack spacing={4}>
+      <Stack spacing={4} sx={{ mt: 5 }}>
         <TextField
           label="Username"
           variant="standard"
@@ -123,20 +136,22 @@ function Form({ route, method }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <TextField
-              label="First Name"
-              variant="standard"
-              fullWidth
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            <TextField
-              label="Last Name"
-              variant="standard"
-              fullWidth
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="First Name"
+                variant="standard"
+                fullWidth
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <TextField
+                label="Last Name"
+                variant="standard"
+                fullWidth
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </Stack>
             <TextField
               label="Company"
               variant="standard"
@@ -186,11 +201,11 @@ function Form({ route, method }) {
           type="submit"
           fullWidth
           sx={{
-            backgroundColor: "#033f63",
+            backgroundColor: "#d6393a",
             ":hover": {
               backgroundColor: "#ffffff",
-              color: "#033f63",
-              border: "1px solid #033f63",
+              color: "#d6393a",
+              border: "1px solid #d6393a",
             },
           }}
         >
