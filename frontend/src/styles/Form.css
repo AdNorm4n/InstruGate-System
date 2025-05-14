@@ -89,13 +89,13 @@
 
 /* Input field focus override */
 .input-field:focus {
-  color: #d6393a;
+  color: #333;
 }
 
 /* Icon color */
 .eye-icon,
 .MuiSvgIcon-root {
-  color: #d6393a;
+  color: #333;
 }
 
 /* Register link styling */

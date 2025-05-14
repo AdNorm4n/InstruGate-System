@@ -1,19 +1,31 @@
 .instrument-card {
-  border: 1px solid #ccc;
-  padding: 16px;
-  border-radius: 12px;
-  margin: 12px;
-  width: 280px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin: 12px;
+  min-width: 240px;
+  min-height: 340px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
 }
 
-.instrument-card img {
+.instrument-card:hover {
+  transform: scale(1.03);
+}
+
+.instrument-image {
   width: 100%;
-  height: auto;
+  height: 180px;
+  object-fit: cover;
   border-radius: 8px;
 }
 
-.instrument-card h3 {
-  margin-top: 8px;
+.card-content {
+  flex: 1;
+  margin-top: 10px;
 }

@@ -8,14 +8,39 @@ import InfoIcon from "@mui/icons-material/Info";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import HomeRepairServiceIcon from "@mui/icons-material/HomeRepairService";
 import api from "../api";
 import headerBanner from "../assets/menu.png";
 import logo from "../assets/ashcroft.png";
+import centerLogo from "../assets/instrugate.png";
 
 export default function Navbar({ userRole }) {
   const [instruments, setInstruments] = useState([]);
+  const [hideTopToolbar, setHideTopToolbar] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
+  // Scroll event handler to show/hide top toolbar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Scrolling down and past 50px
+        setHideTopToolbar(true);
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
+        // Scrolling up or near top
+        setHideTopToolbar(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  // Fetch instruments
   useEffect(() => {
     api
       .get("/api/instruments/")
@@ -32,6 +57,12 @@ export default function Navbar({ userRole }) {
             fontWeight: "bold",
             icon: <InfoIcon />,
             path: "/about",
+          },
+          {
+            text: "Tools",
+            fontWeight: "bold",
+            icon: <HomeRepairServiceIcon />,
+            path: "/tools",
           },
           {
             text: "Products",
@@ -60,34 +91,66 @@ export default function Navbar({ userRole }) {
   ];
 
   return (
-    <AppBar position="fixed" sx={{ backgroundColor: "#ffffff", boxShadow: 3 }}>
-      {/* Top Banner Section with Logout */}
+    <AppBar
+      position="fixed"
+      sx={{
+        boxShadow: 0,
+        transition: "all 0.3s ease",
+        backgroundColor: "transparent",
+      }}
+    >
+      {/* Top Banner Section with Logos and Logout */}
       <Toolbar
         sx={{
           minHeight: 100,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          position: "relative",
+          maxHeight: hideTopToolbar ? 0 : 100,
+          opacity: hideTopToolbar ? 0 : 1,
+          overflow: "hidden",
+          transition: "max-height 0.3s ease, opacity 0.3s ease",
+          backgroundColor: "#ffffff",
         }}
       >
-        {/* Box for logos */}
-        <Box sx={{}}>
-          {/* First Logo */}
-          <img
-            src={logo}
-            alt="New Logo"
-            style={{ height: "30px", paddingBottom: "7px" }}
-          />
+        {/* Left: Box for existing logos */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {/* Box for logos */}
 
-          {/* Second Logo */}
-          <img
-            src={headerBanner}
-            alt="Header Banner"
-            style={{ height: "50px" }}
-          />
+          <Box sx={{}}>
+            {/* First Logo */}
+
+            <img
+              src={logo}
+              alt="New Logo"
+              style={{ height: "30px", paddingBottom: "7px" }}
+            />
+
+            {/* Second Logo */}
+
+            <img
+              src={headerBanner}
+              alt="Header Banner"
+              style={{ height: "50px" }}
+            />
+          </Box>
         </Box>
 
-        {/* Logout Button */}
+        {/* Center: Logo */}
+        <Box
+          sx={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <img src={centerLogo} alt="Center Logo" style={{ height: "40px" }} />
+        </Box>
+
+        {/* Right: Logout Button */}
         <Button
           startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
           onClick={() => navigate("/logout")}
@@ -110,6 +173,9 @@ export default function Navbar({ userRole }) {
           display: "flex",
           justifyContent: "center",
           backgroundColor: "#d6393a",
+          transform: hideTopToolbar ? "translateY(-64px)" : "translateY(0)",
+          transition: "transform 0.3s ease",
+          zIndex: 1100,
         }}
       >
         <Box sx={{ display: "flex", gap: 3 }}>

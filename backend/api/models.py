@@ -91,6 +91,7 @@ class AddOn(models.Model):
 class Quotation(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quotations')
     submitted_at = models.DateTimeField(auto_now_add=True)
+    company = models.CharField(max_length=255, blank=True, null=True)  # ✅ Added Company
 
     def __str__(self):
         return f"Quotation {self.id} by {self.created_by.username}"

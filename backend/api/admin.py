@@ -77,5 +77,5 @@ class QuotationItemInline(admin.TabularInline):
 
 @admin.register(Quotation)
 class QuotationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_by', 'submitted_at']
+    list_display = ['id', 'created_by', 'company', 'submitted_at', ]
     inlines = [QuotationItemInline]

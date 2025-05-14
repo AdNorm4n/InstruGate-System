@@ -6,12 +6,13 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import InstrumentList from "./pages/InstrumentList";
-import Configurator from "./components/Configurator";
-import Review from "./components/Review";
-import SelectedInstruments from "./components/SelectedInstruments";
+import Configurator from "./pages/Configurator";
+import Review from "./pages/Review";
+import SelectedInstruments from "./pages/SelectedInstruments";
 import ProtectedRoute from "./components/ProtectedRoute";
 import QuotationForm from "./pages/QuotationForm";
 import SubmittedQuotations from "./pages/SubmittedQuotations";
+import Footer from "./components/Footer";
 
 function Logout() {
   localStorage.clear();
@@ -32,6 +33,7 @@ function App() {
           element={
             <ProtectedRoute>
               <Home />
+              <Footer />
             </ProtectedRoute>
           }
         />
@@ -40,6 +42,7 @@ function App() {
           element={
             <ProtectedRoute>
               <InstrumentList />
+              <Footer />
             </ProtectedRoute>
           }
         />
@@ -48,6 +51,7 @@ function App() {
           element={
             <ProtectedRoute>
               <Configurator />
+              <Footer />
             </ProtectedRoute>
           }
         />
@@ -56,6 +60,7 @@ function App() {
           element={
             <ProtectedRoute>
               <Review />
+              <Footer />
             </ProtectedRoute>
           }
         />
@@ -64,6 +69,7 @@ function App() {
           element={
             <ProtectedRoute>
               <SelectedInstruments />
+              <Footer />
             </ProtectedRoute>
           }
         />
@@ -72,6 +78,7 @@ function App() {
           element={
             <ProtectedRoute>
               <QuotationForm instruments={[]} /> {}
+              <Footer />
             </ProtectedRoute>
           }
         />
@@ -80,6 +87,7 @@ function App() {
           element={
             <ProtectedRoute>
               <SubmittedQuotations />
+              <Footer />
             </ProtectedRoute>
           }
         />

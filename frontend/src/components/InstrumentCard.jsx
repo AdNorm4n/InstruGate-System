@@ -12,14 +12,22 @@ const InstrumentCard = ({ instrument }) => {
 
   return (
     <div className="instrument-card" onClick={handleClick}>
-      {instrument.image && <img src={instrument.image} alt={instrument.name} />}
-      <h3>{instrument.name}</h3>
-      <p>
-        <strong>Description:</strong> {instrument.description}
-      </p>
-      <p>
-        <strong>Specs:</strong> {instrument.specifications}
-      </p>
+      {instrument.image && (
+        <img
+          src={instrument.image}
+          alt={instrument.name}
+          className="instrument-image"
+        />
+      )}
+      <div className="card-content">
+        <h3>{instrument.name}</h3>
+        <p>
+          <strong>Description:</strong> {instrument.description}
+        </p>
+        <p>
+          <strong>Specs:</strong> {instrument.specifications}
+        </p>
+      </div>
     </div>
   );
 };

@@ -60,13 +60,15 @@ class QuotationItemSerializer(serializers.ModelSerializer):
 
 class QuotationSerializer(serializers.ModelSerializer):
     items = QuotationItemSerializer(many=True)
+    company = serializers.CharField(source='created_by.company', read_only=True)  #
 
     class Meta:
         model = Quotation
-        fields = ['items']
+        fields = ['id', 'submitted_at', 'company', 'items']
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
+        validated_data.pop('company', None)
         user = self.context['request'].user
         quotation = Quotation.objects.create(created_by=user, **validated_data)
         for item in items_data:
