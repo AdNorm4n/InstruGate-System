@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
-  Container,
   Typography,
   Button,
-  List,
-  ListItem,
-  ListItemText,
   CircularProgress,
+  Fade,
+  Container,
+  Grid,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import api from "../api";
 import Navbar from "../components/Navbar";
-import "../styles/Configurator.css";
+import InstrumentCard from "../components/InstrumentCard";
+import "../styles/SelectedInstruments.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
@@ -29,6 +30,10 @@ function SelectedInstruments() {
   });
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isClicked, setIsClicked] = useState(null);
+  const [isImageEnlarged, setIsImageEnlarged] = useState(null);
+
+  const baseUrl = "http://127.0.0.1:8000";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,8 +49,16 @@ function SelectedInstruments() {
 
         const cart =
           JSON.parse(localStorage.getItem("selectedInstruments")) || [];
-        setSelectedInstruments(cart);
-        console.log("Selected instruments:", cart);
+        const updatedCart = cart.map((item) => ({
+          ...item,
+          quantity: item.quantity || 1,
+        }));
+        setSelectedInstruments(updatedCart);
+        localStorage.setItem(
+          "selectedInstruments",
+          JSON.stringify(updatedCart)
+        );
+        console.log("Selected instruments:", updatedCart);
       } catch (err) {
         console.error("Error fetching data:", err);
         setUserRole("error");
@@ -57,208 +70,339 @@ function SelectedInstruments() {
     fetchData();
   }, [navigate]);
 
+  const updateInstrumentQuantity = (index, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeInstrument(index);
+      return;
+    }
+    const updated = [...selectedInstruments];
+    updated[index] = { ...updated[index], quantity: newQuantity };
+    setSelectedInstruments(updated);
+    localStorage.setItem("selectedInstruments", JSON.stringify(updated));
+    console.log("Updated selectedInstruments:", updated);
+  };
+
   const removeInstrument = (indexToRemove) => {
     const updated = selectedInstruments.filter(
       (_, index) => index !== indexToRemove
     );
     setSelectedInstruments(updated);
     localStorage.setItem("selectedInstruments", JSON.stringify(updated));
-    console.log("Updated selectedInstruments:", updated);
+    console.log("Removed instrument at index:", indexToRemove);
   };
 
-  const handleAddMoreInstruments = () => {
-    navigate("/instruments");
+  const clearAllInstruments = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to clear your cart?"
+    );
+    if (confirmed) {
+      setSelectedInstruments([]);
+      localStorage.setItem("selectedInstruments", JSON.stringify([]));
+      console.log("Cleared all selectedInstruments");
+    } else {
+      console.log("Cart clear canceled");
+      setIsClicked(null);
+    }
   };
 
-  const handleProceedToQuotation = () => {
-    navigate("/quotation", { state: { selectedInstruments, userData } });
-    console.log("Navigating to quotation with:", {
-      selectedInstruments,
-      userData,
-    });
+  const handleClick = (action, path = null, state = null) => {
+    setIsClicked(action);
+    console.log("handleClick called:", { action, path, state });
+    setTimeout(() => {
+      try {
+        if (path) {
+          console.log("Navigating to:", path, "with state:", state);
+          navigate(path, { state });
+        }
+        setIsClicked(null);
+      } catch (err) {
+        console.error("Navigation error:", err);
+        alert("Failed to navigate");
+        setIsClicked(null);
+      }
+    }, 300);
+  };
+
+  const handleImageClick = (index) => {
+    if (selectedInstruments[index]?.instrument?.image) {
+      setIsImageEnlarged(index);
+      console.log("Image clicked, opening overlay for index:", index);
+    }
+  };
+
+  const handleCloseOverlay = () => {
+    setIsImageEnlarged(null);
+    console.log("Closing image overlay");
   };
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: "20%" }}>
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
         <CircularProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Loading selected instruments...
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 2,
+            fontFamily: "Helvetica, sans-serif",
+            fontWeight: "bold",
+            color: "#000000",
+          }}
+        >
+          Loading your cart...
         </Typography>
-      </div>
+      </Box>
     );
   }
 
   if (userRole === "error") {
     return (
-      <div style={{ textAlign: "center", marginTop: "20%" }}>
-        <Typography variant="h6" color="error">
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
+        <Typography
+          variant="h6"
+          color="error"
+          sx={{
+            fontFamily: "Roboto, sans-serif",
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+          }}
+        >
           Failed to load user data. Please log in again.
         </Typography>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div
-      className="configurator-page"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-      }}
-    >
-      <Navbar userRole={userRole} />
-      <DrawerHeader />
+    <Fade in timeout={800}>
+      <Box
+        className="selected-instruments-page"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          background: "linear-gradient(to bottom, #f5f5f5, #e9ecef)",
+        }}
+      >
+        <Navbar userRole={userRole} />
+        <DrawerHeader />
 
-      <main style={{ flex: 1 }}>
-        <Container maxWidth="xl" sx={{ py: 4, mt: 10 }}>
-          <Typography
-            variant="h5"
-            align="center"
-            gutterBottom
-            sx={{
-              fontWeight: "bold",
-              color: "#000000",
-              fontFamily: "Helvetica, sans-serif",
-              textTransform: "uppercase",
-              letterSpacing: 0,
-              mb: 6,
-              textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            Selected Instruments
-          </Typography>
+        <main style={{ flex: 1 }}>
+          <Container sx={{ py: 4, mt: 12 }}>
+            <Typography
+              variant="h5"
+              align="center"
+              gutterBottom
+              sx={{
+                fontWeight: "bold",
+                fontFamily: "Helvetica, sans-serif",
+                textTransform: "uppercase",
+                letterSpacing: 0,
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                color: "#000000",
+              }}
+            >
+              selected instruments
+            </Typography>
 
-          {selectedInstruments.length === 0 ? (
-            <Box sx={{ textAlign: "center", mt: 8 }}>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                No instruments selected yet.
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAddMoreInstruments}
-                sx={{ borderRadius: 2 }}
-              >
-                Add Instruments
-              </Button>
-            </Box>
-          ) : (
-            <>
+            {selectedInstruments.length === 0 ? (
               <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  justifyContent: "center",
-                  mb: 6,
-                }}
+                className="action-section"
+                sx={{ textAlign: "center", mt: 20 }}
               >
-                <Button
-                  variant="contained"
+                <Typography
+                  variant="h6"
+                  color="error"
                   sx={{
-                    bgcolor: "#3498db",
-                    borderRadius: 2,
-                    "&:hover": { bgcolor: "#2980b9" },
+                    fontFamily: "Helvetica, sans-serif",
+                    fontWeight: "bold",
                   }}
-                  onClick={handleAddMoreInstruments}
                 >
-                  Add More Instruments
-                </Button>
+                  Your cart is empty. Explore our instruments to get started.
+                </Typography>
                 <Button
+                  className="primary-button"
                   variant="contained"
+                  onClick={() => handleClick("add", "/instruments")}
+                  disabled={isClicked === "add"}
                   sx={{
-                    bgcolor: "#27ae60",
-                    borderRadius: 2,
-                    "&:hover": { bgcolor: "#219653" },
+                    fontFamily: "Helvetica, sans-serif",
+                    backgroundColor: "#1976d2",
+                    color: "white",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                    "&:hover": {
+                      backgroundColor: "#34495e",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                      transform: "scale(1.05)",
+                    },
+                    "&.Mui-disabled": {
+                      opacity: 0.6,
+                      backgroundColor: "#2c3e50",
+                      color: "white",
+                    },
                   }}
-                  onClick={handleProceedToQuotation}
                 >
-                  Proceed to Quotation
+                  {isClicked === "add" ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Add Instruments"
+                  )}
                 </Button>
               </Box>
-
-              {selectedInstruments.map((item, index) => (
+            ) : (
+              <>
                 <Box
-                  key={index}
+                  className={`action-section ${
+                    isClicked ? "action-section-clicked" : ""
+                  }`}
                   sx={{
-                    mb: 4,
-                    p: 3,
-                    border: 1,
-                    borderColor: "grey.300",
-                    borderRadius: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 8,
+                    px: 4, // optional padding
                   }}
                 >
-                  <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-                    {item.instrument.name}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 2 }}>
-                    <strong>Product Code:</strong> {item.productCode}
-                  </Typography>
-
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: "bold", mb: 1 }}
-                  >
-                    Requirements
-                  </Typography>
-                  <List>
-                    {Object.values(item.selections).length > 0 ? (
-                      Object.values(item.selections).map((selection, idx) => (
-                        <ListItem key={idx} disablePadding>
-                          <ListItemText
-                            primary={`[${selection.code}] ${selection.label}`}
-                          />
-                        </ListItem>
-                      ))
-                    ) : (
-                      <ListItem disablePadding>
-                        <ListItemText primary="No requirements selected." />
-                      </ListItem>
-                    )}
-                  </List>
-
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: "bold", mb: 1, mt: 2 }}
-                  >
-                    Add-Ons
-                  </Typography>
-                  <List>
-                    {item.selectedAddOns.length > 0 ? (
-                      item.selectedAddOns.map((addon, idx) => (
-                        <ListItem key={idx} disablePadding>
-                          <ListItemText
-                            primary={`[${addon.code}] ${addon.label} (${addon.addon_type.name})`}
-                          />
-                        </ListItem>
-                      ))
-                    ) : (
-                      <ListItem disablePadding>
-                        <ListItemText primary="No Add-Ons selected." />
-                      </ListItem>
-                    )}
-                  </List>
-
+                  {/* Left Button */}
                   <Button
+                    className="primary-button"
                     variant="contained"
+                    onClick={() => handleClick("add", "/instruments")}
+                    disabled={isClicked === "add"}
                     sx={{
-                      bgcolor: "#e74c3c",
-                      mt: 2,
-                      borderRadius: 2,
-                      "&:hover": { bgcolor: "#c0392b" },
+                      fontFamily: "Helvetica, sans-serif",
+                      "&.Mui-disabled": { opacity: 0.6 },
                     }}
-                    onClick={() => removeInstrument(index)}
                   >
-                    Remove
+                    {isClicked === "add" ? (
+                      <CircularProgress size={24} sx={{ color: "white" }} />
+                    ) : (
+                      "Add More"
+                    )}
+                  </Button>
+
+                  {/* Center Button */}
+                  <Button
+                    className="primary-button"
+                    variant="contained"
+                    onClick={() =>
+                      handleClick("proceed", "/quotation", {
+                        selectedInstruments,
+                        userData,
+                      })
+                    }
+                    disabled={isClicked === "proceed"}
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif",
+                      backgroundColor: "#1976d2",
+                      color: "white",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                      "&:hover": {
+                        backgroundColor: "#34495e",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        transform: "scale(1.05)",
+                      },
+                      "&.Mui-disabled": {
+                        opacity: 0.6,
+                        backgroundColor: "#2c3e50",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    {isClicked === "proceed" ? (
+                      <CircularProgress size={24} sx={{ color: "white" }} />
+                    ) : (
+                      "Proceed to Quotation"
+                    )}
+                  </Button>
+
+                  {/* Right Button */}
+                  <Button
+                    className="danger-button"
+                    variant="contained"
+                    onClick={() => {
+                      setIsClicked("clear");
+                      setTimeout(() => {
+                        clearAllInstruments();
+                      }, 300);
+                    }}
+                    disabled={isClicked === "clear"}
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif",
+                      backgroundColor: "#d6393a",
+                      color: "white",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                      "&:hover": {
+                        backgroundColor: "#d6393a",
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                        transform: "scale(1.05)",
+                      },
+                      "&.Mui-disabled": {
+                        opacity: 0.6,
+                        backgroundColor: "#d6393a",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    {isClicked === "clear" ? (
+                      <CircularProgress size={24} sx={{ color: "white" }} />
+                    ) : (
+                      "Clear Cart"
+                    )}
                   </Button>
                 </Box>
-              ))}
-            </>
-          )}
-        </Container>
-      </main>
-    </div>
+
+                <Grid container spacing={4}>
+                  {selectedInstruments.map((item, index) => {
+                    const imageUrl = item.instrument?.image
+                      ? new URL(item.instrument.image, baseUrl).href
+                      : null;
+                    return (
+                      <Grid item xs={12} sm={6} md={4} key={index}>
+                        <InstrumentCard
+                          instrument={item.instrument}
+                          userRole={userRole}
+                          configData={null}
+                          productCode={item.productCode}
+                          requirements={Object.values(item.selections)}
+                          addOns={item.selectedAddOns}
+                          quantity={item.quantity}
+                          onQuantityChange={(newQuantity) =>
+                            updateInstrumentQuantity(index, newQuantity)
+                          }
+                          onRemove={() => removeInstrument(index)}
+                          onImageClick={() => handleImageClick(index)}
+                          isSelectedInstrument
+                        />
+                        {isImageEnlarged === index && (
+                          <Box
+                            className="image-overlay"
+                            onClick={handleCloseOverlay}
+                          >
+                            <Box className="enlarged-image-container">
+                              <img
+                                src={imageUrl}
+                                alt={item.instrument.name}
+                                className="enlarged-image"
+                              />
+                              <button
+                                className="close-button"
+                                onClick={handleCloseOverlay}
+                              >
+                                ×
+                              </button>
+                            </Box>
+                          </Box>
+                        )}
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              </>
+            )}
+          </Container>
+        </main>
+      </Box>
+    </Fade>
   );
 }
 

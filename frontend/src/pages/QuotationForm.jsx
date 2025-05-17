@@ -9,12 +9,15 @@ import {
   ListItem,
   ListItemText,
   Button,
+  CircularProgress,
+  Fade,
+  TextField,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
-import "../styles/Configurator.css";
+import "../styles/QuotationForm.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
@@ -26,6 +29,12 @@ function QuotationForm() {
   const [selectedInstruments, setSelectedInstruments] = useState([]);
   const [userData, setUserData] = useState({});
   const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isClicked, setIsClicked] = useState(false);
+  const [error, setError] = useState(null);
+  const [projectName, setProjectName] = useState("");
+
+  const baseUrl = "http://127.0.0.1:8000";
 
   const getToken = () => localStorage.getItem(ACCESS_TOKEN);
   const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN);
@@ -37,8 +46,7 @@ function QuotationForm() {
         const refresh = getRefreshToken();
 
         if (!access || !refresh) {
-          navigate("/login");
-          return;
+          throw new Error("No tokens found");
         }
 
         // Check token expiration
@@ -51,38 +59,64 @@ function QuotationForm() {
           console.log("Token refreshed:", access);
         }
 
-        // Fetch user data if not in location.state
-        if (!location.state?.userData) {
-          const userRes = await api.get("/api/users/me/", {
-            headers: { Authorization: `Bearer ${access}` },
-          });
-          setUserData(userRes.data);
-          setUserRole(userRes.data.role);
-          console.log("User data:", userRes.data);
-        } else {
-          setUserData(location.state.userData || {});
-          setUserRole(location.state.userData?.role || null);
-        }
+        // Always fetch user data from API
+        const userRes = await api.get("/api/users/me/", {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        console.log(
+          "Full user data response:",
+          JSON.stringify(userRes.data, null, 2)
+        );
+        setUserData(userRes.data);
+        setUserRole(userRes.data.role);
+        console.log("User role:", userRes.data.role);
 
         // Set selected instruments
         setSelectedInstruments(location.state?.selectedInstruments || []);
       } catch (error) {
         console.error("Error fetching user data:", error);
+        setError("Failed to load data. Please log in again.");
         navigate("/login");
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, [location.state, navigate]);
 
+  const handleImageClick = (index) => {
+    if (selectedInstruments[index]?.instrument?.image) {
+    }
+  };
+
+  const handleCloseOverlay = () => {};
+
   const handleSubmit = async () => {
+    if (!projectName.trim()) {
+      alert("Project Name is required.");
+      return;
+    }
+
+    if (!["client", "customer"].includes(userRole)) {
+      alert("Only clients can submit quotations.");
+      return;
+    }
+
+    const confirmed = window.confirm("Are you sure you want to submit?");
+    if (!confirmed) {
+      console.log("Submission canceled by user");
+      return;
+    }
+    console.log("User confirmed submission");
+    console.log("Project Name:", projectName);
+
+    setIsClicked(true);
     try {
       let access = getToken();
       const refresh = getRefreshToken();
 
       if (!access || !refresh) {
-        alert("No access token found. Please log in again.");
-        navigate("/login");
-        return;
+        throw new Error("No access token found");
       }
 
       const decoded = jwtDecode(access);
@@ -97,10 +131,20 @@ function QuotationForm() {
       const payload = {
         items: selectedInstruments.map((instrumentData) => ({
           product_code: instrumentData.productCode,
-          instrument: instrumentData.instrument.id,
+          instrument_id: instrumentData.instrument.id,
+          quantity: instrumentData.quantity || 1,
+          selections: Object.values(instrumentData.selections).map((sel) => ({
+            field_option_id: sel.id,
+          })),
+          addons: instrumentData.selectedAddOns.map((addon) => ({
+            addon_id: addon.id,
+          })),
         })),
         company: userData.company,
+        project_name: projectName,
       };
+
+      console.log("Submitting payload:", JSON.stringify(payload, null, 2));
 
       await api.post("/api/quotations/", payload, {
         headers: {
@@ -119,137 +163,359 @@ function QuotationForm() {
           error?.response?.data?.detail || error.message
         }`
       );
+    } finally {
+      setTimeout(() => setIsClicked(false), 300);
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
+        <CircularProgress size={48} sx={{ color: "#007bff" }} />
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 2,
+            fontFamily: "Helvetica, sans-serif",
+            fontWeight: "bold",
+            color: "#000000",
+          }}
+        >
+          Loading quotation...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
+        <Typography
+          variant="h6"
+          color="error"
+          sx={{
+            fontFamily: "Helvetica, sans-serif",
+            fontWeight: "bold",
+            fontSize: "1.5rem",
+          }}
+        >
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  const isSubmitDisabled =
+    isClicked ||
+    !projectName.trim() ||
+    !["client", "customer"].includes(userRole);
+
   return (
-    <div
-      className="configurator-page"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-      }}
-    >
-      <Navbar userRole={userRole} />
-      <DrawerHeader />
+    <Fade in timeout={800}>
+      <Box
+        className="quotation-form-page"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          background: "linear-gradient(to bottom, #f5f5f5, #e9ecef)",
+        }}
+      >
+        <Navbar userRole={userRole} />
+        <DrawerHeader />
 
-      <main style={{ flex: 1 }}>
-        <Container maxWidth="xl" sx={{ py: 4, mt: 10 }}>
-          <Typography
-            variant="h5"
-            align="center"
-            gutterBottom
-            sx={{
-              fontWeight: "bold",
-              color: "#000000",
-              fontFamily: "Helvetica, sans-serif",
-              textTransform: "uppercase",
-              letterSpacing: 0,
-              mb: 6,
-              textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            Quotation Summary
-          </Typography>
-
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              <strong>User:</strong> {userData.first_name || "N/A"} (
-              {userData.username || "N/A"})
-            </Typography>
-            <Typography variant="body1">
-              <strong>Company:</strong> {userData.company || "N/A"}
-            </Typography>
-          </Box>
-
-          {selectedInstruments.length === 0 ? (
-            <Typography variant="body1" align="center" sx={{ mt: 4 }}>
-              No instruments selected.
-            </Typography>
-          ) : (
-            <Box sx={{ spaceY: 4 }}>
-              {selectedInstruments.map((item, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    mb: 4,
-                    p: 3,
-                    border: 1,
-                    borderColor: "grey.300",
-                    borderRadius: 2,
-                  }}
-                >
-                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    {item.instrument.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: "text.secondary", mb: 2 }}
-                  >
-                    <strong>Product Code:</strong> {item.productCode}
-                  </Typography>
-
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: "bold", mb: 1 }}
-                  >
-                    Requirements
-                  </Typography>
-                  <List>
-                    {Object.values(item.selections).map((sel, idx) => (
-                      <ListItem key={idx} disablePadding>
-                        <ListItemText primary={`[${sel.code}] ${sel.label}`} />
-                      </ListItem>
-                    ))}
-                  </List>
-
-                  <Typography
-                    variant="subtitle1"
-                    sx={{ fontWeight: "bold", mb: 1 }}
-                  >
-                    Add-Ons
-                  </Typography>
-                  <List>
-                    {item.selectedAddOns.length > 0 ? (
-                      item.selectedAddOns.map((addon, idx) => (
-                        <ListItem key={idx} disablePadding>
-                          <ListItemText
-                            primary={`[${addon.code}] ${addon.label} (${addon.addon_type.name})`}
-                          />
-                        </ListItem>
-                      ))
-                    ) : (
-                      <ListItem disablePadding>
-                        <ListItemText primary="No Add-Ons selected" />
-                      </ListItem>
-                    )}
-                  </List>
-                </Box>
-              ))}
-            </Box>
-          )}
-
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
+        <main style={{ flex: 1 }}>
+          <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
+            <Typography
+              variant="h5"
+              align="center"
+              gutterBottom
               sx={{
-                textTransform: "uppercase",
                 fontWeight: "bold",
-                px: 4,
-                py: 1.5,
-                backgroundColor: "#1976d2",
-                "&:hover": { backgroundColor: "#115293" },
+                color: "#000000",
+                fontFamily: "Helvetica, sans-serif",
+                textTransform: "uppercase",
+                letterSpacing: 0,
+                mb: 6,
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
               }}
             >
-              Submit Quotation
-            </Button>
-          </Box>
-        </Container>
-      </main>
-    </div>
+              Quotation Summary
+            </Typography>
+
+            <Box
+              className={`user-info-box action-section ${
+                isClicked ? "action-section-clicked" : ""
+              }`}
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 8,
+                p: 3,
+                border: "4px solid #e0e0e0",
+                borderRadius: "8px",
+                backgroundColor: "#fff",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                },
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif",
+                  fontWeight: "medium",
+                  color: "#333",
+                }}
+              >
+                <strong>Name:</strong> {userData.first_name || "N/A"}
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif",
+                  fontWeight: "medium",
+                  color: "#333",
+                }}
+              >
+                <strong>Company:</strong> {userData.company || "N/A"}
+              </Typography>
+              <TextField
+                label="Project Name"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                variant="outlined"
+                required
+                error={!projectName.trim() && isClicked}
+                helperText={
+                  !projectName.trim() && isClicked
+                    ? "Project Name is required"
+                    : ""
+                }
+                sx={{
+                  width: "200px",
+                  "& .MuiInputBase-root": {
+                    fontFamily: "Helvetica, sans-serif",
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontFamily: "Helvetica, sans-serif",
+                  },
+                }}
+              />
+            </Box>
+
+            {!["client", "customer"].includes(userRole) && (
+              <Typography
+                variant="body1"
+                color="error"
+                sx={{
+                  mb: 4,
+                  fontFamily: "Helvetica, sans-serif",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                Only clients can submit quotations.
+              </Typography>
+            )}
+
+            {selectedInstruments.length === 0 ? (
+              <Typography
+                variant="h6"
+                align="center"
+                sx={{
+                  mt: 4,
+                  fontFamily: "Helvetica, sans-serif",
+                  fontWeight: "bold",
+                  color: "error",
+                }}
+              >
+                No instruments selected.
+              </Typography>
+            ) : (
+              <Box sx={{ spaceY: 4 }}>
+                {selectedInstruments.map((item, index) => {
+                  const imageUrl = item.instrument?.image
+                    ? new URL(item.instrument.image, baseUrl).href
+                    : null;
+                  return (
+                    <Box
+                      key={index}
+                      className="instrument-box"
+                      sx={{
+                        mb: 4,
+                        p: 3,
+                        border: "4px solid #e0e0e0",
+                        borderRadius: "8px",
+                        backgroundColor: "#fff",
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                        },
+                      }}
+                    >
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={item.instrument.name}
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                            borderRadius: "8px",
+                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                            marginBottom: "16px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handleImageClick(index)}
+                        />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: "100px",
+                            height: "100px",
+                            backgroundColor: "#e0e0e0",
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            mb: 2,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "#666",
+                              fontFamily: "Helvetica, sans-serif",
+                            }}
+                          >
+                            No Image
+                          </Typography>
+                        </Box>
+                      )}
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#000000",
+                          mb: 1,
+                        }}
+                      >
+                        {item.instrument.name}
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#0a5",
+                          mb: 1,
+                        }}
+                      >
+                        <strong>Product Code:</strong> {item.productCode}
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#0a5",
+                          mb: 2,
+                        }}
+                      >
+                        <strong>Quantity:</strong> {item.quantity || 1}
+                      </Typography>
+
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#000000",
+                          mb: 1,
+                        }}
+                      >
+                        Requirements
+                      </Typography>
+                      <List>
+                        {Object.values(item.selections).map((sel, idx) => (
+                          <ListItem key={idx} disablePadding>
+                            <ListItemText
+                              primary={`[${sel.code}] ${sel.label}`}
+                              sx={{
+                                fontFamily: "Helvetica, sans-serif",
+                                color: "#333",
+                              }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#000000",
+                          mb: 1,
+                        }}
+                      >
+                        Add-Ons
+                      </Typography>
+                      <List>
+                        {item.selectedAddOns.length > 0 ? (
+                          item.selectedAddOns.map((addon, idx) => (
+                            <ListItem key={idx} disablePadding>
+                              <ListItemText
+                                primary={`[${addon.code}] ${addon.label} (${addon.addon_type.name})`}
+                                sx={{
+                                  fontFamily: "Helvetica, sans-serif",
+                                  color: "#333",
+                                }}
+                              />
+                            </ListItem>
+                          ))
+                        ) : (
+                          <ListItem disablePadding>
+                            <ListItemText
+                              primary="No Add-Ons selected"
+                              sx={{
+                                fontFamily: "Helvetica, sans-serif",
+                                color: "#333",
+                              }}
+                            />
+                          </ListItem>
+                        )}
+                      </List>
+                    </Box>
+                  );
+                })}
+              </Box>
+            )}
+
+            <Box className="action-section" sx={{ mt: 4 }}>
+              <Button
+                className="primary-button"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={isSubmitDisabled}
+              >
+                {isClicked ? (
+                  <CircularProgress size={24} sx={{ color: "white" }} />
+                ) : (
+                  "Submit Quotation"
+                )}
+              </Button>
+            </Box>
+          </Container>
+        </main>
+      </Box>
+    </Fade>
   );
 }
 

@@ -10,9 +10,92 @@
   margin-bottom: 20px;
 }
 
-.configurator-header h2 {
-  font-size: 28px;
+.review-section,
+.action-section {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.1s ease;
+  position: relative;
+}
+
+.action-section {
+  display: flex;
+  justify-content: center;
+}
+
+.action-section-clicked {
+  transform: scale(0.98);
+}
+
+.action-section-clicked::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  z-index: 1;
+}
+
+.section-heading {
+  font-size: 20px;
   color: #2c3e50;
+  margin-bottom: 12px;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.section-heading::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: #0a5;
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-item {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.next-button {
+  padding: 12px 24px;
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.next-button:hover {
+  background-color: #34495e;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .description {
@@ -24,145 +107,6 @@
   font-size: 26px;
   color: #0a5;
   margin-top: 24px;
-}
-
-.config-form {
-  margin-top: 20px;
-  padding: 16px;
-  background-color: #fafafa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  transition: transform 0.1s ease;
-  position: relative;
-}
-
-.config-form-clicked {
-  transform: scale(0.98);
-}
-
-.config-form-clicked::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  z-index: 1;
-}
-
-.fields-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.field-item {
-  padding: 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.field-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.addons-section {
-  margin-top: 20px;
-  padding: 16px;
-  background-color: #fafafa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  transition: transform 0.1s ease;
-  position: relative;
-}
-
-.addons-section-clicked {
-  transform: scale(0.98);
-}
-
-.addons-section-clicked::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  z-index: 1;
-}
-
-.addons-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.addon-type-group {
-  margin-bottom: 16px;
-}
-
-.addon-type-heading {
-  font-size: 20px;
-  color: #2c3e50;
-  margin-bottom: 12px;
-  position: relative;
-  text-transform: uppercase;
-}
-
-.addon-type-heading::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 40px;
-  height: 2px;
-  background-color: #0a5;
-}
-
-.addon-type-items {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.addon-item {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.addon-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.next-button {
-  margin-top: 30px;
-  padding: 12px 24px;
-  background-color: #2c3e50;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.next-button:hover {
-  background-color: #34495e;
 }
 
 .instrument-image {

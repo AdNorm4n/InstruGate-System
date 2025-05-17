@@ -6,8 +6,6 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  Collapse,
-  Divider,
   Container,
   CircularProgress,
 } from "@mui/material";
@@ -24,11 +22,11 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const InstrumentList = () => {
   const [groupedData, setGroupedData] = useState({});
   const [userRole, setUserRole] = useState(null);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const [expandedType, setExpandedType] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [configCache, setConfigCache] = useState({});
 
-  // 🟢 Fetch user role and instruments
+  // Fetch user role, instruments, and prefetch configs
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -40,19 +38,39 @@ const InstrumentList = () => {
         setUserRole(userRes.data.role);
 
         const instruments = instrumentsRes.data.filter((i) => i.is_available);
+        console.log("Instruments API response:", instruments);
         const grouped = {};
 
         instruments.forEach((instrument) => {
           const category = instrument.type.category.name;
-          const type = instrument.type.name;
-
-          if (!grouped[category]) grouped[category] = {};
-          if (!grouped[category][type]) grouped[category][type] = [];
-
-          grouped[category][type].push(instrument);
+          if (!grouped[category]) grouped[category] = [];
+          grouped[category].push(instrument);
         });
 
         setGroupedData(grouped);
+
+        // Prefetch instrument configs
+        const configPromises = instruments.map((instrument) =>
+          api.get(`/api/instruments/${instrument.id}/config/`).catch((err) => {
+            console.error(
+              `Failed to prefetch config for ${instrument.id}:`,
+              err
+            );
+            return { data: null };
+          })
+        );
+        const configResponses = await Promise.all(configPromises);
+        const newConfigCache = {};
+        configResponses.forEach((res, index) => {
+          if (res.data) {
+            newConfigCache[instruments[index].id] = res.data;
+            console.log(
+              `Prefetched config for ${instruments[index].id}:`,
+              res.data
+            );
+          }
+        });
+        setConfigCache(newConfigCache);
       } catch (err) {
         console.error("Error fetching data:", err);
         setUserRole("error");
@@ -64,43 +82,64 @@ const InstrumentList = () => {
     fetchData();
   }, []);
 
-  // 🔄 Loading fallback
+  // Handle category click
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category === selectedCategory ? null : category);
+  };
+
+  // Loading fallback
   if (loading) {
     return (
-      <div style={{ textAlign: "center", marginTop: "20%" }}>
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
         <CircularProgress />
-        <Typography variant="h6" sx={{ mt: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 2,
+            fontFamily: "Helvetica, sans-serif",
+            fontWeight: "bold",
+            color: "#000000",
+          }}
+        >
           Loading instruments...
         </Typography>
-      </div>
+      </Box>
     );
   }
 
-  // ❌ Error fallback
+  // Error fallback
   if (userRole === "error") {
     return (
-      <div style={{ textAlign: "center", marginTop: "20%" }}>
-        <Typography variant="h6" color="error">
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
+        <Typography
+          variant="h6"
+          color="error"
+          sx={{
+            fontFamily: "Helvetica, sans-serif",
+            fontWeight: "bold",
+          }}
+        >
           Failed to load instruments. Please try again later.
         </Typography>
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div
+    <Box
       className="instrument-list-page"
-      style={{
+      sx={{
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
+        bgcolor: "#f5f5f5",
       }}
     >
       <Navbar userRole={userRole} />
       <DrawerHeader />
 
       <main style={{ flex: 1 }}>
-        <Container maxWidth="xl" sx={{ py: 4, mt: 10 }}>
+        <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
           <Typography
             variant="h5"
             align="center"
@@ -115,42 +154,49 @@ const InstrumentList = () => {
               textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
-            Rüeger’s Products
+            Rüeger’s Instruments
           </Typography>
 
           {/* Categories */}
           <Grid container spacing={4} justifyContent="center">
             {Object.keys(groupedData).map((category) => (
-              <Grid item xs={12} sm={4} key={category}>
+              <Grid item xs={12} sm={6} md={4} key={category}>
                 <Card
-                  elevation={4}
+                  elevation={3}
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 2,
                     bgcolor:
-                      expandedCategory === category ? "primary.light" : "white",
-                    height: "150px",
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    textAlign: "center",
+                      selectedCategory === category ? "#e3f2fd" : "white",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                    },
                   }}
                 >
                   <CardActionArea
-                    sx={{ width: "100%", height: "100%" }}
-                    onClick={() =>
-                      setExpandedCategory(
-                        expandedCategory === category ? null : category
-                      )
-                    }
+                    onClick={() => handleCategoryClick(category)}
+                    sx={{ p: 3 }}
                   >
-                    <CardContent>
-                      <Typography variant="h6" fontWeight="bold" align="center">
+                    <CardContent sx={{ textAlign: "center" }}>
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        fontFamily="Helvetica, sans-serif"
+                        color={
+                          selectedCategory === category
+                            ? "primary.main"
+                            : "#000000"
+                        }
+                      >
                         {category}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {Object.keys(groupedData[category]).length} types
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        fontFamily="Helvetica, sans-serif"
+                      >
+                        {groupedData[category].length} instruments
                       </Typography>
                     </CardContent>
                   </CardActionArea>
@@ -159,88 +205,38 @@ const InstrumentList = () => {
             ))}
           </Grid>
 
-          {/* Types and Instruments */}
-          {expandedCategory && (
-            <Box sx={{ mt: 6 }}>
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: "bold" }}>
-                {expandedCategory}
+          {/* Instruments */}
+          {selectedCategory && (
+            <Box sx={{ mt: 8 }}>
+              <Typography
+                variant="h5"
+                align="left"
+                sx={{
+                  mb: 6,
+                  fontWeight: "bold",
+                  color: "#000000",
+                  fontFamily: "Helvetica, sans-serif",
+                  textTransform: "uppercase",
+                }}
+              >
+                {selectedCategory}
               </Typography>
-
-              <Grid container spacing={3}>
-                {Object.keys(groupedData[expandedCategory]).map((type) => {
-                  const isExpanded =
-                    expandedType === `${expandedCategory}-${type}`;
-
-                  return (
-                    <Grid item xs={12} key={type}>
-                      <Card
-                        elevation={3}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "space-between",
-                          borderRadius: 3,
-                        }}
-                        className="instrument-card"
-                      >
-                        <CardActionArea
-                          onClick={() =>
-                            setExpandedType(
-                              isExpanded ? null : `${expandedCategory}-${type}`
-                            )
-                          }
-                        >
-                          <CardContent>
-                            <Typography variant="h6" align="center">
-                              {type}
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              align="center"
-                              color="text.secondary"
-                            >
-                              {groupedData[expandedCategory][type].length} items
-                            </Typography>
-                          </CardContent>
-                        </CardActionArea>
-
-                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                          <Divider />
-                          <Box
-                            sx={{
-                              p: 2,
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: 2,
-                              justifyContent: "flex-start",
-                            }}
-                          >
-                            {groupedData[expandedCategory][type].map(
-                              (instrument) => (
-                                <Box
-                                  key={instrument.id}
-                                  sx={{
-                                    flex: "1 1 calc(20% - 1rem)",
-                                    minWidth: 240,
-                                    maxWidth: "100%",
-                                  }}
-                                >
-                                  <InstrumentCard instrument={instrument} />
-                                </Box>
-                              )
-                            )}
-                          </Box>
-                        </Collapse>
-                      </Card>
-                    </Grid>
-                  );
-                })}
+              <Grid container spacing={4}>
+                {groupedData[selectedCategory].map((instrument) => (
+                  <Grid item xs={12} key={instrument.id}>
+                    <InstrumentCard
+                      instrument={instrument}
+                      userRole={userRole}
+                      configData={configCache[instrument.id]}
+                    />
+                  </Grid>
+                ))}
               </Grid>
             </Box>
           )}
         </Container>
       </main>
-    </div>
+    </Box>
   );
 };
 

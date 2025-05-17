@@ -1,10 +1,13 @@
+import { Box, CircularProgress } from "@mui/material";
 import "../styles/LoadingIndicator.css";
 
 const LoadingIndicator = () => {
   return (
-    <div className="loading-container">
-      <div className="loader"></div>
-    </div>
+    <Box className="loading-container">
+      <Box className="loading-content">
+        <CircularProgress size={24} sx={{ color: "#ffffff" }} />
+      </Box>
+    </Box>
   );
 };
 

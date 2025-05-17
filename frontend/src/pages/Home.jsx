@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import "../styles/Home.css";
 import { styled } from "@mui/material/styles";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
 function Home() {
+  const navigate = useNavigate();
   const [userRole, setUserRole] = useState(null);
+  const [isClicked, setIsClicked] = useState(null);
 
   useEffect(() => {
     api
@@ -21,17 +26,48 @@ function Home() {
       });
   }, []);
 
+  const handleClick = (action, path) => {
+    setIsClicked(action);
+    console.log("handleClick called:", { action, path });
+    setTimeout(() => {
+      try {
+        navigate(path);
+        setIsClicked(null);
+      } catch (err) {
+        console.error("Navigation error:", err);
+        alert("Failed to navigate");
+        setIsClicked(null);
+      }
+    }, 300);
+  };
+
   if (userRole === null) {
-    return <div>Loading...</div>;
+    return (
+      <Box sx={{ textAlign: "center", mt: "20vh" }}>
+        <CircularProgress size={48} sx={{ color: "#007bff" }} />
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 2,
+            fontFamily: "Helvetica, sans-serif",
+            fontWeight: "bold",
+            color: "#000000",
+          }}
+        >
+          Loading...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div
+    <Box
       className="home-wrapper"
-      style={{
+      sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        minHeight: "100vh",
+        bgcolor: "#f8f9fa",
       }}
     >
       <Navbar userRole={userRole} />
@@ -41,11 +77,28 @@ function Home() {
         {/* 🏠 Hero Section */}
         <section className="home-hero">
           <div className="hero-text">
-            <h1>Welcome to InstruGate</h1>
-            <p>
+            <Typography
+              variant="h4"
+              sx={{
+                fontFamily: "Helvetica, sans-serif",
+                fontWeight: "bold",
+                color: "white",
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                mb: 1,
+              }}
+            >
+              Welcome to InstruGate
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily: "Helvetica, sans-serif",
+                color: "white",
+              }}
+            >
               Keep your business running with reliable pressure & temperature
               instruments
-            </p>
+            </Typography>
           </div>
         </section>
 
@@ -55,17 +108,50 @@ function Home() {
             <div className="role-section admin">
               <div className="card">
                 <div className="card-icon">⚙️</div>
-                <h3>Admin Panel</h3>
-                <p>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    fontWeight: "bold",
+                    color: "#d6393a",
+                    mb: 1,
+                  }}
+                >
+                  Admin Panel
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    mb: 1,
+                  }}
+                >
                   You are logged in as <strong>Admin</strong>.
-                </p>
-                <p>
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    mb: 2,
+                  }}
+                >
                   Manage users, instruments, and system settings from the admin
                   panel.
-                </p>
-                <a href="/admin" className="admin-button">
-                  Learn More
-                </a>
+                </Typography>
+                <Button
+                  className="admin-button"
+                  variant="contained"
+                  onClick={() => handleClick("admin", "/admin")}
+                  disabled={isClicked === "admin"}
+                >
+                  {isClicked === "admin" ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Go to Admin Panel"
+                  )}
+                </Button>
               </div>
             </div>
           )}
@@ -73,16 +159,49 @@ function Home() {
             <div className="role-section engineer">
               <div className="card">
                 <div className="card-icon">📐</div>
-                <h3>Proposal Engineer Tools</h3>
-                <p>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    fontWeight: "bold",
+                    color: "#d6393a",
+                    mb: 1,
+                  }}
+                >
+                  Proposal Engineer Tools
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    mb: 1,
+                  }}
+                >
                   You are logged in as <strong>Proposal Engineer</strong>.
-                </p>
-                <p>
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    mb: 2,
+                  }}
+                >
                   You can browse instruments and prepare technical proposals.
-                </p>
-                <a href="/instruments" className="primary-button">
-                  Learn More
-                </a>
+                </Typography>
+                <Button
+                  className="primary-button"
+                  variant="contained"
+                  onClick={() => handleClick("engineer", "/instruments")}
+                  disabled={isClicked === "engineer"}
+                >
+                  {isClicked === "engineer" ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Review Quotations"
+                  )}
+                </Button>
               </div>
             </div>
           )}
@@ -90,23 +209,56 @@ function Home() {
             <div className="role-section client">
               <div className="card">
                 <div className="card-icon">🔍</div>
-                <h3>Client Resources</h3>
-                <p>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    fontWeight: "bold",
+                    color: "#d6393a",
+                    mb: 1,
+                  }}
+                >
+                  Client Resources
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    mb: 1,
+                  }}
+                >
                   You are logged in as <strong>Client</strong>.
-                </p>
-                <p>
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    mb: 2,
+                  }}
+                >
                   You can search for instruments and submit request orders for
                   your projects.
-                </p>
-                <a href="/instruments" className="primary-button">
-                  Browse Instruments
-                </a>
+                </Typography>
+                <Button
+                  className="primary-button"
+                  variant="contained"
+                  onClick={() => handleClick("client", "/instruments")}
+                  disabled={isClicked === "client"}
+                >
+                  {isClicked === "client" ? (
+                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  ) : (
+                    "Browse Instruments"
+                  )}
+                </Button>
               </div>
             </div>
           )}
         </section>
       </main>
-    </div>
+    </Box>
   );
 }
 

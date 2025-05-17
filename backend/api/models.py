@@ -86,20 +86,44 @@ class AddOn(models.Model):
     def __str__(self):
         return f"[{self.code}] {self.label} ({self.addon_type.name})"
 
-# NEW MODELS FOR QUOTATION & CONFIGURATION
-
 class Quotation(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quotations')
     submitted_at = models.DateTimeField(auto_now_add=True)
-    company = models.CharField(max_length=255, blank=True, null=True)  # ✅ Added Company
+    company = models.CharField(max_length=255, blank=True, null=True)
+    project_name = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    remarks = models.TextField(blank=True, null=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
+    rejected_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Quotation {self.id} by {self.created_by.username}"
+        return f"Quotation {self.id} by {self.created_by.username} ({self.status})"
 
 class QuotationItem(models.Model):
     quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='items')
     product_code = models.CharField(max_length=100)
+    quantity = models.PositiveIntegerField(default=1)
     instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"(Quotation {self.quotation.id})"
+
+class QuotationItemSelection(models.Model):
+    quotation_item = models.ForeignKey(QuotationItem, on_delete=models.CASCADE, related_name='selections')
+    field_option = models.ForeignKey(FieldOption, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Selection {self.field_option} for QuotationItem {self.quotation_item.id}"
+
+class QuotationItemAddOn(models.Model):
+    quotation_item = models.ForeignKey(QuotationItem, on_delete=models.CASCADE, related_name='addons')
+    addon = models.ForeignKey(AddOn, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"AddOn {self.addon} for QuotationItem {self.quotation_item.id}"

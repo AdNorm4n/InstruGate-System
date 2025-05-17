@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     InstrumentListView, InstrumentConfigView,
-    InstrumentOptionListView, QuotationCreateView, SubmittedQuotationView
+    InstrumentOptionListView, QuotationCreateView,
+    SubmittedQuotationView, QuotationReviewView
 )
 
 urlpatterns = [
@@ -10,4 +11,6 @@ urlpatterns = [
     path("instruments/<int:pk>/addons/", InstrumentOptionListView.as_view(), name="instrument-addons"),
     path("quotations/", QuotationCreateView.as_view(), name="quotation-create"),
     path("quotations/submitted/", SubmittedQuotationView.as_view(), name="submitted-quotation"),
+    path("quotations/review/", QuotationReviewView.as_view(), name="quotation-review"),
+    path("quotations/review/<int:pk>/", QuotationReviewView.as_view(), name="quotation-review-detail"),
 ]
