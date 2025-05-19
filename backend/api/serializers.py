@@ -114,16 +114,20 @@ class QuotationSerializer(serializers.ModelSerializer):
         model = Quotation
         fields = ['id', 'company', 'project_name', 'status', 'remarks', 'submitted_at', 'rejected_at', 'approved_at', 'items', 'created_by']
         read_only_fields = ['status', 'remarks', 'rejected_at', 'approved_at', 'created_by']
+        extra_kwargs = {
+            'project_name': {'required': True, 'allow_blank': False},
+            'company': {'required': True, 'allow_blank': False}
+        }
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        company = validated_data.pop('company', None)
-        project_name = validated_data.pop('project_name', '')
+        company = validated_data.pop('company')
+        project_name = validated_data.pop('project_name')
+        # Explicitly pass only the fields we want, avoiding any potential overlap
         quotation = Quotation.objects.create(
             company=company,
             project_name=project_name,
-            created_by=self.context['request'].user,
-            **validated_data
+            created_by=self.context['request'].user
         )
         for item_data in items_data:
             QuotationItemSerializer().create({

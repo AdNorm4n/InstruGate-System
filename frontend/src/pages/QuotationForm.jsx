@@ -59,7 +59,7 @@ function QuotationForm() {
           console.log("Token refreshed:", access);
         }
 
-        // Always fetch user data from API
+        // Fetch user data from API
         const userRes = await api.get("/api/users/me/", {
           headers: { Authorization: `Bearer ${access}` },
         });
@@ -86,10 +86,9 @@ function QuotationForm() {
 
   const handleImageClick = (index) => {
     if (selectedInstruments[index]?.instrument?.image) {
+      // Handle image click if needed
     }
   };
-
-  const handleCloseOverlay = () => {};
 
   const handleSubmit = async () => {
     if (!projectName.trim()) {
@@ -97,7 +96,7 @@ function QuotationForm() {
       return;
     }
 
-    if (!["client", "customer"].includes(userRole)) {
+    if (userRole !== "client") {
       alert("Only clients can submit quotations.");
       return;
     }
@@ -206,9 +205,7 @@ function QuotationForm() {
   }
 
   const isSubmitDisabled =
-    isClicked ||
-    !projectName.trim() ||
-    !["client", "customer"].includes(userRole);
+    isClicked || !projectName.trim() || userRole !== "client";
 
   return (
     <Fade in timeout={800}>
@@ -308,7 +305,7 @@ function QuotationForm() {
               />
             </Box>
 
-            {!["client", "customer"].includes(userRole) && (
+            {userRole !== "client" && (
               <Typography
                 variant="body1"
                 color="error"

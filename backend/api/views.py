@@ -8,6 +8,10 @@ from .serializers import (
     AddOnSerializer, QuotationSerializer, QuotationReviewSerializer
 )
 
+class IsClient(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'client'
+
 class IsProposalEngineerOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role in ['proposal_engineer', 'admin']
@@ -40,7 +44,7 @@ class InstrumentOptionListView(generics.ListAPIView):
 
 class QuotationCreateView(generics.CreateAPIView):
     serializer_class = QuotationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsClient]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -50,12 +54,23 @@ class SubmittedQuotationView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Quotation.objects.filter(created_by=self.request.user).order_by('-submitted_at')
+        queryset = Quotation.objects.filter(created_by=self.request.user).order_by('-submitted_at')
+        status_filter = self.request.query_params.get('status')
+        if status_filter in ['pending', 'approved', 'rejected']:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
 
 class QuotationReviewView(generics.GenericAPIView):
     serializer_class = QuotationReviewSerializer
     permission_classes = [IsProposalEngineerOrAdmin]
     queryset = Quotation.objects.all().order_by('-submitted_at')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        status_filter = self.request.query_params.get('status')
+        if status_filter in ['pending', 'approved', 'rejected']:
+            queryset = queryset.filter(status=status_filter)
+        return queryset
 
     def get(self, request, *args, **kwargs):
         serializer = QuotationSerializer(self.get_queryset(), many=True)
