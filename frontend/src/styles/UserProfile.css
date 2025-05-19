@@ -1,0 +1,7 @@
+.user-profile-page {
+  font-family: "Helvetica, sans-serif";
+}
+
+.user-profile-page .MuiTextField-root {
+  margin-bottom: 16px;
+}

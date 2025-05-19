@@ -9,8 +9,6 @@ urlpatterns = [
     path("api/token/", TokenObtainPairView.as_view(), name="get_token"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="refresh"),
     path("api-auth/", include("rest_framework.urls")),
-    
-    # ✅ Your app routes
-    path("api/", include("api.urls")),        # Instruments
-    path("api/users/", include("users.urls")), # Custom user auth & profile     
+    path("api/", include("api.urls")),
+    path("api/users/", include("users.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

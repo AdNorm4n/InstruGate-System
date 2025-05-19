@@ -109,15 +109,22 @@ class QuotationItemSerializer(serializers.ModelSerializer):
 class QuotationSerializer(serializers.ModelSerializer):
     items = QuotationItemSerializer(many=True)
     created_by = serializers.CharField(source='created_by.username', read_only=True)
+    created_by_first_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Quotation
-        fields = ['id', 'company', 'project_name', 'status', 'remarks', 'submitted_at', 'rejected_at', 'approved_at', 'items', 'created_by']
+        fields = [
+            'id', 'company', 'project_name', 'status', 'remarks', 'submitted_at',
+            'rejected_at', 'approved_at', 'items', 'created_by', 'created_by_first_name'
+        ]
         read_only_fields = ['status', 'remarks', 'rejected_at', 'approved_at', 'created_by']
         extra_kwargs = {
             'project_name': {'required': True, 'allow_blank': False},
             'company': {'required': True, 'allow_blank': False}
         }
+
+    def get_created_by_first_name(self, obj):
+        return obj.created_by.first_name if obj.created_by.first_name else "N/A"
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')

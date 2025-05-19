@@ -112,9 +112,9 @@ function SubmittedQuotations() {
       );
       quotationsRes.data.forEach((q) =>
         console.log(
-          `Quotation ${q.id} created_by:`,
-          q.created_by,
-          typeof q.created_by
+          `Quotation ${q.id} created_by_first_name:`,
+          q.created_by_first_name,
+          typeof q.created_by_first_name
         )
       );
 
@@ -318,7 +318,7 @@ function SubmittedQuotations() {
                 letterSpacing: 0,
                 textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
                 color: "#000000",
-                mb: 3, // Added spacing below title
+                mb: 3, // Spacing below title
               }}
             >
               Quotation Dashboard
@@ -402,7 +402,7 @@ function SubmittedQuotations() {
                           className="quotation-detail"
                         >
                           <strong>Submitted by:</strong>{" "}
-                          {quotation.created_by || "N/A"}
+                          {quotation.created_by_first_name || "N/A"}
                         </Typography>
                         <Typography
                           variant="body1"

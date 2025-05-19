@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
@@ -12,6 +11,9 @@ import SelectedInstruments from "./pages/SelectedInstruments";
 import ProtectedRoute from "./components/ProtectedRoute";
 import QuotationForm from "./pages/QuotationForm";
 import SubmittedQuotations from "./pages/SubmittedQuotations";
+import UserProfile from "./pages/UserProfile";
+import Tools from "./pages/Tools";
+import About from "./pages/About";
 import Footer from "./components/Footer";
 
 function Logout() {
@@ -77,7 +79,7 @@ function App() {
           path="/quotation"
           element={
             <ProtectedRoute>
-              <QuotationForm instruments={[]} /> {}
+              <QuotationForm instruments={[]} />
               <Footer />
             </ProtectedRoute>
           }
@@ -87,6 +89,33 @@ function App() {
           element={
             <ProtectedRoute>
               <SubmittedQuotations />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tools"
+          element={
+            <ProtectedRoute>
+              <Tools />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <ProtectedRoute>
+              <About />
               <Footer />
             </ProtectedRoute>
           }

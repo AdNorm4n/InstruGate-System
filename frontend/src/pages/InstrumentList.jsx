@@ -154,7 +154,7 @@ const InstrumentList = () => {
               textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
             }}
           >
-            Rüeger’s Instruments
+            Rueger’s Instruments
           </Typography>
 
           {/* Categories */}
@@ -183,6 +183,7 @@ const InstrumentList = () => {
                         variant="h6"
                         fontWeight="bold"
                         fontFamily="Helvetica, sans-serif"
+                        textTransform="uppercase"
                         color={
                           selectedCategory === category
                             ? "primary.main"
@@ -196,7 +197,7 @@ const InstrumentList = () => {
                         color="text.secondary"
                         fontFamily="Helvetica, sans-serif"
                       >
-                        {groupedData[category].length} instruments
+                        {groupedData[category].length} Instruments
                       </Typography>
                     </CardContent>
                   </CardActionArea>
@@ -208,19 +209,6 @@ const InstrumentList = () => {
           {/* Instruments */}
           {selectedCategory && (
             <Box sx={{ mt: 8 }}>
-              <Typography
-                variant="h5"
-                align="left"
-                sx={{
-                  mb: 6,
-                  fontWeight: "bold",
-                  color: "#000000",
-                  fontFamily: "Helvetica, sans-serif",
-                  textTransform: "uppercase",
-                }}
-              >
-                {selectedCategory}
-              </Typography>
               <Grid container spacing={4}>
                 {groupedData[selectedCategory].map((instrument) => (
                   <Grid item xs={12} key={instrument.id}>

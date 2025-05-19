@@ -9,6 +9,7 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import HomeRepairServiceIcon from "@mui/icons-material/HomeRepairService";
+import PersonIcon from "@mui/icons-material/Person";
 import api from "../api";
 import headerBanner from "../assets/menu.png";
 import logo from "../assets/ashcroft.png";
@@ -26,10 +27,8 @@ export default function Navbar({ userRole }) {
       const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Scrolling down and past 50px
         setHideTopToolbar(true);
       } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
-        // Scrolling up or near top
         setHideTopToolbar(false);
       }
 
@@ -99,7 +98,7 @@ export default function Navbar({ userRole }) {
         backgroundColor: "transparent",
       }}
     >
-      {/* Top Banner Section with Logos and Logout */}
+      {/* Top Banner Section with Logos, Profile, and Logout */}
       <Toolbar
         sx={{
           minHeight: 100,
@@ -116,19 +115,12 @@ export default function Navbar({ userRole }) {
       >
         {/* Left: Box for existing logos */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* Box for logos */}
-
           <Box sx={{}}>
-            {/* First Logo */}
-
             <img
               src={logo}
               alt="New Logo"
               style={{ height: "30px", paddingBottom: "7px" }}
             />
-
-            {/* Second Logo */}
-
             <img
               src={headerBanner}
               alt="Header Banner"
@@ -150,20 +142,35 @@ export default function Navbar({ userRole }) {
           <img src={centerLogo} alt="Center Logo" style={{ height: "40px" }} />
         </Box>
 
-        {/* Right: Logout Button */}
-        <Button
-          startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
-          onClick={() => navigate("/logout")}
-          sx={{
-            color: "#d6393a",
-            textTransform: "none",
-            fontWeight: "bold",
-            bgcolor: "#ffffff",
-            "&:hover": { bgcolor: "#f5f5f5" },
-          }}
-        >
-          Logout
-        </Button>
+        {/* Right: Profile and Logout Buttons */}
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            startIcon={<PersonIcon sx={{ color: "#d6393a" }} />}
+            onClick={() => navigate("/profile")}
+            sx={{
+              color: "#d6393a",
+              textTransform: "none",
+              fontWeight: "bold",
+              bgcolor: "#ffffff",
+              "&:hover": { bgcolor: "#f5f5f5" },
+            }}
+          >
+            Profile
+          </Button>
+          <Button
+            startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
+            onClick={() => navigate("/logout")}
+            sx={{
+              color: "#d6393a",
+              textTransform: "none",
+              fontWeight: "bold",
+              bgcolor: "#ffffff",
+              "&:hover": { bgcolor: "#f5f5f5" },
+            }}
+          >
+            Logout
+          </Button>
+        </Box>
       </Toolbar>
 
       {/* Bottom Menu Section */}
