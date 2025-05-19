@@ -401,8 +401,7 @@ function UserProfile() {
                 sx={{
                   mt: 3,
                   fontFamily: "Helvetica, sans-serif",
-                  bgcolor: "#d6393a",
-                  "&:hover": { bgcolor: "#b53031" },
+                  "&:hover": { bgcolor: "#2c3e50" },
                 }}
               >
                 {submitting ? (
