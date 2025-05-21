@@ -14,6 +14,10 @@ import SubmittedQuotations from "./pages/SubmittedQuotations";
 import UserProfile from "./pages/UserProfile";
 import Tools from "./pages/Tools";
 import About from "./pages/About";
+import AdminPanel from "./pages/AdminPanel";
+import UsersAdmin from "./pages/UsersAdmin";
+import InstrumentsAdmin from "./pages/InstrumentsAdmin";
+import QuotationsAdmin from "./pages/QuotationsAdmin";
 import Footer from "./components/Footer";
 
 function Logout() {
@@ -116,6 +120,42 @@ function App() {
           element={
             <ProtectedRoute>
               <About />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-panel"
+          element={
+            <ProtectedRoute>
+              <AdminPanel />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <UsersAdmin />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/instruments"
+          element={
+            <ProtectedRoute>
+              <InstrumentsAdmin />
+              <Footer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/quotations"
+          element={
+            <ProtectedRoute>
+              <QuotationsAdmin />
               <Footer />
             </ProtectedRoute>
           }

@@ -21,7 +21,6 @@ export default function Navbar({ userRole }) {
   const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
 
-  // Scroll event handler to show/hide top toolbar
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -39,13 +38,26 @@ export default function Navbar({ userRole }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  // Fetch instruments
   useEffect(() => {
     api
       .get("/api/instruments/")
       .then((res) => setInstruments(res.data))
       .catch(() => alert("Failed to load instruments"));
   }, []);
+
+  const handleAdminPanel = () => {
+    navigate("/admin-panel");
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.post("/api/users/logout/", {});
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    localStorage.clear();
+    navigate("/login");
+  };
 
   const menuItems = [
     { text: "Home", fontWeight: "bold", icon: <HomeIcon />, path: "/" },
@@ -83,7 +95,7 @@ export default function Navbar({ userRole }) {
             text: "Admin Panel",
             fontWeight: "bold",
             icon: <AdminPanelSettingsIcon />,
-            path: "/admin",
+            action: handleAdminPanel,
           },
         ]
       : []),
@@ -98,7 +110,6 @@ export default function Navbar({ userRole }) {
         backgroundColor: "transparent",
       }}
     >
-      {/* Top Banner Section with Logos, Profile, and Logout */}
       <Toolbar
         sx={{
           minHeight: 100,
@@ -113,7 +124,6 @@ export default function Navbar({ userRole }) {
           backgroundColor: "#ffffff",
         }}
       >
-        {/* Left: Box for existing logos */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box sx={{}}>
             <img
@@ -128,8 +138,6 @@ export default function Navbar({ userRole }) {
             />
           </Box>
         </Box>
-
-        {/* Center: Logo */}
         <Box
           sx={{
             position: "absolute",
@@ -141,8 +149,6 @@ export default function Navbar({ userRole }) {
         >
           <img src={centerLogo} alt="Center Logo" style={{ height: "40px" }} />
         </Box>
-
-        {/* Right: Profile and Logout Buttons */}
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button
             startIcon={<PersonIcon sx={{ color: "#d6393a" }} />}
@@ -159,7 +165,7 @@ export default function Navbar({ userRole }) {
           </Button>
           <Button
             startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
-            onClick={() => navigate("/logout")}
+            onClick={handleLogout}
             sx={{
               color: "#d6393a",
               textTransform: "none",
@@ -172,8 +178,6 @@ export default function Navbar({ userRole }) {
           </Button>
         </Box>
       </Toolbar>
-
-      {/* Bottom Menu Section */}
       <Toolbar
         sx={{
           minHeight: 64,
@@ -192,7 +196,7 @@ export default function Navbar({ userRole }) {
               startIcon={React.cloneElement(item.icon, {
                 sx: { color: "#ffffff" },
               })}
-              onClick={() => navigate(item.path)}
+              onClick={item.action || (() => navigate(item.path))}
               sx={{
                 color: "#ffffff",
                 textTransform: "none",

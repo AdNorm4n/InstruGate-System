@@ -39,7 +39,7 @@ function ProtectedRoute({ children }) {
 
         if (decoded.exp < now) {
           console.log("ProtectedRoute: Token expired, attempting refresh...");
-          const res = await api.post("/api/users/token/", { refresh });
+          const res = await api.post("/api/token/refresh/", { refresh });
           if (!res.data.access) {
             throw new Error("No access token in refresh response");
           }

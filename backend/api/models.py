@@ -33,7 +33,6 @@ class InstrumentType(models.Model):
         ('Bimetals Thermometers', 'Bimetals Thermometers'),
         ('Gas Actuated Thermometers', 'Gas Actuated Thermometers'),
         ('Thermowells', 'Thermowells'),
-        ('Test Gauges', 'Test Gauges'),
     ]
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='types')
     name = models.CharField(max_length=100, choices=TYPE_CHOICES)
@@ -68,6 +67,9 @@ class FieldOption(models.Model):
     label = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
 
+    class Meta:
+        unique_together = ('field', 'label', 'code')
+
     def __str__(self):
         return f"[{self.code}] {self.label}"
 
@@ -82,6 +84,9 @@ class AddOn(models.Model):
     addon_type = models.ForeignKey(AddOnType, on_delete=models.CASCADE, related_name="addons")
     label = models.CharField(max_length=200)
     code = models.CharField(max_length=20)
+
+    class Meta:
+        unique_together = ('addon_type', 'label', 'code')
 
     def __str__(self):
         return f"[{self.code}] {self.label} ({self.addon_type.name})"
@@ -118,12 +123,18 @@ class QuotationItemSelection(models.Model):
     quotation_item = models.ForeignKey(QuotationItem, on_delete=models.CASCADE, related_name='selections')
     field_option = models.ForeignKey(FieldOption, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('quotation_item', 'field_option')
+
     def __str__(self):
         return f"Selection {self.field_option} for QuotationItem {self.quotation_item.id}"
 
 class QuotationItemAddOn(models.Model):
     quotation_item = models.ForeignKey(QuotationItem, on_delete=models.CASCADE, related_name='addons')
     addon = models.ForeignKey(AddOn, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('quotation_item', 'addon')
 
     def __str__(self):
         return f"AddOn {self.addon} for QuotationItem {self.quotation_item.id}"

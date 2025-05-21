@@ -1,0 +1,33 @@
+.admin-panel {
+  padding: 20px;
+}
+
+.table-container {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.MuiTable-root {
+  min-width: 650px;
+}
+
+.MuiTableCell-head {
+  font-weight: bold;
+  background-color: #f5f5f5;
+}
+
+.MuiTableRow-root:hover {
+  background-color: #f9f9f9;
+}
+
+.MuiButton-contained {
+  background-color: #1976d2;
+}
+
+.MuiButton-contained:hover {
+  background-color: #115293;
+}
+
+.MuiDialogContent-root {
+  min-width: 400px;
+}

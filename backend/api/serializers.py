@@ -5,7 +5,9 @@ from .models import (
     AddOn, AddOnType, Quotation, QuotationItem,
     QuotationItemSelection, QuotationItemAddOn
 )
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,68 +17,100 @@ class UserSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['id', 'name']
 
 class InstrumentTypeSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), source='category', write_only=True
+    )
+
     class Meta:
         model = InstrumentType
-        fields = '__all__'
+        fields = ['id', 'name', 'category', 'category_id']
 
 class InstrumentSerializer(serializers.ModelSerializer):
     type = InstrumentTypeSerializer(read_only=True)
+    type_id = serializers.PrimaryKeyRelatedField(
+        queryset=InstrumentType.objects.all(), source='type', write_only=True
+    )
+
     class Meta:
         model = Instrument
-        fields = '__all__'
+        fields = ['id', 'name', 'type', 'type_id', 'description', 'specifications', 'image', 'is_available', 'created_at']
+        read_only_fields = ['created_at']
+        extra_kwargs = {
+            'image': {'required': False, 'allow_null': True},
+            'description': {'required': False, 'allow_blank': True},
+            'specifications': {'required': False, 'allow_blank': True},
+            'is_available': {'required': False},
+        }
 
 class FieldOptionSerializer(serializers.ModelSerializer):
+    field = serializers.PrimaryKeyRelatedField(queryset=ConfigurableField.objects.all())
+
     class Meta:
         model = FieldOption
-        fields = ['id', 'label', 'code']
+        fields = ['id', 'field', 'label', 'code']
 
 class ConfigurableFieldSerializer(serializers.ModelSerializer):
     options = FieldOptionSerializer(many=True, read_only=True)
-    parent_field = serializers.PrimaryKeyRelatedField(read_only=True)
+    instrument = serializers.PrimaryKeyRelatedField(queryset=Instrument.objects.all())
+    parent_field = serializers.PrimaryKeyRelatedField(queryset=ConfigurableField.objects.all(), allow_null=True)
+
     class Meta:
         model = ConfigurableField
-        fields = ['id', 'name', 'order', 'options', 'parent_field', 'trigger_value']
+        fields = ['id', 'instrument', 'name', 'order', 'parent_field', 'trigger_value', 'options']
+        extra_kwargs = {
+            'order': {'required': False},
+            'trigger_value': {'required': False, 'allow_blank': True, 'allow_null': True},
+        }
 
 class InstrumentConfigSerializer(serializers.ModelSerializer):
-    fields = ConfigurableFieldSerializer(many=True)
+    fields = ConfigurableFieldSerializer(many=True, read_only=True)
+
     class Meta:
         model = Instrument
         fields = ['id', 'name', 'description', 'fields']
 
 class AddOnTypeSerializer(serializers.ModelSerializer):
+    instruments = serializers.PrimaryKeyRelatedField(queryset=Instrument.objects.all(), many=True, required=False)
+
     class Meta:
         model = AddOnType
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'instruments']
 
 class AddOnSerializer(serializers.ModelSerializer):
-    addon_type = AddOnTypeSerializer()
+    addon_type = AddOnTypeSerializer(read_only=True)
+    addon_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=AddOnType.objects.all(), source='addon_type', write_only=True
+    )
+
     class Meta:
         model = AddOn
-        fields = ['id', 'label', 'code', 'addon_type']
+        fields = ['id', 'addon_type', 'addon_type_id', 'label', 'code']
 
 class QuotationItemSelectionSerializer(serializers.ModelSerializer):
     field_option = FieldOptionSerializer(read_only=True)
     field_option_id = serializers.PrimaryKeyRelatedField(
         queryset=FieldOption.objects.all(), source='field_option', write_only=True
     )
+    quotation_item = serializers.PrimaryKeyRelatedField(queryset=QuotationItem.objects.all())
 
     class Meta:
         model = QuotationItemSelection
-        fields = ['field_option', 'field_option_id']
+        fields = ['id', 'quotation_item', 'field_option', 'field_option_id']
 
 class QuotationItemAddOnSerializer(serializers.ModelSerializer):
     addon = AddOnSerializer(read_only=True)
     addon_id = serializers.PrimaryKeyRelatedField(
         queryset=AddOn.objects.all(), source='addon', write_only=True
     )
+    quotation_item = serializers.PrimaryKeyRelatedField(queryset=QuotationItem.objects.all())
 
     class Meta:
         model = QuotationItemAddOn
-        fields = ['addon', 'addon_id']
+        fields = ['id', 'quotation_item', 'addon', 'addon_id']
 
 class QuotationItemSerializer(serializers.ModelSerializer):
     instrument = InstrumentSerializer(read_only=True)
@@ -88,7 +122,7 @@ class QuotationItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuotationItem
-        fields = ['product_code', 'quantity', 'instrument', 'instrument_id', 'selections', 'addons']
+        fields = ['id', 'product_code', 'quantity', 'instrument', 'instrument_id', 'selections', 'addons']
 
     def create(self, validated_data):
         selections_data = validated_data.pop('selections', [])
@@ -117,7 +151,7 @@ class QuotationSerializer(serializers.ModelSerializer):
             'id', 'company', 'project_name', 'status', 'remarks', 'submitted_at',
             'rejected_at', 'approved_at', 'items', 'created_by', 'created_by_first_name'
         ]
-        read_only_fields = ['status', 'remarks', 'rejected_at', 'approved_at', 'created_by']
+        read_only_fields = ['status', 'remarks', 'rejected_at', 'approved_at', 'created_by', 'submitted_at']
         extra_kwargs = {
             'project_name': {'required': True, 'allow_blank': False},
             'company': {'required': True, 'allow_blank': False}
@@ -128,12 +162,9 @@ class QuotationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        company = validated_data.pop('company')
-        project_name = validated_data.pop('project_name')
-        # Explicitly pass only the fields we want, avoiding any potential overlap
         quotation = Quotation.objects.create(
-            company=company,
-            project_name=project_name,
+            company=validated_data.pop('company'),
+            project_name=validated_data.pop('project_name'),
             created_by=self.context['request'].user
         )
         for item_data in items_data:
@@ -147,7 +178,7 @@ class QuotationReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quotation
         fields = ['id', 'status', 'remarks', 'rejected_at', 'submitted_at']
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'submitted_at']
 
     def validate(self, data):
         if data.get('status') == 'rejected' and not data.get('remarks'):
