@@ -25,21 +25,13 @@ import {
   MenuItem,
   TableSortLabel,
   Snackbar,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Tabs,
+  Tab,
 } from "@mui/material";
-import {
-  Add,
-  Edit,
-  Delete,
-  ExpandMore,
-  Check,
-  Close,
-} from "@mui/icons-material";
+import { Add, Edit, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Navbar from "../components/Navbar";
-import ErrorBoundary from "./ErrorBoundary";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000",
@@ -65,8 +57,14 @@ const QuotationsAdmin = () => {
     instruments: [],
     fieldoptions: [],
     addons: [],
+    users: [],
   });
-  const [filteredQuotations, setFilteredQuotations] = useState([]);
+  const [filteredData, setFilteredData] = useState({
+    quotations: [],
+    quotationitems: [],
+    quotationitemselections: [],
+    quotationitemaddons: [],
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -81,15 +79,15 @@ const QuotationsAdmin = () => {
     field: "id",
     direction: "asc",
   });
-  const [nestedData, setNestedData] = useState([]);
+  const [activeTab, setActiveTab] = useState(0);
 
   const tabs = [
     {
       name: ENTITY_TYPES.QUOTATIONS,
-      endpoint: "/api/quotations/review/",
+      endpoint: "/api/admin/quotations/",
       fields: [
         "id",
-        "created_by_first_name",
+        "created_by.first_name",
         "company",
         "project_name",
         "status",
@@ -98,70 +96,82 @@ const QuotationsAdmin = () => {
         "rejected_at",
         "remarks",
       ],
-      writableFields: ["company", "project_name", "items"],
-      permissions: ["admin", "proposal_engineer", "client"],
-      searchFields: ["company", "project_name"],
-      actions: ["approve", "reject"],
-      nestedFields: [
-        {
-          name: "items",
-          fields: ["product_code", "quantity", "instrument.name"],
-          writableFields: ["product_code", "quantity", "instrument_id"],
-          lookups: { instrument_id: "instruments" },
-          nested: [
-            {
-              name: "selections",
-              fields: ["field_option.label"],
-              writableFields: ["field_option_id"],
-              lookups: { field_option_id: "fieldoptions" },
-            },
-            {
-              name: "addons",
-              fields: ["addon.label"],
-              writableFields: ["addon_id"],
-              lookups: { addon_id: "addons" },
-            },
-          ],
-        },
+      writableFields: [
+        "created_by_id",
+        "company",
+        "project_name",
+        "status",
+        "remarks",
       ],
+      searchFields: ["company", "project_name"],
+      lookups: { created_by_id: "users" },
+      displayFields: {
+        id: "ID",
+        "created_by.first_name": "Created By",
+        company: "Company",
+        project_name: "Project Name",
+        status: "Status",
+        submitted_at: "Submitted At",
+        approved_at: "Approved At",
+        rejected_at: "Rejected At",
+        remarks: "Remarks",
+      },
+      actions: ["approve", "reject"],
     },
     {
       name: ENTITY_TYPES.QUOTATION_ITEMS,
-      endpoint: "/api/quotation-items/",
-      fields: ["id", "product_code", "quantity", "instrument.name"],
+      endpoint: "/api/admin/quotation-items/",
+      fields: [
+        "id",
+        "quotation.id",
+        "product_code",
+        "quantity",
+        "instrument.name",
+      ],
       writableFields: [
+        "quotation_id",
         "product_code",
         "quantity",
         "instrument_id",
-        "quotation_id",
       ],
-      permissions: ["admin", "proposal_engineer"],
-      lookups: { instrument_id: "instruments", quotation_id: "quotations" },
       searchFields: ["product_code"],
+      lookups: { quotation_id: "quotations", instrument_id: "instruments" },
+      displayFields: {
+        id: "ID",
+        "quotation.id": "Quotation ID",
+        product_code: "Product Code",
+        quantity: "Quantity",
+        "instrument.name": "Instrument",
+      },
     },
     {
       name: ENTITY_TYPES.QUOTATION_ITEM_SELECTIONS,
-      endpoint: "/api/quotation-item-selections/",
+      endpoint: "/api/admin/quotation-item-selections/",
       fields: ["id", "quotation_item.id", "field_option.label"],
       writableFields: ["quotation_item_id", "field_option_id"],
-      permissions: ["admin", "proposal_engineer"],
+      searchFields: [],
       lookups: {
         quotation_item_id: "quotationitems",
         field_option_id: "fieldoptions",
       },
-      searchFields: [],
+      displayFields: {
+        id: "ID",
+        "quotation_item.id": "Quotation Item ID",
+        "field_option.label": "Field Option",
+      },
     },
     {
       name: ENTITY_TYPES.QUOTATION_ITEM_ADDONS,
-      endpoint: "/api/quotation-item-addons/",
+      endpoint: "/api/admin/quotation-item-addons/",
       fields: ["id", "quotation_item.id", "addon.label"],
       writableFields: ["quotation_item_id", "addon_id"],
-      permissions: ["admin", "proposal_engineer"],
-      lookups: {
-        quotation_item_id: "quotationitems",
-        addon_id: "addons",
-      },
       searchFields: [],
+      lookups: { quotation_item_id: "quotationitems", addon_id: "addons" },
+      displayFields: {
+        id: "ID",
+        "quotation_item.id": "Quotation Item ID",
+        "addon.label": "AddOn",
+      },
     },
   ];
 
@@ -172,47 +182,66 @@ const QuotationsAdmin = () => {
       const access = localStorage.getItem("access");
       if (!access) {
         setError("Please log in to access the admin panel.");
-        setLoading(false);
         return;
       }
       const headers = { Authorization: `Bearer ${access}` };
       const endpoints = [
-        "/api/quotations/review/",
-        "/api/quotation-items/",
-        "/api/quotation-item-selections/",
-        "/api/quotation-item-addons/",
+        "/api/admin/quotations/",
+        "/api/admin/quotation-items/",
+        "/api/admin/quotation-item-selections/",
+        "/api/admin/quotation-item-addons/",
         "/api/instruments/",
         "/api/field-options/",
         "/api/addons/",
+        "/api/users/list/",
         "/api/users/me/",
       ];
       const responses = await Promise.all(
-        endpoints.map((endpoint) =>
-          api.get(endpoint, { headers }).catch((err) => ({
-            error: err.response?.data?.detail || err.message,
-            data: [],
-          }))
+        endpoints.map((endpoint, index) =>
+          api.get(endpoint, { headers }).catch((err) => {
+            console.error(
+              `Error fetching ${endpoint}:`,
+              err.response?.data || err.message
+            );
+            return {
+              error: err.response?.data?.detail || err.message,
+              data: [],
+            };
+          })
         )
       );
 
       const newData = {
-        quotations: responses[0].data || [],
-        quotationitems: responses[1].data || [],
-        quotationitemselections: responses[2].data || [],
-        quotationitemaddons: responses[3].data || [],
-        instruments: responses[4].data || [],
-        fieldoptions: responses[5].data || [],
-        addons: responses[6].data || [],
+        quotations: Array.isArray(responses[0].data) ? responses[0].data : [],
+        quotationitems: Array.isArray(responses[1].data)
+          ? responses[1].data
+          : [],
+        quotationitemselections: Array.isArray(responses[2].data)
+          ? responses[2].data
+          : [],
+        quotationitemaddons: Array.isArray(responses[3].data)
+          ? responses[3].data
+          : [],
+        instruments: Array.isArray(responses[4].data) ? responses[4].data : [],
+        fieldoptions: Array.isArray(responses[5].data) ? responses[5].data : [],
+        addons: Array.isArray(responses[6].data) ? responses[6].data : [],
+        users: Array.isArray(responses[7].data) ? responses[7].data : [],
       };
-      console.log("Fetched Quotation Items:", newData.quotationitems);
+      console.log("Fetched Data:", newData); // Debug log
       setData(newData);
-      setFilteredQuotations(newData.quotations);
-      setUserRole(responses[7].data.role || "client");
+      setFilteredData({
+        quotations: newData.quotations,
+        quotationitems: newData.quotationitems,
+        quotationitemselections: newData.quotationitemselections,
+        quotationitemaddons: newData.quotationitemaddons,
+      });
+      setUserRole(responses[8].data?.role || "client");
 
       if (responses.some((res) => res.error)) {
         setError("Some data could not be loaded. Please try again.");
       }
     } catch (err) {
+      console.error("fetchData Error:", err, err.response?.data);
       setError(
         `Error loading data: ${err.response?.data?.detail || err.message}`
       );
@@ -226,35 +255,45 @@ const QuotationsAdmin = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = [...data.quotations];
+    const tab = tabs[activeTab];
+    const key = tab.name.toLowerCase().replace(" ", "");
+    let filtered = [...(data[key] || [])];
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        tabs[0].searchFields.some((field) =>
-          item[field]?.toLowerCase().includes(searchTerm.toLowerCase())
+        tab.searchFields.some((field) =>
+          getField(item, field)
+            ?.toString()
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
         )
       );
     }
-    if (statusFilter) {
-      filtered = filtered.filter((item) => item.status === statusFilter);
+    if (tab.name === ENTITY_TYPES.QUOTATIONS && statusFilter) {
+      filtered = filtered.filter((item) => item?.status === statusFilter);
     }
     filtered.sort((a, b) => {
-      const getField = (obj, field) => {
-        if (field.includes(".")) {
-          const [key, subKey] = field.split(".");
-          return obj[key]?.[subKey] || "";
-        }
-        return obj[field] || "";
-      };
-      const fieldA = getField(a, sortConfig.field);
-      const fieldB = getField(b, sortConfig.field);
+      const fieldA = getField(a, sortConfig.field) || "";
+      const fieldB = getField(b, sortConfig.field) || "";
       const multiplier = sortConfig.direction === "asc" ? 1 : -1;
       if (sortConfig.field === "id") {
-        return multiplier * (fieldA - fieldB);
+        return multiplier * ((a?.id || 0) - (b?.id || 0));
       }
       return multiplier * fieldA.toString().localeCompare(fieldB.toString());
     });
-    setFilteredQuotations(filtered);
-  }, [searchTerm, statusFilter, data.quotations, sortConfig]);
+    setFilteredData((prev) => ({
+      ...prev,
+      [key]: filtered,
+    }));
+  }, [searchTerm, statusFilter, data, sortConfig, activeTab]);
+
+  const getField = (obj, field) => {
+    if (!obj) return "";
+    if (field.includes(".")) {
+      const [key, subKey] = field.split(".");
+      return obj[key]?.[subKey] || "";
+    }
+    return obj[field] || "";
+  };
 
   const handleSort = (field) => {
     setSortConfig((prev) => ({
@@ -264,59 +303,65 @@ const QuotationsAdmin = () => {
     }));
   };
 
-  const openAddModal = (type, parent = {}) => {
-    if (!tabs.find((t) => t.name === type)?.permissions.includes(userRole)) {
-      setError(`You do not have permission to add ${type}.`);
+  const openAddModal = () => {
+    if (userRole !== "admin") {
+      setError("You do not have permission to add items.");
       return;
     }
-    setModalType(type);
     setModalAction("add");
-    setModalData({ ...parent });
-    setNestedData([]);
+    setModalData({});
+    setModalType(tabs[activeTab].name);
     setOpenModal(true);
   };
 
-  const openEditModal = (type, item) => {
-    if (!tabs.find((t) => t.name === type)?.permissions.includes(userRole)) {
-      setError(`You do not have permission to edit ${type}.`);
+  const openEditModal = (item) => {
+    if (userRole !== "admin") {
+      setError("You do not have permission to edit items.");
       return;
     }
-    setModalType(type);
     setModalAction("edit");
     setModalData({ ...item });
-    setNestedData(item.items || []);
+    setModalType(tabs[activeTab].name);
     setOpenModal(true);
   };
 
   const handleModalClose = () => {
     setOpenModal(false);
     setModalData({});
-    setNestedData([]);
+    setModalType("");
     setError("");
   };
 
   const handleSave = async () => {
-    if (
-      !tabs.find((t) => t.name === modalType)?.permissions.includes(userRole)
-    ) {
-      setError(`You do not have permission to save ${modalType}.`);
+    if (userRole !== "admin") {
+      setError("You do not have permission to save items.");
       return;
     }
+
+    const tab = tabs.find((t) => t.name === modalType);
+    const requiredFields = tab.writableFields.filter(
+      (f) => !["status", "remarks"].includes(f)
+    );
+    for (const field of requiredFields) {
+      if (!modalData[field] && modalData[field] !== 0) {
+        setError(
+          `${field
+            .replace("_id", "")
+            .replace("_", " ")
+            .toUpperCase()} is required.`
+        );
+        return;
+      }
+    }
+
     try {
       const access = localStorage.getItem("access");
-      const tab = tabs.find((t) => t.name === modalType);
       const endpoint =
         modalAction === "edit"
           ? `${tab.endpoint}${modalData.id}/`
           : tab.endpoint;
       const method = modalAction === "edit" ? "patch" : "post";
       const payload = { ...modalData };
-
-      if (modalType === ENTITY_TYPES.QUOTATIONS && nestedData.length > 0) {
-        payload.items = nestedData;
-      } else if (modalType === ENTITY_TYPES.QUOTATION_ITEMS) {
-        payload.quotation_id = modalData.quotation_id;
-      }
 
       await api({
         method,
@@ -341,14 +386,14 @@ const QuotationsAdmin = () => {
     }
   };
 
-  const handleDelete = async (id, type) => {
-    if (!tabs.find((t) => t.name === type)?.permissions.includes(userRole)) {
-      setError(`You do not have permission to delete ${type}.`);
+  const handleDelete = async (id) => {
+    if (userRole !== "admin") {
+      setError("You do not have permission to delete items.");
       return;
     }
     if (
       !window.confirm(
-        `Are you sure you want to delete this ${type
+        `Are you sure you want to delete this ${tabs[activeTab].name
           .toLowerCase()
           .replace("s", "")}?`
       )
@@ -357,21 +402,23 @@ const QuotationsAdmin = () => {
     }
     try {
       const access = localStorage.getItem("access");
-      const tab = tabs.find((t) => t.name === type);
+      const tab = tabs[activeTab];
       await api.delete(`${tab.endpoint}${id}/`, {
         headers: { Authorization: `Bearer ${access}` },
       });
-      setSuccess(`${type} deleted successfully!`);
+      setSuccess(`${tab.name} deleted successfully!`);
       fetchData();
     } catch (err) {
       setError(
-        `Failed to delete ${type}: ${err.response?.data?.detail || err.message}`
+        `Failed to delete ${tab.name}: ${
+          err.response?.data?.detail || err.message
+        }`
       );
     }
   };
 
   const handleQuotationAction = async (id, action, remarks = "") => {
-    if (!["admin", "proposal_engineer"].includes(userRole)) {
+    if (userRole !== "admin") {
       setError("You do not have permission to perform this action.");
       return;
     }
@@ -401,57 +448,19 @@ const QuotationsAdmin = () => {
     }
   };
 
-  const addNestedItem = () => {
-    setNestedData([
-      ...nestedData,
-      {
-        product_code: "",
-        quantity: 1,
-        instrument_id: "",
-        selections: [],
-        addons: [],
-      },
-    ]);
-  };
-
-  const updateNestedItem = (index, field, value) => {
-    const updated = [...nestedData];
-    updated[index][field] = value;
-    setNestedData(updated);
-  };
-
-  const addNestedSubItem = (itemIndex, subField) => {
-    const updated = [...nestedData];
-    updated[itemIndex][subField].push({ [`${subField.slice(0, -1)}_id`]: "" });
-    setNestedData(updated);
-  };
-
-  const updateNestedSubItem = (itemIndex, subField, subIndex, value) => {
-    const updated = [...nestedData];
-    updated[itemIndex][subField][subIndex][`${subField.slice(0, -1)}_id`] =
-      value;
-    setNestedData(updated);
-  };
-
   const renderModalContent = () => {
     const tab = tabs.find((t) => t.name === modalType);
-    if (!tab) {
-      return (
-        <Box sx={{ p: 2 }}>
-          <Alert severity="error">Invalid entity type: {modalType}</Alert>
-        </Box>
-      );
-    }
+    if (!tab)
+      return <Alert severity="error">Invalid entity type: {modalType}</Alert>;
 
     return (
       <>
         {tab.writableFields.map((field) => {
-          if (field === "items") return null;
           if (tab.lookups && tab.lookups[field]) {
             const lookupKey = tab.lookups[field];
             const lookupItems = data[lookupKey] || [];
             return (
-              <FormControl fullWidth key={field} sx={{ mt: 2 }}>
+              <FormControl fullWidth key={field} margin="normal" size="small">
                 <InputLabel>
                   {field.replace("_id", "").replace("_", " ").toUpperCase()}
                 </InputLabel>
@@ -460,12 +469,30 @@ const QuotationsAdmin = () => {
                   onChange={(e) =>
                     setModalData({ ...modalData, [field]: e.target.value })
                   }
+                  required
                 >
                   {lookupItems.map((item) => (
                     <MenuItem key={item.id} value={item.id}>
-                      {item.name || item.label || item.id}
+                      {item.name || item.label || item.first_name || item.id}
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+            );
+          }
+          if (field === "status") {
+            return (
+              <FormControl fullWidth key={field} margin="normal" size="small">
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={modalData[field] || "pending"}
+                  onChange={(e) =>
+                    setModalData({ ...modalData, [field]: e.target.value })
+                  }
+                >
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="approved">Approved</MenuItem>
+                  <MenuItem value="rejected">Rejected</MenuItem>
                 </Select>
               </FormControl>
             );
@@ -480,148 +507,23 @@ const QuotationsAdmin = () => {
               }
               fullWidth
               margin="normal"
-              type={
-                field.includes("quantity") || field.includes("order")
-                  ? "number"
-                  : "text"
-              }
+              type={field.includes("quantity") ? "number" : "text"}
               variant="outlined"
-              sx={{ fontFamily: "Helvetica, sans-serif" }}
+              size="small"
+              multiline={field === "remarks"}
+              rows={field === "remarks" ? 4 : 1}
+              required={!["remarks"].includes(field)}
             />
           );
         })}
-        {tab.nestedFields && (
-          <Box sx={{ mt: 2 }}>
-            <Typography
-              variant="h6"
-              sx={{ fontFamily: "Helvetica, sans-serif" }}
-            >
-              Items
-            </Typography>
-            {nestedData.map((item, index) => (
-              <Box key={index} sx={{ border: 1, p: 2, mb: 2, borderRadius: 2 }}>
-                {tab.nestedFields[0].writableFields.map((field) => {
-                  if (
-                    tab.nestedFields[0].lookups &&
-                    tab.nestedFields[0].lookups[field]
-                  ) {
-                    const lookupKey = tab.nestedFields[0].lookups[field];
-                    const lookupItems = data[lookupKey] || [];
-                    return (
-                      <FormControl fullWidth key={field} sx={{ mt: 2 }}>
-                        <InputLabel>
-                          {field
-                            .replace("_id", "")
-                            .replace("_", " ")
-                            .toUpperCase()}
-                        </InputLabel>
-                        <Select
-                          value={item[field] || ""}
-                          onChange={(e) =>
-                            updateNestedItem(index, field, e.target.value)
-                          }
-                        >
-                          {lookupItems.map((opt) => (
-                            <MenuItem key={opt.id} value={opt.id}>
-                              {opt.name || opt.label || opt.id}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    );
-                  }
-                  return (
-                    <TextField
-                      key={field}
-                      label={field
-                        .replace("_id", "")
-                        .replace("_", " ")
-                        .toUpperCase()}
-                      value={item[field] || ""}
-                      onChange={(e) =>
-                        updateNestedItem(index, field, e.target.value)
-                      }
-                      fullWidth
-                      margin="normal"
-                      type={field === "quantity" ? "number" : "text"}
-                      variant="outlined"
-                      sx={{ fontFamily: "Helvetica, sans-serif" }}
-                    />
-                  );
-                })}
-                {tab.nestedFields[0].nested.map((sub) => (
-                  <Box key={sub.name} sx={{ ml: 2, mt: 1 }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ fontFamily: "Helvetica, sans-serif" }}
-                    >
-                      {sub.name.charAt(0).toUpperCase() + sub.name.slice(1)}
-                    </Typography>
-                    {item[sub.name].map((subItem, subIndex) => {
-                      const lookupKey = sub.lookups[sub.writableFields[0]];
-                      const lookupItems = data[lookupKey] || [];
-                      return (
-                        <FormControl fullWidth key={subIndex} sx={{ mt: 1 }}>
-                          <InputLabel>
-                            {sub.writableFields[0]
-                              .replace("_id", "")
-                              .toUpperCase()}
-                          </InputLabel>
-                          <Select
-                            value={subItem[`${sub.name.slice(0, -1)}_id`] || ""}
-                            onChange={(e) =>
-                              updateNestedSubItem(
-                                index,
-                                sub.name,
-                                subIndex,
-                                e.target.value
-                              )
-                            }
-                          >
-                            {lookupItems.map((opt) => (
-                              <MenuItem key={opt.id} value={opt.id}>
-                                {opt.label || opt.name || opt.id}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      );
-                    })}
-                    <Button
-                      onClick={() => addNestedSubItem(index, sub.name)}
-                      startIcon={<Add />}
-                      sx={{
-                        mt: 1,
-                        bgcolor: "#1976d2",
-                        "&:hover": { bgcolor: "#115293" },
-                        color: "#fff",
-                      }}
-                    >
-                      Add {sub.name.slice(0, -1)}
-                    </Button>
-                  </Box>
-                ))}
-              </Box>
-            ))}
-            <Button
-              onClick={addNestedItem}
-              startIcon={<Add />}
-              sx={{
-                bgcolor: "#1976d2",
-                "&:hover": { bgcolor: "#115293" },
-                color: "#fff",
-              }}
-            >
-              Add Item
-            </Button>
-          </Box>
-        )}
       </>
     );
   };
 
-  const renderQuotationTable = (quotations) => {
-    const tab = tabs[0];
+  const renderTable = () => {
+    const tab = tabs[activeTab];
+    const items = filteredData[tab.name.toLowerCase().replace(" ", "")] || [];
+
     return (
       <Table>
         <TableHead>
@@ -629,7 +531,11 @@ const QuotationsAdmin = () => {
             {tab.fields.map((field) => (
               <TableCell
                 key={field}
-                sx={{ fontWeight: "bold", fontFamily: "Helvetica, sans-serif" }}
+                sx={{
+                  fontWeight: "bold",
+                  fontFamily: "Helvetica, sans-serif",
+                  bgcolor: "#f5f5f5",
+                }}
               >
                 <TableSortLabel
                   active={sortConfig.field === field}
@@ -638,127 +544,16 @@ const QuotationsAdmin = () => {
                   }
                   onClick={() => handleSort(field)}
                 >
-                  {field.replace("_", " ").toUpperCase()}
+                  {tab.displayFields[field] || field.toUpperCase()}
                 </TableSortLabel>
               </TableCell>
             ))}
             <TableCell
-              sx={{ fontWeight: "bold", fontFamily: "Helvetica, sans-serif" }}
-            >
-              ACTIONS
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {quotations.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={tab.fields.length + 1} align="center">
-                <Typography sx={{ fontFamily: "Helvetica, sans-serif", py: 2 }}>
-                  No quotations found.
-                </Typography>
-              </TableCell>
-            </TableRow>
-          ) : (
-            quotations.map((item) => (
-              <TableRow
-                key={item.id}
-                sx={{
-                  "&:hover": { bgcolor: "#e3f2fd" },
-                  transition: "background-color 0.2s",
-                }}
-              >
-                {tab.fields.map((field) => (
-                  <TableCell
-                    key={field}
-                    sx={{ fontFamily: "Helvetica, sans-serif" }}
-                  >
-                    {field === "created_by_first_name"
-                      ? item.created_by_first_name || "N/A"
-                      : field === "submitted_at" ||
-                        field === "approved_at" ||
-                        field === "rejected_at"
-                      ? item[field]
-                        ? new Date(item[field]).toLocaleString()
-                        : "N/A"
-                      : item[field] || "N/A"}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <IconButton
-                    onClick={() => openEditModal(ENTITY_TYPES.QUOTATIONS, item)}
-                    disabled={!tab.permissions.includes(userRole)}
-                    sx={{ color: "#1976d2" }}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    onClick={() =>
-                      handleDelete(item.id, ENTITY_TYPES.QUOTATIONS)
-                    }
-                    disabled={!tab.permissions.includes(userRole)}
-                    sx={{ color: "#d32f2f" }}
-                  >
-                    <Delete />
-                  </IconButton>
-                  {["admin", "proposal_engineer"].includes(userRole) && (
-                    <>
-                      <IconButton
-                        onClick={() =>
-                          handleQuotationAction(item.id, "approve")
-                        }
-                        disabled={item.status === "approved"}
-                        sx={{ color: "#388e3c" }}
-                      >
-                        <Check />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => {
-                          const remarks = prompt(
-                            "Enter remarks for rejection:"
-                          );
-                          if (remarks)
-                            handleQuotationAction(item.id, "reject", remarks);
-                        }}
-                        disabled={item.status === "rejected"}
-                        sx={{ color: "#d32f2f" }}
-                      >
-                        <Close />
-                      </IconButton>
-                    </>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    );
-  };
-
-  const renderSubTable = (type, items, parentId) => {
-    const tab = tabs.find((t) => t.name === type);
-    if (!tab) return null;
-
-    console.log(`Filtered ${type} for parentId ${parentId}:`, items);
-
-    return (
-      <Table>
-        <TableHead>
-          <TableRow>
-            {tab.fields.map((field) => (
-              <TableCell
-                key={field}
-                sx={{ fontWeight: "bold", fontFamily: "Helvetica, sans-serif" }}
-              >
-                {field
-                  .replace("instrument.", "")
-                  .replace("field_option.", "")
-                  .replace("addon.", "")
-                  .toUpperCase()}
-              </TableCell>
-            ))}
-            <TableCell
-              sx={{ fontWeight: "bold", fontFamily: "Helvetica, sans-serif" }}
+              sx={{
+                fontWeight: "bold",
+                fontFamily: "Helvetica, sans-serif",
+                bgcolor: "#f5f5f5",
+              }}
             >
               ACTIONS
             </TableCell>
@@ -769,58 +564,86 @@ const QuotationsAdmin = () => {
             <TableRow>
               <TableCell colSpan={tab.fields.length + 1} align="center">
                 <Typography sx={{ fontFamily: "Helvetica, sans-serif", py: 2 }}>
-                  No {type.toLowerCase()} found. Try adding a new item or check
-                  the database for associated items.
+                  No {tab.name.toLowerCase()} found.
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            items.map((item) => (
-              <TableRow
-                key={item.id}
-                sx={{
-                  "&:hover": { bgcolor: "#e3f2fd" },
-                  transition: "background-color 0.2s",
-                }}
-              >
-                {tab.fields.map((field) => (
-                  <TableCell
-                    key={field}
-                    sx={{ fontFamily: "Helvetica, sans-serif" }}
-                  >
-                    {field.includes("instrument.name")
-                      ? data.instruments.find((i) => i.id === item.instrument)
-                          ?.name || "N/A"
-                      : field.includes("field_option.label")
-                      ? data.fieldoptions.find(
-                          (f) => f.id === item.field_option
-                        )?.label || "N/A"
-                      : field.includes("addon.label")
-                      ? data.addons.find((a) => a.id === item.addon)?.label ||
-                        "N/A"
-                      : field.includes(".id")
-                      ? item[field.split(".")[0]]?.id || "N/A"
-                      : item[field.split(".").pop()] || "N/A"}
+            items.map((item) =>
+              item && item.id ? ( // Ensure item is valid
+                <TableRow
+                  key={item.id}
+                  sx={{
+                    "&:hover": { bgcolor: "#e3f2fd" },
+                    transition: "background-color 0.2s",
+                  }}
+                >
+                  {tab.fields.map((field) => (
+                    <TableCell
+                      key={field}
+                      sx={{ fontFamily: "Helvetica, sans-serif" }}
+                    >
+                      {field.includes(".")
+                        ? getField(item, field) || "N/A"
+                        : field === "submitted_at" ||
+                          field === "approved_at" ||
+                          field === "rejected_at"
+                        ? item[field]
+                          ? new Date(item[field]).toLocaleString()
+                          : "N/A"
+                        : item[field] || "N/A"}
+                    </TableCell>
+                  ))}
+                  <TableCell>
+                    <IconButton
+                      onClick={() => openEditModal(item)}
+                      disabled={userRole !== "admin"}
+                      sx={{ color: "#1976d2" }}
+                    >
+                      <Edit />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => handleDelete(item.id)}
+                      disabled={userRole !== "admin"}
+                      sx={{ color: "#d32f2f" }}
+                    >
+                      <Delete />
+                    </IconButton>
+                    {tab.name === ENTITY_TYPES.QUOTATIONS &&
+                      userRole === "admin" && (
+                        <>
+                          <IconButton
+                            onClick={() =>
+                              handleQuotationAction(item.id, "approve")
+                            }
+                            disabled={item.status === "approved"}
+                            sx={{ color: "#388e3c" }}
+                          >
+                            <Check />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => {
+                              const remarks = prompt(
+                                "Enter remarks for rejection:"
+                              );
+                              if (remarks)
+                                handleQuotationAction(
+                                  item.id,
+                                  "reject",
+                                  remarks
+                                );
+                            }}
+                            disabled={item.status === "rejected"}
+                            sx={{ color: "#d32f2f" }}
+                          >
+                            <Close />
+                          </IconButton>
+                        </>
+                      )}
                   </TableCell>
-                ))}
-                <TableCell>
-                  <IconButton
-                    onClick={() => openEditModal(type, item)}
-                    disabled={!tab.permissions.includes(userRole)}
-                    sx={{ color: "#1976d2" }}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleDelete(item.id, type)}
-                    disabled={!tab.permissions.includes(userRole)}
-                    sx={{ color: "#d32f2f" }}
-                  >
-                    <Delete />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))
+                </TableRow>
+              ) : null
+            )
           )}
         </TableBody>
       </Table>
@@ -828,18 +651,18 @@ const QuotationsAdmin = () => {
   };
 
   return (
-    <ErrorBoundary>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
-          bgcolor: "#f5f5f5",
-        }}
-      >
-        <Navbar userRole={userRole} />
-        <DrawerHeader />
-        <main style={{ flex: 1 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        bgcolor: "#f5f5f5",
+      }}
+    >
+      <Navbar userRole={userRole} />
+      <DrawerHeader />
+      <main style={{ flex: 1 }}>
+        <ErrorBoundary>
           <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
             <Typography
               variant="h5"
@@ -889,47 +712,59 @@ const QuotationsAdmin = () => {
                     color: "#000000",
                   }}
                 >
-                  Loading quotations...
+                  Loading data...
                 </Typography>
               </Box>
             ) : (
               <>
+                <Tabs
+                  value={activeTab}
+                  onChange={(e, newValue) => setActiveTab(newValue)}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  sx={{ mb: 4 }}
+                >
+                  {tabs.map((tab, index) => (
+                    <Tab key={tab.name} label={tab.name} value={index} />
+                  ))}
+                </Tabs>
                 <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
                   <TextField
-                    label="Search by Company or Project Name"
+                    label={`Search ${tabs[activeTab].name}`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{ flex: 1, minWidth: "200px" }}
                     variant="outlined"
                     size="small"
                   />
-                  <FormControl sx={{ minWidth: "150px" }} size="small">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      label="Status"
-                    >
-                      <MenuItem value="">All Statuses</MenuItem>
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="approved">Approved</MenuItem>
-                      <MenuItem value="rejected">Rejected</MenuItem>
-                    </Select>
-                  </FormControl>
+                  {tabs[activeTab].name === ENTITY_TYPES.QUOTATIONS && (
+                    <FormControl sx={{ minWidth: "200px" }} size="small">
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        label="Status"
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="pending">Pending</MenuItem>
+                        <MenuItem value="approved">Approved</MenuItem>
+                        <MenuItem value="rejected">Rejected</MenuItem>
+                      </Select>
+                    </FormControl>
+                  )}
                   <Button
                     variant="contained"
                     startIcon={<Add />}
-                    onClick={() => openAddModal(ENTITY_TYPES.QUOTATIONS)}
-                    disabled={!tabs[0].permissions.includes(userRole)}
+                    onClick={openAddModal}
+                    disabled={userRole !== "admin"}
                     sx={{
                       bgcolor: "#1976d2",
                       "&:hover": { bgcolor: "#115293" },
                       textTransform: "none",
                       px: 3,
-                      color: "#fff",
                     }}
                   >
-                    Add Quotation
+                    Add {tabs[activeTab].name.slice(0, -1)}
                   </Button>
                 </Box>
                 <Paper
@@ -940,235 +775,12 @@ const QuotationsAdmin = () => {
                     "&:hover": { boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)" },
                   }}
                 >
-                  {filteredQuotations.length === 0 ? (
-                    <Box sx={{ p: 4, textAlign: "center" }}>
-                      <Typography
-                        sx={{
-                          fontFamily: "Helvetica, sans-serif",
-                          color: "#555",
-                        }}
-                      >
-                        No quotations found. Try adjusting the search or status
-                        filter, or add a new quotation.
-                      </Typography>
-                    </Box>
-                  ) : (
-                    filteredQuotations.map((quotation) => (
-                      <Accordion key={quotation.id}>
-                        <AccordionSummary expandIcon={<ExpandMore />}>
-                          <Typography
-                            sx={{
-                              fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
-                            }}
-                          >
-                            Quotation {quotation.id} - {quotation.project_name}{" "}
-                            ({quotation.company})
-                          </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <Box sx={{ mb: 2 }}>
-                            <Button
-                              variant="outlined"
-                              startIcon={<Add />}
-                              onClick={() =>
-                                openAddModal(ENTITY_TYPES.QUOTATION_ITEMS, {
-                                  quotation_id: quotation.id,
-                                })
-                              }
-                              disabled={!tabs[1].permissions.includes(userRole)}
-                              sx={{
-                                mb: 2,
-                                color: "#1976d2",
-                                borderColor: "#1976d2",
-                              }}
-                            >
-                              Add Quotation Item
-                            </Button>
-                          </Box>
-                          {renderQuotationTable([quotation])}
-                          <Accordion>
-                            <AccordionSummary expandIcon={<ExpandMore />}>
-                              <Typography
-                                sx={{ fontFamily: "Helvetica, sans-serif" }}
-                              >
-                                Quotation Items
-                              </Typography>
-                            </AccordionSummary>
-                            <AccordionDetails>
-                              <Box sx={{ mb: 2 }}>
-                                <Button
-                                  variant="outlined"
-                                  startIcon={<Add />}
-                                  onClick={() =>
-                                    openAddModal(ENTITY_TYPES.QUOTATION_ITEMS, {
-                                      quotation_id: quotation.id,
-                                    })
-                                  }
-                                  disabled={
-                                    !tabs[1].permissions.includes(userRole)
-                                  }
-                                  sx={{
-                                    mb: 2,
-                                    color: "#1976d2",
-                                    borderColor: "#1976d2",
-                                  }}
-                                >
-                                  Add Quotation Item
-                                </Button>
-                              </Box>
-                              {renderSubTable(
-                                ENTITY_TYPES.QUOTATION_ITEMS,
-                                data.quotationitems.filter((item) => {
-                                  if (!item.quotation) return false;
-                                  if (typeof item.quotation === "object") {
-                                    return (
-                                      item.quotation.id === quotation.id ||
-                                      item.quotation.quotation_id ===
-                                        quotation.id
-                                    );
-                                  }
-                                  return item.quotation === quotation.id;
-                                }),
-                                quotation.id
-                              )}
-                              {data.quotationitems
-                                .filter((item) => {
-                                  if (!item.quotation) return false;
-                                  if (typeof item.quotation === "object") {
-                                    return (
-                                      item.quotation.id === quotation.id ||
-                                      item.quotation.quotation_id ===
-                                        quotation.id
-                                    );
-                                  }
-                                  return item.quotation === quotation.id;
-                                })
-                                .map((item) => (
-                                  <Accordion key={item.id}>
-                                    <AccordionSummary
-                                      expandIcon={<ExpandMore />}
-                                    >
-                                      <Typography
-                                        sx={{
-                                          fontFamily: "Helvetica, sans-serif",
-                                        }}
-                                      >
-                                        Item {item.id} -{" "}
-                                        {item.product_code || "N/A"}
-                                      </Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-                                      <Accordion>
-                                        <AccordionSummary
-                                          expandIcon={<ExpandMore />}
-                                        >
-                                          <Typography
-                                            sx={{
-                                              fontFamily:
-                                                "Helvetica, sans-serif",
-                                            }}
-                                          >
-                                            Selections
-                                          </Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                          <Button
-                                            variant="outlined"
-                                            startIcon={<Add />}
-                                            onClick={() =>
-                                              openAddModal(
-                                                ENTITY_TYPES.QUOTATION_ITEM_SELECTIONS,
-                                                {
-                                                  quotation_item_id: item.id,
-                                                }
-                                              )
-                                            }
-                                            disabled={
-                                              !tabs[2].permissions.includes(
-                                                userRole
-                                              )
-                                            }
-                                            sx={{
-                                              mb: 2,
-                                              color: "#1976d2",
-                                              borderColor: "#1976d2",
-                                            }}
-                                          >
-                                            Add Selection
-                                          </Button>
-                                          {renderSubTable(
-                                            ENTITY_TYPES.QUOTATION_ITEM_SELECTIONS,
-                                            data.quotationitemselections.filter(
-                                              (s) =>
-                                                s.quotation_item === item.id
-                                            ),
-                                            item.id
-                                          )}
-                                        </AccordionDetails>
-                                      </Accordion>
-                                      <Accordion>
-                                        <AccordionSummary
-                                          expandIcon={<ExpandMore />}
-                                        >
-                                          <Typography
-                                            sx={{
-                                              fontFamily:
-                                                "Helvetica, sans-serif",
-                                            }}
-                                          >
-                                            AddOns
-                                          </Typography>
-                                        </AccordionSummary>
-                                        <AccordionDetails>
-                                          <Button
-                                            variant="outlined"
-                                            startIcon={<Add />}
-                                            onClick={() =>
-                                              openAddModal(
-                                                ENTITY_TYPES.QUOTATION_ITEM_ADDONS,
-                                                {
-                                                  quotation_item_id: item.id,
-                                                }
-                                              )
-                                            }
-                                            disabled={
-                                              !tabs[3].permissions.includes(
-                                                userRole
-                                              )
-                                            }
-                                            sx={{
-                                              mb: 2,
-                                              color: "#1976d2",
-                                              borderColor: "#1976d2",
-                                            }}
-                                          >
-                                            Add AddOn
-                                          </Button>
-                                          {renderSubTable(
-                                            ENTITY_TYPES.QUOTATION_ITEM_ADDONS,
-                                            data.quotationitemaddons.filter(
-                                              (a) =>
-                                                a.quotation_item === item.id
-                                            ),
-                                            item.id
-                                          )}
-                                        </AccordionDetails>
-                                      </Accordion>
-                                    </AccordionDetails>
-                                  </Accordion>
-                                ))}
-                            </AccordionDetails>
-                          </Accordion>
-                        </AccordionDetails>
-                      </Accordion>
-                    ))
-                  )}
+                  {renderTable()}
                 </Paper>
                 <Dialog
                   open={openModal}
                   onClose={handleModalClose}
-                  maxWidth="md"
+                  maxWidth="sm"
                   fullWidth
                   PaperProps={{
                     component: "form",
@@ -1197,7 +809,6 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "Helvetica, sans-serif",
                         textTransform: "none",
-                        color: "#555",
                       }}
                     >
                       Cancel
@@ -1210,19 +821,18 @@ const QuotationsAdmin = () => {
                         "&:hover": { bgcolor: "#115293" },
                         fontFamily: "Helvetica, sans-serif",
                         textTransform: "none",
-                        color: "#fff",
                       }}
                     >
-                      Save
+                      {modalAction === "add" ? "Create" : "Save"}
                     </Button>
                   </DialogActions>
                 </Dialog>
               </>
             )}
           </Container>
-        </main>
-      </Box>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </main>
+    </Box>
   );
 };
 

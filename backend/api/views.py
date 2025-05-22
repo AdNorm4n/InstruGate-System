@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from .models import (
     Category, InstrumentType, Instrument, ConfigurableField,
     FieldOption, AddOnType, AddOn, Quotation, QuotationItem,
@@ -14,8 +15,21 @@ from .serializers import (
     AddOnTypeSerializer, AddOnSerializer,
     InstrumentConfigSerializer, QuotationSerializer,
     QuotationReviewSerializer, QuotationItemSerializer,
-    QuotationItemSelectionSerializer, QuotationItemAddOnSerializer
+    QuotationItemSelectionSerializer, QuotationItemAddOnSerializer,
+    AdminCategorySerializer, AdminInstrumentTypeSerializer,
+    AdminInstrumentSerializer, AdminConfigurableFieldSerializer,
+    AdminFieldOptionSerializer, AdminAddOnTypeSerializer,
+    AdminAddOnSerializer, AdminQuotationSerializer,
+    AdminQuotationItemSerializer, AdminQuotationItemSelectionSerializer,
+    AdminQuotationItemAddOnSerializer, UserSerializer
 )
+
+User = get_user_model()
+
+# Custom Permissions
+class IsAdmin(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'admin'
 
 class IsClient(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -24,6 +38,19 @@ class IsClient(permissions.BasePermission):
 class IsProposalEngineerOrAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role in ['proposal_engineer', 'admin']
+
+# User Views
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin]
+
+class UserMeView(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 # Category Views
 class CategoryListView(generics.ListCreateAPIView):
@@ -113,12 +140,12 @@ class FieldOptionDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsProposalEngineerOrAdmin]
 
 # AddOnType Views
-class AddonTypeListView(generics.ListCreateAPIView):
+class AddOnTypeListView(generics.ListCreateAPIView):  # Fixed naming
     queryset = AddOnType.objects.all()
     serializer_class = AddOnTypeSerializer
     permission_classes = [IsProposalEngineerOrAdmin]
 
-class AddonTypeDetailView(generics.RetrieveUpdateDestroyAPIView):
+class AddOnTypeDetailView(generics.RetrieveUpdateDestroyAPIView):  # Fixed naming
     queryset = AddOnType.objects.all()
     serializer_class = AddOnTypeSerializer
     permission_classes = [IsProposalEngineerOrAdmin]
@@ -226,3 +253,114 @@ class QuotationItemAddOnDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = QuotationItemAddOn.objects.all()
     serializer_class = QuotationItemAddOnSerializer
     permission_classes = [IsProposalEngineerOrAdmin]
+
+# Admin-specific Views
+class AdminCategoryListView(generics.ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = AdminCategorySerializer
+    permission_classes = [IsAdmin]
+
+class AdminCategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = AdminCategorySerializer
+    permission_classes = [IsAdmin]
+
+class AdminInstrumentTypeListView(generics.ListCreateAPIView):
+    queryset = InstrumentType.objects.all()
+    serializer_class = AdminInstrumentTypeSerializer
+    permission_classes = [IsAdmin]
+
+class AdminInstrumentTypeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = InstrumentType.objects.all()
+    serializer_class = AdminInstrumentTypeSerializer
+    permission_classes = [IsAdmin]
+
+class AdminInstrumentListView(generics.ListCreateAPIView):
+    queryset = Instrument.objects.all()
+    serializer_class = AdminInstrumentSerializer
+    permission_classes = [IsAdmin]
+
+class AdminInstrumentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Instrument.objects.all()
+    serializer_class = AdminInstrumentSerializer
+    permission_classes = [IsAdmin]
+
+class AdminConfigurableFieldListView(generics.ListCreateAPIView):
+    queryset = ConfigurableField.objects.all()
+    serializer_class = AdminConfigurableFieldSerializer
+    permission_classes = [IsAdmin]
+
+class AdminConfigurableFieldDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ConfigurableField.objects.all()
+    serializer_class = AdminConfigurableFieldSerializer
+    permission_classes = [IsAdmin]
+
+class AdminFieldOptionListView(generics.ListCreateAPIView):
+    queryset = FieldOption.objects.all()
+    serializer_class = AdminFieldOptionSerializer
+    permission_classes = [IsAdmin]
+
+class AdminFieldOptionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = FieldOption.objects.all()
+    serializer_class = AdminFieldOptionSerializer
+    permission_classes = [IsAdmin]
+
+class AdminAddOnTypeListView(generics.ListCreateAPIView):
+    queryset = AddOnType.objects.all()
+    serializer_class = AdminAddOnTypeSerializer
+    permission_classes = [IsAdmin]
+
+class AdminAddOnTypeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AddOnType.objects.all()
+    serializer_class = AdminAddOnTypeSerializer
+    permission_classes = [IsAdmin]
+
+class AdminAddOnListView(generics.ListCreateAPIView):
+    queryset = AddOn.objects.all()
+    serializer_class = AdminAddOnSerializer
+    permission_classes = [IsAdmin]
+
+class AdminAddOnDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AddOn.objects.all()
+    serializer_class = AdminAddOnSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationListView(generics.ListCreateAPIView):
+    queryset = Quotation.objects.all()
+    serializer_class = AdminQuotationSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Quotation.objects.all()
+    serializer_class = AdminQuotationSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationItemListView(generics.ListCreateAPIView):
+    queryset = QuotationItem.objects.all()
+    serializer_class = AdminQuotationItemSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationItemDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = QuotationItem.objects.all()
+    serializer_class = AdminQuotationItemSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationItemSelectionListView(generics.ListCreateAPIView):
+    queryset = QuotationItemSelection.objects.all()
+    serializer_class = AdminQuotationItemSelectionSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationItemSelectionDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = QuotationItemSelection.objects.all()
+    serializer_class = AdminQuotationItemSelectionSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationItemAddOnListView(generics.ListCreateAPIView):
+    queryset = QuotationItemAddOn.objects.all()
+    serializer_class = AdminQuotationItemAddOnSerializer
+    permission_classes = [IsAdmin]
+
+class AdminQuotationItemAddOnDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = QuotationItemAddOn.objects.all()
+    serializer_class = AdminQuotationItemAddOnSerializer
+    permission_classes = [IsAdmin]

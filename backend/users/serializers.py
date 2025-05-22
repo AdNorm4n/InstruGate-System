@@ -9,6 +9,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True, "required": False, "allow_blank": True},
             "role": {"read_only": True},  # role = "client" by default
+            "company": {"required": True, "allow_blank": False},  # Enforce non-empty company
         }
 
     def create(self, validated_data):
@@ -19,6 +20,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+        # Ensure company is a string, default to "Unknown" if null
+        ret["company"] = instance.company if instance.company else "Unknown"
         print("CustomUserSerializer: Serialized data:", ret)  # Debug log
         return ret
 
@@ -32,7 +35,7 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ["username", "role"]
         extra_kwargs = {
             "email": {"required": True, "allow_blank": False},
-            "company": {"required": False, "allow_blank": True, "allow_null": True},
+            "company": {"required": True, "allow_blank": False},
             "first_name": {"required": False, "allow_blank": True},
             "last_name": {"required": False, "allow_blank": True},
         }
@@ -65,8 +68,8 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_company(self, value):
-        if value == "":
-            return None
+        if not value:
+            raise serializers.ValidationError("Company is required.")
         return value
 
     def update(self, instance, validated_data):
@@ -91,7 +94,7 @@ class AdminUserUpdateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "username": {"required": True, "allow_blank": False},
             "email": {"required": True, "allow_blank": False},
-            "company": {"required": False, "allow_blank": True, "allow_null": True},
+            "company": {"required": True, "allow_blank": False},
             "first_name": {"required": False, "allow_blank": True},
             "last_name": {"required": False, "allow_blank": True},
             "role": {"required": True},
@@ -116,8 +119,8 @@ class AdminUserUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_company(self, value):
-        if value == "":
-            return None
+        if not value:
+            raise serializers.ValidationError("Company is required.")
         return value
 
     def update(self, instance, validated_data):
