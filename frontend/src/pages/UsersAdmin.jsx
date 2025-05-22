@@ -98,7 +98,8 @@ const UsersAdmin = () => {
       filtered = filtered.filter(
         (user) =>
           user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.company?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     if (roleFilter) {
@@ -320,7 +321,7 @@ const UsersAdmin = () => {
             <>
               <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
                 <TextField
-                  label="Search by Username or Email"
+                  label="Search by Username, Email or Company"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   sx={{ flex: 1, minWidth: "200px" }}
