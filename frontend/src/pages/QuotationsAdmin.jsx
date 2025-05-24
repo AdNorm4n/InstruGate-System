@@ -25,10 +25,9 @@ import {
   MenuItem,
   TableSortLabel,
   Snackbar,
-  Tabs,
-  Tab,
+  Divider,
 } from "@mui/material";
-import { Add, Edit, Delete, Check, Close } from "@mui/icons-material";
+import { Add, Visibility, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -41,36 +40,20 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
-const ENTITY_TYPES = {
-  QUOTATIONS: "Quotations",
-  QUOTATION_ITEMS: "Quotation Items",
-  QUOTATION_ITEM_SELECTIONS: "Quotation Item Selections",
-  QUOTATION_ITEM_ADDONS: "Quotation Item AddOns",
-};
-
 const QuotationsAdmin = () => {
   const [data, setData] = useState({
     quotations: [],
-    quotationitems: [],
-    quotationitemselections: [],
-    quotationitemaddons: [],
     instruments: [],
-    fieldoptions: [],
-    addons: [],
     users: [],
   });
   const [filteredData, setFilteredData] = useState({
     quotations: [],
-    quotationitems: [],
-    quotationitemselections: [],
-    quotationitemaddons: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [modalData, setModalData] = useState({});
-  const [modalType, setModalType] = useState("");
   const [modalAction, setModalAction] = useState("add");
   const [userRole, setUserRole] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,11 +62,11 @@ const QuotationsAdmin = () => {
     field: "id",
     direction: "asc",
   });
-  const [activeTab, setActiveTab] = useState(0);
+  const [quotationItems, setQuotationItems] = useState([]);
 
   const tabs = [
     {
-      name: ENTITY_TYPES.QUOTATIONS,
+      name: "Quotations",
       endpoint: "/api/admin/quotations/",
       fields: [
         "id",
@@ -96,13 +79,7 @@ const QuotationsAdmin = () => {
         "rejected_at",
         "remarks",
       ],
-      writableFields: [
-        "created_by_id",
-        "company",
-        "project_name",
-        "status",
-        "remarks",
-      ],
+      writableFields: ["created_by_id", "company", "project_name"],
       searchFields: ["company", "project_name"],
       lookups: { created_by_id: "users" },
       displayFields: {
@@ -116,62 +93,8 @@ const QuotationsAdmin = () => {
         rejected_at: "Rejected At",
         remarks: "Remarks",
       },
+      permissions: ["admin"],
       actions: ["approve", "reject"],
-    },
-    {
-      name: ENTITY_TYPES.QUOTATION_ITEMS,
-      endpoint: "/api/admin/quotation-items/",
-      fields: [
-        "id",
-        "quotation.id",
-        "product_code",
-        "quantity",
-        "instrument.name",
-      ],
-      writableFields: [
-        "quotation_id",
-        "product_code",
-        "quantity",
-        "instrument_id",
-      ],
-      searchFields: ["product_code"],
-      lookups: { quotation_id: "quotations", instrument_id: "instruments" },
-      displayFields: {
-        id: "ID",
-        "quotation.id": "Quotation ID",
-        product_code: "Product Code",
-        quantity: "Quantity",
-        "instrument.name": "Instrument",
-      },
-    },
-    {
-      name: ENTITY_TYPES.QUOTATION_ITEM_SELECTIONS,
-      endpoint: "/api/admin/quotation-item-selections/",
-      fields: ["id", "quotation_item.id", "field_option.label"],
-      writableFields: ["quotation_item_id", "field_option_id"],
-      searchFields: [],
-      lookups: {
-        quotation_item_id: "quotationitems",
-        field_option_id: "fieldoptions",
-      },
-      displayFields: {
-        id: "ID",
-        "quotation_item.id": "Quotation Item ID",
-        "field_option.label": "Field Option",
-      },
-    },
-    {
-      name: ENTITY_TYPES.QUOTATION_ITEM_ADDONS,
-      endpoint: "/api/admin/quotation-item-addons/",
-      fields: ["id", "quotation_item.id", "addon.label"],
-      writableFields: ["quotation_item_id", "addon_id"],
-      searchFields: [],
-      lookups: { quotation_item_id: "quotationitems", addon_id: "addons" },
-      displayFields: {
-        id: "ID",
-        "quotation_item.id": "Quotation Item ID",
-        "addon.label": "AddOn",
-      },
     },
   ];
 
@@ -187,17 +110,12 @@ const QuotationsAdmin = () => {
       const headers = { Authorization: `Bearer ${access}` };
       const endpoints = [
         "/api/admin/quotations/",
-        "/api/admin/quotation-items/",
-        "/api/admin/quotation-item-selections/",
-        "/api/admin/quotation-item-addons/",
         "/api/instruments/",
-        "/api/field-options/",
-        "/api/addons/",
         "/api/users/list/",
         "/api/users/me/",
       ];
       const responses = await Promise.all(
-        endpoints.map((endpoint, index) =>
+        endpoints.map((endpoint) =>
           api.get(endpoint, { headers }).catch((err) => {
             console.error(
               `Error fetching ${endpoint}:`,
@@ -213,29 +131,22 @@ const QuotationsAdmin = () => {
 
       const newData = {
         quotations: Array.isArray(responses[0].data) ? responses[0].data : [],
-        quotationitems: Array.isArray(responses[1].data)
-          ? responses[1].data
+        instruments: Array.isArray(responses[1].data) ? responses[1].data : [],
+        users: Array.isArray(responses[2].data)
+          ? responses[2].data.map((user) => ({
+              ...user,
+              company: user.company || "N/A",
+              first_name: user.first_name || "Unknown User",
+            }))
           : [],
-        quotationitemselections: Array.isArray(responses[2].data)
-          ? responses[2].data
-          : [],
-        quotationitemaddons: Array.isArray(responses[3].data)
-          ? responses[3].data
-          : [],
-        instruments: Array.isArray(responses[4].data) ? responses[4].data : [],
-        fieldoptions: Array.isArray(responses[5].data) ? responses[5].data : [],
-        addons: Array.isArray(responses[6].data) ? responses[6].data : [],
-        users: Array.isArray(responses[7].data) ? responses[7].data : [],
       };
-      console.log("Fetched Data:", newData); // Debug log
+
+      console.log("Fetched Data:", newData);
       setData(newData);
       setFilteredData({
         quotations: newData.quotations,
-        quotationitems: newData.quotationitems,
-        quotationitemselections: newData.quotationitemselections,
-        quotationitemaddons: newData.quotationitemaddons,
       });
-      setUserRole(responses[8].data?.role || "client");
+      setUserRole(responses[3].data?.role || "client");
 
       if (responses.some((res) => res.error)) {
         setError("Some data could not be loaded. Please try again.");
@@ -255,10 +166,10 @@ const QuotationsAdmin = () => {
   }, []);
 
   useEffect(() => {
-    const tab = tabs[activeTab];
-    const key = tab.name.toLowerCase().replace(" ", "");
-    let filtered = [...(data[key] || [])];
-    if (searchTerm) {
+    const tab = tabs[0];
+    let filtered = [...data.quotations];
+
+    if (searchTerm && tab.searchFields.length > 0) {
       filtered = filtered.filter((item) =>
         tab.searchFields.some((field) =>
           getField(item, field)
@@ -268,9 +179,11 @@ const QuotationsAdmin = () => {
         )
       );
     }
-    if (tab.name === ENTITY_TYPES.QUOTATIONS && statusFilter) {
-      filtered = filtered.filter((item) => item?.status === statusFilter);
+
+    if (statusFilter) {
+      filtered = filtered.filter((item) => item.status === statusFilter);
     }
+
     filtered.sort((a, b) => {
       const fieldA = getField(a, sortConfig.field) || "";
       const fieldB = getField(b, sortConfig.field) || "";
@@ -280,19 +193,42 @@ const QuotationsAdmin = () => {
       }
       return multiplier * fieldA.toString().localeCompare(fieldB.toString());
     });
+
+    console.log("Filtered Quotations:", filtered);
+
     setFilteredData((prev) => ({
       ...prev,
-      [key]: filtered,
+      quotations: filtered,
     }));
-  }, [searchTerm, statusFilter, data, sortConfig, activeTab]);
+  }, [searchTerm, statusFilter, data, sortConfig]);
 
   const getField = (obj, field) => {
     if (!obj) return "";
     if (field.includes(".")) {
       const [key, subKey] = field.split(".");
-      return obj[key]?.[subKey] || "";
+      if (key === "created_by" && subKey === "first_name") {
+        const userId =
+          obj.created_by_id || (obj.created_by && obj.created_by.id);
+        if (userId) {
+          const user = data.users.find((u) => u.id === userId);
+          return user?.first_name || "Unknown User";
+        }
+        return obj.created_by?.first_name || "Unknown User";
+      }
+      return obj[key]?.[subKey] || "N/A";
     }
-    return obj[field] || "";
+    if (
+      field === "submitted_at" ||
+      field === "approved_at" ||
+      field === "rejected_at"
+    ) {
+      return obj[field] ? new Date(obj[field]).toLocaleString() : "N/A";
+    }
+    if (field === "status") {
+      const status = obj[field] || "N/A";
+      return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+    return obj[field] || "N/A";
   };
 
   const handleSort = (field) => {
@@ -304,46 +240,74 @@ const QuotationsAdmin = () => {
   };
 
   const openAddModal = () => {
-    if (userRole !== "admin") {
-      setError("You do not have permission to add items.");
+    if (!tabs[0].permissions.includes(userRole)) {
+      setError("You do not have permission to add quotations.");
       return;
     }
     setModalAction("add");
     setModalData({});
-    setModalType(tabs[activeTab].name);
+    setQuotationItems([]);
     setOpenModal(true);
   };
 
-  const openEditModal = (item) => {
-    if (userRole !== "admin") {
-      setError("You do not have permission to edit items.");
+  const openViewModal = async (item) => {
+    if (!tabs[0].permissions.includes(userRole)) {
+      setError("You do not have permission to view quotations.");
       return;
     }
-    setModalAction("edit");
+    setModalAction("view");
     setModalData({ ...item });
-    setModalType(tabs[activeTab].name);
+    setQuotationItems([]);
+    try {
+      const access = localStorage.getItem("access");
+      const headers = { Authorization: `Bearer ${access}` };
+      const quotationItemsResponse = await api.get(
+        "/api/admin/quotation-items/",
+        {
+          headers,
+          params: { quotation_id: item.id },
+        }
+      );
+      const items = Array.isArray(quotationItemsResponse.data)
+        ? quotationItemsResponse.data.filter(
+            (qItem) => qItem.quotation_id === item.id
+          )
+        : [];
+      setQuotationItems(items);
+    } catch (err) {
+      console.error(
+        "Error fetching quotation items:",
+        err.response?.data || err.message
+      );
+      setError(
+        `Failed to load quotation items: ${
+          err.response?.data?.detail || err.message
+        }`
+      );
+    }
     setOpenModal(true);
   };
 
   const handleModalClose = () => {
     setOpenModal(false);
     setModalData({});
-    setModalType("");
+    setQuotationItems([]);
     setError("");
   };
 
-  const handleSave = async () => {
-    if (userRole !== "admin") {
-      setError("You do not have permission to save items.");
+  const handleSaveQuotation = async () => {
+    if (!tabs[0].permissions.includes(userRole)) {
+      setError("You do not have permission to save quotations.");
       return;
     }
-
-    const tab = tabs.find((t) => t.name === modalType);
-    const requiredFields = tab.writableFields.filter(
-      (f) => !["status", "remarks"].includes(f)
-    );
+    const tab = tabs[0];
+    const requiredFields = tab.writableFields.filter((f) => f !== "remarks");
     for (const field of requiredFields) {
-      if (!modalData[field] && modalData[field] !== 0) {
+      if (
+        !modalData[field] &&
+        modalData[field] !== 0 &&
+        modalData[field] !== false
+      ) {
         setError(
           `${field
             .replace("_id", "")
@@ -356,61 +320,53 @@ const QuotationsAdmin = () => {
 
     try {
       const access = localStorage.getItem("access");
-      const endpoint =
-        modalAction === "edit"
-          ? `${tab.endpoint}${modalData.id}/`
-          : tab.endpoint;
-      const method = modalAction === "edit" ? "patch" : "post";
-      const payload = { ...modalData };
-
-      await api({
+      const endpoint = tab.endpoint;
+      const method = "post";
+      const payload = {
+        created_by_id: modalData.created_by_id,
+        company: modalData.company,
+        project_name: modalData.project_name,
+      };
+      console.log("Quotation Payload:", payload);
+      const response = await api({
         method,
         url: endpoint,
         data: payload,
         headers: { Authorization: `Bearer ${access}` },
       });
+      console.log("Save Quotation Response:", response.data);
 
-      setSuccess(
-        `${modalType} ${
-          modalAction === "add" ? "created" : "updated"
-        } successfully!`
-      );
+      setSuccess(`Quotation created successfully!`);
       fetchData();
       handleModalClose();
     } catch (err) {
+      console.error("Error Response:", err.response?.data);
       const errorMessage =
         err.response?.data?.detail ||
         Object.values(err.response?.data)?.[0] ||
         err.message;
-      setError(`Failed to save ${modalType}: ${errorMessage}`);
+      setError(`Failed to save quotation: ${errorMessage}`);
     }
   };
 
   const handleDelete = async (id) => {
-    if (userRole !== "admin") {
-      setError("You do not have permission to delete items.");
+    if (!tabs[0].permissions.includes(userRole)) {
+      setError("You do not have permission to delete quotations.");
       return;
     }
-    if (
-      !window.confirm(
-        `Are you sure you want to delete this ${tabs[activeTab].name
-          .toLowerCase()
-          .replace("s", "")}?`
-      )
-    ) {
+    if (!window.confirm("Are you sure you want to delete this quotation?")) {
       return;
     }
     try {
       const access = localStorage.getItem("access");
-      const tab = tabs[activeTab];
-      await api.delete(`${tab.endpoint}${id}/`, {
+      await api.delete(`${tabs[0].endpoint}${id}/`, {
         headers: { Authorization: `Bearer ${access}` },
       });
-      setSuccess(`${tab.name} deleted successfully!`);
+      setSuccess("Quotation deleted successfully!");
       fetchData();
     } catch (err) {
       setError(
-        `Failed to delete ${tab.name}: ${
+        `Failed to delete quotation: ${
           err.response?.data?.detail || err.message
         }`
       );
@@ -418,7 +374,7 @@ const QuotationsAdmin = () => {
   };
 
   const handleQuotationAction = async (id, action, remarks = "") => {
-    if (userRole !== "admin") {
+    if (!tabs[0].permissions.includes(userRole)) {
       setError("You do not have permission to perform this action.");
       return;
     }
@@ -434,7 +390,7 @@ const QuotationsAdmin = () => {
         }
         payload.remarks = remarks;
       }
-      await api.patch(`/api/quotations/review/${id}/`, payload, {
+      await api.patch(`/api/admin/quotations/${id}/`, payload, {
         headers: { Authorization: `Bearer ${access}` },
       });
       setSuccess(`Quotation ${action}d successfully!`);
@@ -448,81 +404,9 @@ const QuotationsAdmin = () => {
     }
   };
 
-  const renderModalContent = () => {
-    const tab = tabs.find((t) => t.name === modalType);
-    if (!tab)
-      return <Alert severity="error">Invalid entity type: {modalType}</Alert>;
-
-    return (
-      <>
-        {tab.writableFields.map((field) => {
-          if (tab.lookups && tab.lookups[field]) {
-            const lookupKey = tab.lookups[field];
-            const lookupItems = data[lookupKey] || [];
-            return (
-              <FormControl fullWidth key={field} margin="normal" size="small">
-                <InputLabel>
-                  {field.replace("_id", "").replace("_", " ").toUpperCase()}
-                </InputLabel>
-                <Select
-                  value={modalData[field] || ""}
-                  onChange={(e) =>
-                    setModalData({ ...modalData, [field]: e.target.value })
-                  }
-                  required
-                >
-                  {lookupItems.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
-                      {item.name || item.label || item.first_name || item.id}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            );
-          }
-          if (field === "status") {
-            return (
-              <FormControl fullWidth key={field} margin="normal" size="small">
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={modalData[field] || "pending"}
-                  onChange={(e) =>
-                    setModalData({ ...modalData, [field]: e.target.value })
-                  }
-                >
-                  <MenuItem value="pending">Pending</MenuItem>
-                  <MenuItem value="approved">Approved</MenuItem>
-                  <MenuItem value="rejected">Rejected</MenuItem>
-                </Select>
-              </FormControl>
-            );
-          }
-          return (
-            <TextField
-              key={field}
-              label={field.replace("_id", "").replace("_", " ").toUpperCase()}
-              value={modalData[field] || ""}
-              onChange={(e) =>
-                setModalData({ ...modalData, [field]: e.target.value })
-              }
-              fullWidth
-              margin="normal"
-              type={field.includes("quantity") ? "number" : "text"}
-              variant="outlined"
-              size="small"
-              multiline={field === "remarks"}
-              rows={field === "remarks" ? 4 : 1}
-              required={!["remarks"].includes(field)}
-            />
-          );
-        })}
-      </>
-    );
-  };
-
   const renderTable = () => {
-    const tab = tabs[activeTab];
-    const items = filteredData[tab.name.toLowerCase().replace(" ", "")] || [];
+    const tab = tabs[0];
+    const items = filteredData.quotations || [];
 
     return (
       <Table>
@@ -564,105 +448,214 @@ const QuotationsAdmin = () => {
             <TableRow>
               <TableCell colSpan={tab.fields.length + 1} align="center">
                 <Typography sx={{ fontFamily: "Helvetica, sans-serif", py: 2 }}>
-                  No {tab.name.toLowerCase()} found.
+                  No quotations found.
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            items.map((item) =>
-              item && item.id ? ( // Ensure item is valid
-                <TableRow
-                  key={item.id}
-                  sx={{
-                    "&:hover": { bgcolor: "#e3f2fd" },
-                    transition: "background-color 0.2s",
-                  }}
-                >
-                  {tab.fields.map((field) => (
-                    <TableCell
-                      key={field}
-                      sx={{ fontFamily: "Helvetica, sans-serif" }}
-                    >
-                      {field.includes(".")
-                        ? getField(item, field) || "N/A"
-                        : field === "submitted_at" ||
-                          field === "approved_at" ||
-                          field === "rejected_at"
-                        ? item[field]
-                          ? new Date(item[field]).toLocaleString()
-                          : "N/A"
-                        : item[field] || "N/A"}
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <IconButton
-                      onClick={() => openEditModal(item)}
-                      disabled={userRole !== "admin"}
-                      sx={{ color: "#1976d2" }}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleDelete(item.id)}
-                      disabled={userRole !== "admin"}
-                      sx={{ color: "#d32f2f" }}
-                    >
-                      <Delete />
-                    </IconButton>
-                    {tab.name === ENTITY_TYPES.QUOTATIONS &&
-                      userRole === "admin" && (
-                        <>
-                          <IconButton
-                            onClick={() =>
-                              handleQuotationAction(item.id, "approve")
-                            }
-                            disabled={item.status === "approved"}
-                            sx={{ color: "#388e3c" }}
-                          >
-                            <Check />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => {
-                              const remarks = prompt(
-                                "Enter remarks for rejection:"
-                              );
-                              if (remarks)
-                                handleQuotationAction(
-                                  item.id,
-                                  "reject",
-                                  remarks
-                                );
-                            }}
-                            disabled={item.status === "rejected"}
-                            sx={{ color: "#d32f2f" }}
-                          >
-                            <Close />
-                          </IconButton>
-                        </>
-                      )}
+            items.map((item) => (
+              <TableRow
+                key={item.id}
+                sx={{
+                  "&:hover": { bgcolor: "#e3f2fd" },
+                  transition: "background-color 0.2s",
+                }}
+              >
+                {tab.fields.map((field) => (
+                  <TableCell
+                    key={field}
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif",
+                      ...(field === "status" && {
+                        color:
+                          getField(item, field) === "Approved"
+                            ? "#388e3c"
+                            : getField(item, field) === "Rejected"
+                            ? "#d32f2f"
+                            : getField(item, field) === "Pending"
+                            ? "#fbc02d"
+                            : "inherit",
+                        fontWeight: field === "status" ? "bold" : "normal",
+                      }),
+                    }}
+                  >
+                    {getField(item, field)}
                   </TableCell>
-                </TableRow>
-              ) : null
-            )
+                ))}
+                <TableCell>
+                  <IconButton
+                    onClick={() => openViewModal(item)}
+                    disabled={!tab.permissions.includes(userRole)}
+                    sx={{ color: "#1976d2" }}
+                    title="View Quotation"
+                  >
+                    <Visibility />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(item.id)}
+                    disabled={!tab.permissions.includes(userRole)}
+                    sx={{ color: "#d32f2f" }}
+                    title="Delete Quotation"
+                  >
+                    <Delete />
+                  </IconButton>
+                  {tab.actions.includes("approve") && (
+                    <IconButton
+                      onClick={() => handleQuotationAction(item.id, "approve")}
+                      disabled={item.status === "approved"}
+                      sx={{ color: "#388e3c" }}
+                      title="Approve Quotation"
+                    >
+                      <Check />
+                    </IconButton>
+                  )}
+                  {tab.actions.includes("reject") && (
+                    <IconButton
+                      onClick={() => {
+                        const remarks = prompt("Enter remarks for rejection:");
+                        if (remarks)
+                          handleQuotationAction(item.id, "reject", remarks);
+                      }}
+                      disabled={item.status === "rejected"}
+                      sx={{ color: "#d32f2f" }}
+                      title="Reject Quotation"
+                    >
+                      <Close />
+                    </IconButton>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
           )}
         </TableBody>
       </Table>
     );
   };
 
+  const renderModalContent = () => {
+    const tab = tabs[0];
+
+    return (
+      <>
+        {tab.writableFields.map((field) => {
+          if (tab.lookups && tab.lookups[field]) {
+            const lookupKey = tab.lookups[field];
+            const lookupItems = data[lookupKey] || [];
+            return (
+              <FormControl fullWidth key={field} margin="normal" size="small">
+                <InputLabel>
+                  {tab.displayFields[field.replace("_id", "")] ||
+                    field.replace("_id", "").toUpperCase()}
+                </InputLabel>
+                <Select
+                  value={modalData[field] || ""}
+                  onChange={(e) =>
+                    setModalData({
+                      ...modalData,
+                      [field]: parseInt(e.target.value, 10) || null,
+                    })
+                  }
+                  required
+                  disabled={modalAction === "view"}
+                >
+                  <MenuItem value="" disabled>
+                    Select a user
+                  </MenuItem>
+                  {lookupItems.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>
+                      {item.first_name || item.username || item.id}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            );
+          }
+          return (
+            <TextField
+              key={field}
+              label={
+                tab.displayFields[field] ||
+                field.replace("_", " ").toUpperCase()
+              }
+              value={modalData[field] || ""}
+              onChange={(e) =>
+                setModalData({ ...modalData, [field]: e.target.value })
+              }
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              size="small"
+              required
+              disabled={modalAction === "view"}
+              sx={{ fontFamily: "Helvetica, sans-serif" }}
+            />
+          );
+        })}
+        {modalAction === "view" && (
+          <>
+            <Divider sx={{ my: 2 }} />
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, fontFamily: "Helvetica, sans-serif" }}
+            >
+              Submitted Instruments
+            </Typography>
+            {quotationItems.length > 0 ? (
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold" }}>ID</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Product Code
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Instrument
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {quotationItems.map((item) => {
+                    const instrument = data.instruments.find(
+                      (inst) => inst.id === item.instrument_id
+                    );
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>{item.product_code || "N/A"}</TableCell>
+                        <TableCell>
+                          {instrument?.name || "Unknown Instrument"}
+                        </TableCell>
+                        <TableCell>{item.quantity || "N/A"}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
+                No instruments submitted for this quotation.
+              </Typography>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        bgcolor: "#f5f5f5",
-      }}
-    >
-      <Navbar userRole={userRole} />
-      <DrawerHeader />
-      <main style={{ flex: 1 }}>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          bgcolor: "#f5f5f5",
+        }}
+      >
+        <Navbar userRole={userRole} />
+        <DrawerHeader />
+        <main style={{ flex: 1 }}>
           <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
             <Typography
               variant="h5"
@@ -717,54 +710,44 @@ const QuotationsAdmin = () => {
               </Box>
             ) : (
               <>
-                <Tabs
-                  value={activeTab}
-                  onChange={(e, newValue) => setActiveTab(newValue)}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  sx={{ mb: 4 }}
-                >
-                  {tabs.map((tab, index) => (
-                    <Tab key={tab.name} label={tab.name} value={index} />
-                  ))}
-                </Tabs>
                 <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
                   <TextField
-                    label={`Search ${tabs[activeTab].name}`}
+                    label={`Search by ${tabs[0].searchFields
+                      .map((field) => tabs[0].displayFields[field])
+                      .join(" or ")}`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{ flex: 1, minWidth: "200px" }}
                     variant="outlined"
                     size="small"
                   />
-                  {tabs[activeTab].name === ENTITY_TYPES.QUOTATIONS && (
-                    <FormControl sx={{ minWidth: "200px" }} size="small">
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        label="Status"
-                      >
-                        <MenuItem value="">All</MenuItem>
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">Approved</MenuItem>
-                        <MenuItem value="rejected">Rejected</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
+                  <FormControl sx={{ minWidth: "150px" }} size="small">
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      label="Status"
+                    >
+                      <MenuItem value="">All Statuses</MenuItem>
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="approved">Approved</MenuItem>
+                      <MenuItem value="rejected">Rejected</MenuItem>
+                    </Select>
+                  </FormControl>
                   <Button
                     variant="contained"
                     startIcon={<Add />}
                     onClick={openAddModal}
-                    disabled={userRole !== "admin"}
+                    disabled={!tabs[0].permissions.includes(userRole)}
                     sx={{
                       bgcolor: "#1976d2",
                       "&:hover": { bgcolor: "#115293" },
                       textTransform: "none",
                       px: 3,
+                      color: "#fff",
                     }}
                   >
-                    Add {tabs[activeTab].name.slice(0, -1)}
+                    Add Quotation
                   </Button>
                 </Box>
                 <Paper
@@ -780,13 +763,13 @@ const QuotationsAdmin = () => {
                 <Dialog
                   open={openModal}
                   onClose={handleModalClose}
-                  maxWidth="sm"
+                  maxWidth="lg"
                   fullWidth
                   PaperProps={{
                     component: "form",
                     onSubmit: (e) => {
                       e.preventDefault();
-                      handleSave();
+                      handleSaveQuotation();
                     },
                     sx: { borderRadius: 2, p: 2 },
                   }}
@@ -798,9 +781,7 @@ const QuotationsAdmin = () => {
                       color: "#1976d2",
                     }}
                   >
-                    {modalAction === "add"
-                      ? `Add ${modalType}`
-                      : `Edit ${modalType}`}
+                    {modalAction === "add" ? "Add Quotation" : "View Quotation"}
                   </DialogTitle>
                   <DialogContent>{renderModalContent()}</DialogContent>
                   <DialogActions>
@@ -809,30 +790,34 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "Helvetica, sans-serif",
                         textTransform: "none",
+                        color: "#555",
                       }}
                     >
-                      Cancel
+                      Close
                     </Button>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        bgcolor: "#1976d2",
-                        "&:hover": { bgcolor: "#115293" },
-                        fontFamily: "Helvetica, sans-serif",
-                        textTransform: "none",
-                      }}
-                    >
-                      {modalAction === "add" ? "Create" : "Save"}
-                    </Button>
+                    {modalAction === "add" && (
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        sx={{
+                          bgcolor: "#1976d2",
+                          "&:hover": { bgcolor: "#115293" },
+                          fontFamily: "Helvetica, sans-serif",
+                          textTransform: "none",
+                          color: "#fff",
+                        }}
+                      >
+                        Save
+                      </Button>
+                    )}
                   </DialogActions>
                 </Dialog>
               </>
             )}
           </Container>
-        </ErrorBoundary>
-      </main>
-    </Box>
+        </main>
+      </Box>
+    </ErrorBoundary>
   );
 };
 

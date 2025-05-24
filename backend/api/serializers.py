@@ -45,10 +45,14 @@ class InstrumentSerializer(serializers.ModelSerializer):
     type_id = serializers.PrimaryKeyRelatedField(
         queryset=InstrumentType.objects.all(), source='type', write_only=True
     )
+    category = CategorySerializer(source='type.category', read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), source='type.category', write_only=True, required=False
+    )
 
     class Meta:
         model = Instrument
-        fields = ['id', 'name', 'type', 'type_id', 'description', 'specifications', 'image', 'is_available', 'created_at']
+        fields = ['id', 'name', 'type', 'type_id', 'category', 'category_id', 'description', 'specifications', 'image', 'is_available', 'created_at']
         read_only_fields = ['created_at']
         extra_kwargs = {
             'name': {'required': True, 'allow_blank': False},
@@ -227,7 +231,7 @@ class QuotationReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"remarks": "Remarks are required when rejecting a quotation."})
         return data
 
-# Instrument Config Serializer (Added)
+# Instrument Config Serializer
 class InstrumentConfigSerializer(serializers.ModelSerializer):
     configurable_fields = ConfigurableFieldSerializer(
         source='configurablefield_set', many=True, read_only=True
@@ -266,10 +270,12 @@ class AdminInstrumentSerializer(serializers.ModelSerializer):
     type_id = serializers.PrimaryKeyRelatedField(
         queryset=InstrumentType.objects.all(), source='type'
     )
+    type = InstrumentTypeSerializer(read_only=True)
+    category = CategorySerializer(source='type.category', read_only=True)
 
     class Meta:
         model = Instrument
-        fields = ['id', 'name', 'type_id', 'description', 'specifications', 'image', 'is_available']
+        fields = ['id', 'name', 'type_id', 'type', 'category', 'description', 'specifications', 'image', 'is_available']
         extra_kwargs = {
             'name': {'required': True, 'allow_blank': False},
             'type_id': {'required': True},

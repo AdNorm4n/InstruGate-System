@@ -253,6 +253,15 @@ const UsersAdmin = () => {
     }
   };
 
+  // Helper function to convert field names to title case
+  const toTitleCase = (str) => {
+    return str
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   return (
     <Box
       sx={{
@@ -388,7 +397,7 @@ const UsersAdmin = () => {
                               }
                               onClick={() => handleSort(field)}
                             >
-                              {field.toUpperCase()}
+                              {toTitleCase(field)}
                             </TableSortLabel>
                           </TableCell>
                         )
@@ -520,7 +529,8 @@ const UsersAdmin = () => {
                     sx={{ fontFamily: "Helvetica, sans-serif" }}
                   />
                   <TextField
-                    label="Last Name"
+                    label=" BEFORE
+Last Name"
                     value={modalData.last_name}
                     onChange={(e) =>
                       setModalData({ ...modalData, last_name: e.target.value })
