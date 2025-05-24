@@ -1,4 +1,3 @@
-// src/components/Form.jsx
 import { useState } from "react";
 import api from "../api";
 import { useNavigate, Link } from "react-router-dom";
@@ -17,6 +16,8 @@ import {
 import {
   AccountCircle,
   LockRounded,
+  Email,
+  Business,
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
@@ -119,7 +120,7 @@ function Form({ route, method }) {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <AccountCircle />
+                <AccountCircle sx={{ color: "#333" }} />
               </InputAdornment>
             ),
           }}
@@ -135,6 +136,14 @@ function Form({ route, method }) {
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email sx={{ color: "#333" }} />
+                  </InputAdornment>
+                ),
+              }}
+              required
             />
             <Stack direction="row" spacing={2}>
               <TextField
@@ -143,6 +152,7 @@ function Form({ route, method }) {
                 fullWidth
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                required
               />
               <TextField
                 label="Last Name"
@@ -150,6 +160,7 @@ function Form({ route, method }) {
                 fullWidth
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                required
               />
             </Stack>
             <TextField
@@ -158,6 +169,14 @@ function Form({ route, method }) {
               fullWidth
               value={company}
               onChange={(e) => setCompany(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Business sx={{ color: "#333" }} />
+                  </InputAdornment>
+                ),
+              }}
+              required
             />
           </>
         )}
@@ -173,7 +192,7 @@ function Form({ route, method }) {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <LockRounded />
+                <LockRounded sx={{ color: "#333" }} />
               </InputAdornment>
             ),
             endAdornment: (
@@ -212,19 +231,19 @@ function Form({ route, method }) {
           {name}
         </Button>
 
-        {method === "register" ? (
-          <div className="register-link">
+        <div className="register-link">
+          {method === "register" ? (
             <p>
               Already have an account? <Link to="/login">Login</Link>
             </p>
-          </div>
-        ) : (
-          <div className="register-link">
-            <p>
-              Don't have an account? <Link to="/register">Register</Link>
-            </p>
-          </div>
-        )}
+          ) : (
+            <>
+              <p>
+                Don't have an account? <Link to="/register">Register</Link>
+              </p>
+            </>
+          )}
+        </div>
       </Stack>
     </Box>
   );

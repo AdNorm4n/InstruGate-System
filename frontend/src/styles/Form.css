@@ -42,14 +42,8 @@
   background-position: center;
   background-repeat: no-repeat;
 
-  /* Background image */
-  background-image: url("../assets/form.jpg"); /* Replace with your image path */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
   /* Optional dark overlay for better contrast */
-  background-color: rgba(217, 217, 217, 0.95); /* #D9D9D9 with 85% opacity */
+  background-color: rgba(217, 217, 217, 0.95); /* #D9D9D9 with 95% opacity */
   background-blend-mode: overlay;
 }
 
@@ -73,43 +67,51 @@
   border-left: 1px solid #ffffff;
 }
 
-/* Username & password input wrapper */
-.input-box {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* Each input row with icon + field */
-.input-container {
-  display: flex;
-  align-items: flex-end;
+/* Input field styling */
+.MuiTextField-root {
   width: 100%;
 }
 
-/* Input field focus override */
-.input-field:focus {
-  color: #333;
-}
-
-/* Icon color */
-.eye-icon,
+/* Icon styling */
 .MuiSvgIcon-root {
   color: #333;
+  margin-right: 8px;
 }
 
-/* Register link styling */
+/* Input field focus override */
+.MuiInputBase-input:focus {
+  color: #333;
+}
+
+/* Register and Forgot Password link styling */
 .register-link {
   margin-top: 1rem;
   text-align: center;
+}
+
+.register-link p {
+  margin: 0.5rem 0;
 }
 
 .register-link a {
   color: #007bff;
   text-decoration: none;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .register-link a:hover {
   color: #28666e;
+}
+
+/* Ensure labels animate above the field */
+.MuiInputLabel-root {
+  color: #333;
+  transform-origin: top left;
+}
+
+/* Label when focused or filled */
+.MuiInputLabel-shrink {
+  transform: translate(0, -1.5rem) scale(0.75);
+  color: #333;
 }

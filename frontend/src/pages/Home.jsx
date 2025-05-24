@@ -143,7 +143,7 @@ function Home() {
                 <Button
                   className="admin-button"
                   variant="contained"
-                  onClick={() => handleClick("admin", "/admin")}
+                  onClick={() => handleClick("admin", "/admin-panel")}
                   disabled={isClicked === "admin"}
                 >
                   {isClicked === "admin" ? (
