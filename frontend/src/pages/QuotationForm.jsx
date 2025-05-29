@@ -415,7 +415,7 @@ function QuotationForm() {
                           mb: 1,
                         }}
                       >
-                        <strong>Product Code: {item.productCode}</strong>
+                        <strong>Product Code:</strong> {item.productCode}
                       </Typography>
                       <Typography
                         variant="subtitle1"
@@ -425,7 +425,7 @@ function QuotationForm() {
                           mb: 2,
                         }}
                       >
-                        <strong>Quantity: {item.quantity || 1}</strong>
+                        <strong>Quantity:</strong> {item.quantity || 1}
                       </Typography>
 
                       <Typography
@@ -434,9 +434,10 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
+                          mb: 1,
                         }}
                       >
-                        Requirements:
+                        Requirements
                       </Typography>
                       <List>
                         {Object.values(item.selections).map((sel, idx) => (
@@ -458,9 +459,10 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
+                          mb: 1,
                         }}
                       >
-                        Add-Ons:
+                        Add-Ons
                       </Typography>
                       <List>
                         {item.selectedAddOns.length > 0 ? (
