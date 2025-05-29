@@ -65,6 +65,7 @@ function Configurator({ navigateWithLoading }) {
   );
 
   useEffect(() => {
+    console.log(state.configData);
     if (!state?.configData || !state?.userRole) {
       const fetchData = async () => {
         try {
@@ -74,6 +75,7 @@ function Configurator({ navigateWithLoading }) {
             requests.push(api.get(`/api/instruments/${instrumentId}/config/`));
 
           const responses = await Promise.all(requests);
+          console.log(responses);
           let userRes, instrumentRes;
 
           if (!state?.userRole && !state?.configData) {
@@ -110,13 +112,7 @@ function Configurator({ navigateWithLoading }) {
 
   useEffect(() => {
     if (showAddOns) {
-      api
-        .get(`/api/instruments/${instrumentId}/addons/`)
-        .then((res) => {
-          console.log("Add-ons data:", res.data);
-          setAddons(res.data);
-        })
-        .catch(() => alert("Failed to load add-ons"));
+      setAddons(state?.configData?.addons);
     }
   }, [instrumentId, showAddOns]);
 

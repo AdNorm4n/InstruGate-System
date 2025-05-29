@@ -59,7 +59,7 @@ urlpatterns = [
     # AddOn endpoints
     path('addons/', AddOnListView.as_view(), name='addon-list'),
     path('addons/<int:pk>/', AddOnDetailView.as_view(), name='addon-detail'),
-    path('instruments/<int:pk>/options/', InstrumentOptionListView.as_view(), name='instrument-options'),
+    path('instruments/<int:pk>/addons/', InstrumentOptionListView.as_view(), name='instrument-addons'),
 
     # Quotation endpoints
     path('quotations/', QuotationCreateView.as_view(), name='quotation-create'),

@@ -233,16 +233,17 @@ class QuotationReviewSerializer(serializers.ModelSerializer):
 
 # Instrument Config Serializer
 class InstrumentConfigSerializer(serializers.ModelSerializer):
-    configurable_fields = ConfigurableFieldSerializer(
-        source='configurablefield_set', many=True, read_only=True
-    )
-    addons = AddOnSerializer(
-        source='addontype_set.addon_set', many=True, read_only=True
-    )
+    fields = ConfigurableFieldSerializer(many=True, read_only=True)  # uses related_name="fields"
+    addons = serializers.SerializerMethodField()
 
     class Meta:
         model = Instrument
-        fields = ['id', 'name', 'configurable_fields', 'addons']
+        fields = ['id', 'name', 'fields', 'addons']
+
+    def get_addons(self, obj):
+        # Get all AddOns related via AddOnTypes
+        addons = AddOn.objects.filter(addon_type__in=obj.addon_types.all())
+        return AddOnSerializer(addons, many=True).data
 
 # Admin-specific serializers
 class AdminCategorySerializer(serializers.ModelSerializer):
