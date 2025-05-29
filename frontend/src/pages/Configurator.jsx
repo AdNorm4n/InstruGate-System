@@ -28,12 +28,14 @@ function Configurator({ navigateWithLoading }) {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [instrument, setInstrument] = useState(
-    state?.configData
+    state?.instrument
+      ? { ...state.instrument }
+      : state?.configData
       ? {
           ...state.configData,
           image: state?.instrument?.image || state.configData.image,
         }
-      : state?.instrument || null
+      : null
   );
   const [fields, setFields] = useState(state?.configData?.fields || []);
   const [addons, setAddons] = useState([]);
@@ -58,6 +60,8 @@ function Configurator({ navigateWithLoading }) {
   console.log(
     "Instrument:",
     instrument?.name,
+    "Description:",
+    instrument?.description,
     "Image path:",
     instrument?.image,
     "Full URL:",
@@ -65,7 +69,6 @@ function Configurator({ navigateWithLoading }) {
   );
 
   useEffect(() => {
-    console.log(state.configData);
     if (!state?.configData || !state?.userRole) {
       const fetchData = async () => {
         try {
@@ -75,7 +78,6 @@ function Configurator({ navigateWithLoading }) {
             requests.push(api.get(`/api/instruments/${instrumentId}/config/`));
 
           const responses = await Promise.all(requests);
-          console.log(responses);
           let userRes, instrumentRes;
 
           if (!state?.userRole && !state?.configData) {
@@ -84,6 +86,10 @@ function Configurator({ navigateWithLoading }) {
             setInstrument({
               ...instrumentRes.data,
               image: state?.instrument?.image || instrumentRes.data.image,
+              description:
+                state?.instrument?.description ||
+                instrumentRes.data.description ||
+                "No description available",
             });
             setFields(instrumentRes.data.fields || []);
           } else if (!state?.userRole) {
@@ -94,6 +100,10 @@ function Configurator({ navigateWithLoading }) {
             setInstrument({
               ...instrumentRes.data,
               image: state?.instrument?.image || instrumentRes.data.image,
+              description:
+                state?.instrument?.description ||
+                instrumentRes.data.description ||
+                "No description available",
             });
             setFields(instrumentRes.data.fields || []);
           }
@@ -112,9 +122,9 @@ function Configurator({ navigateWithLoading }) {
 
   useEffect(() => {
     if (showAddOns) {
-      setAddons(state?.configData?.addons);
+      setAddons(state?.configData?.addons || []);
     }
-  }, [instrumentId, showAddOns]);
+  }, [showAddOns, state?.configData]);
 
   const handleSelect = (fieldId, option) => {
     if (option) {
@@ -260,12 +270,13 @@ function Configurator({ navigateWithLoading }) {
                   fontFamily: "Helvetica, sans-serif",
                   letterSpacing: 0,
                   textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                  textTransform: "uppercase",
                 }}
               >
-                {instrument.name} Configurator
+                {instrument.name}
               </Typography>
             </Box>
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -304,7 +315,7 @@ function Configurator({ navigateWithLoading }) {
               align="center"
               sx={{ fontFamily: "Helvetica, sans-serif", mb: 3 }}
             >
-              {instrument.description}
+              {instrument.description || "No description available"}
             </Typography>
             <Typography
               className="product-code"

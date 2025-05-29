@@ -176,7 +176,7 @@ function Review() {
                 Review Your Configuration
               </Typography>
             </Box>
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
               {imageUrl ? (
                 <img
                   src={imageUrl}
@@ -216,6 +216,7 @@ function Review() {
                 mb: 4,
                 fontFamily: "Helvetica, sans-serif",
                 color: "#000000",
+                fontWeight: "bold",
               }}
             >
               {instrument.name}

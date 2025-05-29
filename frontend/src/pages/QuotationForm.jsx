@@ -248,7 +248,7 @@ function QuotationForm() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                mb: 8,
+                mb: 4,
                 p: 3,
                 border: "4px solid #e0e0e0",
                 borderRadius: "8px",
@@ -415,7 +415,7 @@ function QuotationForm() {
                           mb: 1,
                         }}
                       >
-                        <strong>Product Code:</strong> {item.productCode}
+                        <strong>Product Code: {item.productCode}</strong>
                       </Typography>
                       <Typography
                         variant="subtitle1"
@@ -425,7 +425,7 @@ function QuotationForm() {
                           mb: 2,
                         }}
                       >
-                        <strong>Quantity:</strong> {item.quantity || 1}
+                        <strong>Quantity: {item.quantity || 1}</strong>
                       </Typography>
 
                       <Typography
@@ -434,10 +434,9 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
-                          mb: 1,
                         }}
                       >
-                        Requirements
+                        Requirements:
                       </Typography>
                       <List>
                         {Object.values(item.selections).map((sel, idx) => (
@@ -459,10 +458,9 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
-                          mb: 1,
                         }}
                       >
-                        Add-Ons
+                        Add-Ons:
                       </Typography>
                       <List>
                         {item.selectedAddOns.length > 0 ? (
