@@ -5,6 +5,7 @@ from .models import (
     AddOn, AddOnType, Quotation, QuotationItem,
     QuotationItemSelection, QuotationItemAddOn
 )
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -119,39 +120,40 @@ class AddOnSerializer(serializers.ModelSerializer):
             'code': {'required': True, 'allow_blank': False}
         }
 
-# Quotation Item Selection Serializer
 class QuotationItemSelectionSerializer(serializers.ModelSerializer):
     field_option = FieldOptionSerializer(read_only=True)
     field_option_id = serializers.PrimaryKeyRelatedField(
         queryset=FieldOption.objects.all(), source='field_option', write_only=True
     )
-    quotation_item = serializers.PrimaryKeyRelatedField(queryset=QuotationItem.objects.all())
 
     class Meta:
         model = QuotationItemSelection
-        fields = ['id', 'quotation_item', 'field_option', 'field_option_id']
+        fields = ['id', 'field_option', 'field_option_id']
         extra_kwargs = {
-            'quotation_item': {'required': True},
             'field_option_id': {'required': True}
         }
 
-# Quotation Item AddOn Serializer
+    def validate(self, data):
+        print("QuotationItemSelectionSerializer validate:", data)
+        return data
+
 class QuotationItemAddOnSerializer(serializers.ModelSerializer):
     addon = AddOnSerializer(read_only=True)
     addon_id = serializers.PrimaryKeyRelatedField(
         queryset=AddOn.objects.all(), source='addon', write_only=True
     )
-    quotation_item = serializers.PrimaryKeyRelatedField(queryset=QuotationItem.objects.all())
 
     class Meta:
         model = QuotationItemAddOn
-        fields = ['id', 'quotation_item', 'addon', 'addon_id']
+        fields = ['id', 'addon', 'addon_id']
         extra_kwargs = {
-            'quotation_item': {'required': True},
             'addon_id': {'required': True}
         }
 
-# Quotation Item Serializer
+    def validate(self, data):
+        print("QuotationItemAddOnSerializer validate:", data)
+        return data
+
 class QuotationItemSerializer(serializers.ModelSerializer):
     instrument = InstrumentSerializer(read_only=True)
     instrument_id = serializers.PrimaryKeyRelatedField(
@@ -162,31 +164,36 @@ class QuotationItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = QuotationItem
-        fields = ['id', 'quotation', 'product_code', 'quantity', 'instrument', 'instrument_id', 'selections', 'addons']
+        fields = ['id', 'product_code', 'quantity', 'instrument', 'instrument_id', 'selections', 'addons']
         extra_kwargs = {
-            'quotation': {'required': True},
             'product_code': {'required': True, 'allow_blank': False},
             'quantity': {'required': True},
             'instrument_id': {'required': True}
         }
 
+    def validate(self, data):
+        print("QuotationItemSerializer validate:", data)
+        return data
+
     def create(self, validated_data):
+        print("QuotationItemSerializer.create validated_data:", validated_data)
         selections_data = validated_data.pop('selections', [])
         addons_data = validated_data.pop('addons', [])
         quotation_item = QuotationItem.objects.create(**validated_data)
         for selection_data in selections_data:
+            print("Creating selection:", selection_data)
             QuotationItemSelection.objects.create(
                 quotation_item=quotation_item,
                 field_option=selection_data['field_option']
             )
         for addon_data in addons_data:
+            print("Creating addon:", addon_data)
             QuotationItemAddOn.objects.create(
                 quotation_item=quotation_item,
                 addon=addon_data['addon']
             )
         return quotation_item
 
-# Quotation Serializer
 class QuotationSerializer(serializers.ModelSerializer):
     items = QuotationItemSerializer(many=True)
     created_by = UserSerializer(read_only=True)
@@ -201,9 +208,8 @@ class QuotationSerializer(serializers.ModelSerializer):
             'id', 'created_by', 'created_by_id', 'created_by_first_name', 'company', 'project_name', 'status',
             'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at', 'items'
         ]
-        read_only_fields = ['status', 'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at']
+        read_only_fields = ['id', 'created_at', 'created_by_id', 'created_by_first_name', 'submitted_at', 'updated_at']
         extra_kwargs = {
-            'created_by_id': {'required': True},
             'company': {'required': True, 'allow_blank': False},
             'project_name': {'required': True, 'allow_blank': False}
         }
@@ -211,15 +217,38 @@ class QuotationSerializer(serializers.ModelSerializer):
     def get_created_by_first_name(self, obj):
         return obj.created_by.first_name if obj.created_by.first_name else "N/A"
 
+    def validate(self, data):
+        print("QuotationSerializer validate:", data)
+        return data
+
     def create(self, validated_data):
+        print("QuotationSerializer.create validated_data:", validated_data)
         items_data = validated_data.pop('items')
+        validated_data['submitted_at'] = timezone.now()
         quotation = Quotation.objects.create(**validated_data)
         for item_data in items_data:
+            print("Processing item:", item_data)
             item_data['quotation'] = quotation
             QuotationItemSerializer().create(item_data)
         return quotation
 
-# Quotation Review Serializer
+    def update(self, instance, validated_data):
+        print("QuotationSerializer.update validated_data:", validated_data)
+        status = validated_data.get('status', instance.status)
+        remarks = validated_data.get('remarks', instance.remarks)
+        if status == 'approved' and instance.status != 'approved':
+            instance.approved_at = timezone.now()
+            instance.rejected_at = None
+        elif status == 'rejected' and instance.status != 'rejected':
+            instance.rejected_at = timezone.now()
+            instance.approved_at = None
+        instance.status = status
+        instance.remarks = remarks
+        instance.save()
+        print("Updated quotation:", instance.id, "Status:", instance.status, 
+              "Approved at:", instance.approved_at, "Rejected at:", instance.rejected_at)
+        return instance
+
 class QuotationReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quotation
@@ -231,9 +260,8 @@ class QuotationReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"remarks": "Remarks are required when rejecting a quotation."})
         return data
 
-# Instrument Config Serializer
 class InstrumentConfigSerializer(serializers.ModelSerializer):
-    fields = ConfigurableFieldSerializer(many=True, read_only=True)  # uses related_name="fields"
+    fields = ConfigurableFieldSerializer(many=True, read_only=True)
     addons = serializers.SerializerMethodField()
 
     class Meta:
@@ -241,11 +269,9 @@ class InstrumentConfigSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'fields', 'addons']
 
     def get_addons(self, obj):
-        # Get all AddOns related via AddOnTypes
         addons = AddOn.objects.filter(addon_type__in=obj.addon_types.all())
         return AddOnSerializer(addons, many=True).data
 
-# Admin-specific serializers
 class AdminCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -355,7 +381,7 @@ class AdminQuotationSerializer(serializers.ModelSerializer):
             'id', 'created_by_id', 'company', 'project_name', 'status',
             'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at'
         ]
-        read_only_fields = ['submitted_at', 'approved_at', 'rejected_at', 'updated_at']
+        read_only_fields = ['id', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at']
         extra_kwargs = {
             'created_by_id': {'required': True},
             'company': {'required': True, 'allow_blank': False},
@@ -363,6 +389,27 @@ class AdminQuotationSerializer(serializers.ModelSerializer):
             'status': {'required': False},
             'remarks': {'required': False, 'allow_blank': True}
         }
+
+    def update(self, instance, validated_data):
+        print("AdminQuotationSerializer.update validated_data:", validated_data)
+        # Update status and remarks
+        status = validated_data.get('status', instance.status)
+        remarks = validated_data.get('remarks', instance.remarks)
+
+        # Set approved_at or rejected_at based on status
+        if status == 'approved' and instance.status != 'approved':
+            instance.approved_at = timezone.now()
+            instance.rejected_at = None  # Clear rejected_at
+        elif status == 'rejected' and instance.status != 'rejected':
+            instance.rejected_at = timezone.now()
+            instance.approved_at = None  # Clear approved_at
+
+        # Update fields
+        instance.status = status
+        instance.remarks = remarks
+        instance.save()
+        print(f"Updated Quotation {instance.id}: Status: {instance.status}, Approved at: {instance.approved_at}, Rejected at: {instance.rejected_at}")
+        return instance
 
 class AdminQuotationItemSerializer(serializers.ModelSerializer):
     quotation_id = serializers.PrimaryKeyRelatedField(

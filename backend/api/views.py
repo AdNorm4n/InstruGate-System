@@ -175,6 +175,7 @@ class QuotationCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated, IsClient]
 
     def perform_create(self, serializer):
+        print(self.request)
         serializer.save(created_by=self.request.user)
 
 class SubmittedQuotationView(generics.ListAPIView):

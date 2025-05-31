@@ -101,13 +101,24 @@ function QuotationForm() {
       return;
     }
 
+    if (!userData.id || !userData.company) {
+      alert("User data incomplete. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     const confirmed = window.confirm("Are you sure you want to submit?");
     if (!confirmed) {
       console.log("Submission canceled by user");
       return;
     }
+
     console.log("User confirmed submission");
     console.log("Project Name:", projectName);
+    console.log(
+      "Selected Instruments:",
+      JSON.stringify(selectedInstruments, null, 2)
+    );
 
     setIsClicked(true);
     try {
@@ -115,7 +126,7 @@ function QuotationForm() {
       const refresh = getRefreshToken();
 
       if (!access || !refresh) {
-        throw new Error("No access token found");
+        throw new Error("No access token or refresh token found");
       }
 
       const decoded = jwtDecode(access);
@@ -127,46 +138,67 @@ function QuotationForm() {
         console.log("Token refreshed:", access);
       }
 
+      if (
+        !selectedInstruments ||
+        !Array.isArray(selectedInstruments) ||
+        selectedInstruments.length === 0
+      ) {
+        throw new Error("No valid instruments selected");
+      }
+
       const payload = {
-        items: selectedInstruments.map((instrumentData) => ({
-          product_code: instrumentData.productCode,
-          instrument_id: instrumentData.instrument.id,
-          quantity: instrumentData.quantity || 1,
-          selections: Object.values(instrumentData.selections).map((sel) => ({
-            field_option_id: sel.id,
-          })),
-          addons: instrumentData.selectedAddOns.map((addon) => ({
-            addon_id: addon.id,
-          })),
-        })),
+        created_by_id: userData.id,
         company: userData.company,
         project_name: projectName,
+        items: selectedInstruments.map((instrumentData, index) => {
+          if (!instrumentData.instrument?.id || !instrumentData.productCode) {
+            throw new Error(
+              `Invalid instrument data at index ${index}: ${JSON.stringify(
+                instrumentData
+              )}`
+            );
+          }
+          return {
+            product_code: instrumentData.productCode,
+            instrument_id: Number(instrumentData.instrument.id),
+            quantity: Number(instrumentData.quantity || 1),
+            selections: Object.values(instrumentData.selections || {})
+              .filter((sel) => sel && sel.id)
+              .map((sel) => ({ field_option_id: Number(sel.id) })),
+            addons: (instrumentData.selectedAddOns || [])
+              .filter((addon) => addon && addon.id)
+              .map((addon) => ({ addon_id: Number(addon.id) })),
+          };
+        }),
       };
 
       console.log("Submitting payload:", JSON.stringify(payload, null, 2));
 
-      await api.post("/api/quotations/", payload, {
+      const response = await api.post("/api/quotations/", payload, {
         headers: {
           Authorization: `Bearer ${access}`,
           "Content-Type": "application/json",
         },
       });
 
+      console.log("Submission response:", response.data);
       localStorage.removeItem("selectedInstruments");
       alert("Quotation submitted successfully!");
       navigate("/");
     } catch (error) {
       console.error("Submission failed:", error);
-      alert(
-        `Failed to submit quotation. Error: ${
-          error?.response?.data?.detail || error.message
-        }`
+      console.error(
+        "Full error response:",
+        JSON.stringify(error.response?.data, null, 2)
       );
+      const errorMessage = error.response?.data
+        ? JSON.stringify(error.response.data, null, 2)
+        : error.message;
+      alert(`Failed to submit quotation. Error: ${errorMessage}`);
     } finally {
       setTimeout(() => setIsClicked(false), 300);
     }
   };
-
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", mt: "20vh" }}>
