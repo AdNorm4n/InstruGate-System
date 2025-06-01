@@ -1,33 +1,32 @@
-.admin-panel {
-  padding: 20px;
+.admin-panel-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 60px;
 }
 
-.table-container {
-  margin-top: 20px;
-  overflow-x: auto;
+.admin-panel-page .MuiTypography-root {
+  font-family: "Helvetica, sans-serif" !important;
 }
 
-.MuiTable-root {
-  min-width: 650px;
+.admin-panel-page .MuiAlert-root {
+  border-radius: 8px;
+  padding: 12px;
 }
 
-.MuiTableCell-head {
-  font-weight: bold;
-  background-color: #f5f5f5;
+@media (max-width: 600px) {
+  .admin-panel-page .MuiTypography-h6 {
+    font-size: 1.5rem;
+  }
+
+  .admin-panel-page .MuiButton-root {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
 }
 
-.MuiTableRow-root:hover {
-  background-color: #f9f9f9;
-}
-
-.MuiButton-contained {
-  background-color: #1976d2;
-}
-
-.MuiButton-contained:hover {
-  background-color: #115293;
-}
-
-.MuiDialogContent-root {
-  min-width: 400px;
+@media (max-width: 960px) {
+  .admin-panel-page .MuiContainer-root {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }

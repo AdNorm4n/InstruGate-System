@@ -209,7 +209,7 @@ function Home() {
                   fontSize: "1.25rem",
                 }}
               >
-                Your Dashboard
+                Dashboard
               </Typography>
               <Grid container spacing={2} justifyContent="center">
                 {userRole === "admin" && (
@@ -474,7 +474,7 @@ function Home() {
                           lineHeight: 1.2,
                         }}
                       >
-                        Temp
+                        Temperature
                         <br />
                         Instruments
                       </Typography>

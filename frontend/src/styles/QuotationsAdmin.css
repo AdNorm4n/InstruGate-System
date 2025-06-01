@@ -1,0 +1,62 @@
+.quotations-admin-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+.quotations-admin-page .MuiTable-root {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.quotations-admin-page .MuiTableCell-head {
+  background-color: #f5f5f5;
+  color: #333;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.quotations-admin-page .MuiTableRow-root:hover {
+  background-color: #e3f2fd;
+}
+
+.quotations-admin-page .MuiDialog-paper {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.quotations-admin-page .MuiSnackbar-root .MuiAlert-root {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.quotations-admin-page .MuiTableContainer-root {
+  overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  .quotations-admin-page .MuiTypography-h6 {
+    font-size: 1.5rem;
+  }
+
+  .quotations-admin-page .MuiTextField-root,
+  .quotations-admin-page .MuiFormControl-root {
+    min-width: 100%;
+  }
+
+  .quotations-admin-page .MuiButton-root {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+
+  .quotations-admin-page .MuiTableCell-root {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 960px) {
+  .quotations-admin-page .MuiContainer-root {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}

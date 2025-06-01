@@ -28,16 +28,14 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     ROLE_CHOICES = (
-        ("admin", "Admin"),
-        ("proposal_engineer", "Proposal Engineer"),
-        ("client", "Client"),
+        ('admin', 'Admin'),
+        ('proposal_engineer', 'Proposal Engineer'),
+        ('client', 'Client'),
     )
-
-    email = models.EmailField(unique=True, blank=True, null=True)
-    company = models.CharField(max_length=255, blank=True, null=True)  # ✅ Added Company
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="client")
-
-    objects = CustomUserManager()
+    company = models.CharField(max_length=255, blank=False, null=False)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
 
     def __str__(self):
-        return f"{self.username} ({self.role})"
+        return self.username

@@ -286,7 +286,7 @@ function About() {
                           lineHeight: 1.2,
                         }}
                       >
-                        Temp
+                        Temperature
                         <br />
                         Instruments
                       </Typography>

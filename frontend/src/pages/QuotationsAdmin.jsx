@@ -26,11 +26,15 @@ import {
   TableSortLabel,
   Snackbar,
   Divider,
+  Fade,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { Add, Visibility, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
+import "../styles/quotationsadmin.css";
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000",
@@ -38,6 +42,43 @@ const api = axios.create({
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
+}));
+
+const ToolCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#d4a017",
+  color: "#fff",
+  padding: theme.spacing(1.5, 4),
+  fontWeight: 600,
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif !important",
+  "&:hover": {
+    backgroundColor: "#b8860b",
+    transform: "scale(1.05)",
+  },
+  transition: "all 0.3s ease",
+}));
+
+const CancelButton = styled(Button)(({ theme }) => ({
+  color: "#d6393a",
+  fontFamily: "Helvetica, sans-serif !important",
+  textTransform: "none",
+  "&:hover": {
+    color: "#b71c1c",
+  },
 }));
 
 const QuotationsAdmin = () => {
@@ -417,7 +458,7 @@ const QuotationsAdmin = () => {
                 key={field}
                 sx={{
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
                   bgcolor: "#f5f5f5",
                 }}
               >
@@ -435,21 +476,23 @@ const QuotationsAdmin = () => {
             <TableCell
               sx={{
                 fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Helvetica, sans-serif !important",
                 bgcolor: "#f5f5f5",
               }}
             >
-              ACTIONS
+              Actions
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {items.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={tab.fields.length + 1} align="center">
-                <Typography sx={{ fontFamily: "Helvetica, sans-serif", py: 2 }}>
-                  No quotations found.
-                </Typography>
+              <TableCell
+                colSpan={tab.fields.length + 1}
+                align="center"
+                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              >
+                <Typography sx={{ py: 2 }}>No quotations found.</Typography>
               </TableCell>
             </TableRow>
           ) : (
@@ -465,7 +508,7 @@ const QuotationsAdmin = () => {
                   <TableCell
                     key={field}
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Helvetica, sans-serif !important",
                       ...(field === "status" && {
                         color:
                           getField(item, field) === "Approved"
@@ -483,46 +526,58 @@ const QuotationsAdmin = () => {
                   </TableCell>
                 ))}
                 <TableCell>
-                  <IconButton
-                    onClick={() => openViewModal(item)}
-                    disabled={!tab.permissions.includes(userRole)}
-                    sx={{ color: "#1976d2" }}
-                    title="View Quotation"
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
                   >
-                    <Visibility />
-                  </IconButton>
-                  <IconButton
-                    onClick={() => handleDelete(item.id)}
-                    disabled={!tab.permissions.includes(userRole)}
-                    sx={{ color: "#d32f2f" }}
-                    title="Delete Quotation"
-                  >
-                    <Delete />
-                  </IconButton>
-                  {tab.actions.includes("approve") && (
-                    <IconButton
-                      onClick={() => handleQuotationAction(item.id, "approve")}
-                      disabled={item.status === "approved"}
-                      sx={{ color: "#388e3c" }}
-                      title="Approve Quotation"
-                    >
-                      <Check />
-                    </IconButton>
-                  )}
-                  {tab.actions.includes("reject") && (
-                    <IconButton
-                      onClick={() => {
-                        const remarks = prompt("Enter remarks for rejection:");
-                        if (remarks)
-                          handleQuotationAction(item.id, "reject", remarks);
-                      }}
-                      disabled={item.status === "rejected"}
-                      sx={{ color: "#d32f2f" }}
-                      title="Reject Quotation"
-                    >
-                      <Close />
-                    </IconButton>
-                  )}
+                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                      <IconButton
+                        onClick={() => openViewModal(item)}
+                        disabled={!tab.permissions.includes(userRole)}
+                        sx={{ color: "#1976d2" }}
+                        title="View Quotation"
+                      >
+                        <Visibility />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => handleDelete(item.id)}
+                        disabled={!tab.permissions.includes(userRole)}
+                        sx={{ color: "#d32f2f" }}
+                        title="Delete Quotation"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Box>
+                    <Box sx={{ display: "flex", gap: 0.5 }}>
+                      {tab.actions.includes("approve") && (
+                        <IconButton
+                          onClick={() =>
+                            handleQuotationAction(item.id, "approve")
+                          }
+                          disabled={item.status === "approved"}
+                          sx={{ color: "#388e3c" }}
+                          title="Approve Quotation"
+                        >
+                          <Check />
+                        </IconButton>
+                      )}
+                      {tab.actions.includes("reject") && (
+                        <IconButton
+                          onClick={() => {
+                            const remarks = prompt(
+                              "Enter remarks for rejection:"
+                            );
+                            if (remarks)
+                              handleQuotationAction(item.id, "reject", remarks);
+                          }}
+                          disabled={item.status === "rejected"}
+                          sx={{ color: "#d32f2f" }}
+                          title="Reject Quotation"
+                        >
+                          <Close />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))
@@ -543,7 +598,9 @@ const QuotationsAdmin = () => {
             const lookupItems = data[lookupKey] || [];
             return (
               <FormControl fullWidth key={field} margin="normal" size="small">
-                <InputLabel>
+                <InputLabel
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
                   {tab.displayFields[field.replace("_id", "")] ||
                     field.replace("_id", "").toUpperCase()}
                 </InputLabel>
@@ -557,12 +614,21 @@ const QuotationsAdmin = () => {
                   }
                   required
                   disabled={modalAction === "view"}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                 >
-                  <MenuItem value="" disabled>
+                  <MenuItem
+                    value=""
+                    disabled
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  >
                     Select a user
                   </MenuItem>
                   {lookupItems.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>
+                    <MenuItem
+                      key={item.id}
+                      value={item.id}
+                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                    >
                       {item.first_name || item.username || item.id}
                     </MenuItem>
                   ))}
@@ -587,7 +653,12 @@ const QuotationsAdmin = () => {
               size="small"
               required
               disabled={modalAction === "view"}
-              sx={{ fontFamily: "Helvetica, sans-serif" }}
+              InputLabelProps={{
+                sx: { fontFamily: "Helvetica, sans-serif !important" },
+              }}
+              InputProps={{
+                sx: { fontFamily: "Helvetica, sans-serif !important" },
+              }}
             />
           );
         })}
@@ -596,7 +667,11 @@ const QuotationsAdmin = () => {
             <Divider sx={{ my: 2 }} />
             <Typography
               variant="h6"
-              sx={{ mb: 2, fontFamily: "Helvetica, sans-serif" }}
+              sx={{
+                mb: 2,
+                fontFamily: "Helvetica, sans-serif !important",
+                fontWeight: "bold",
+              }}
             >
               Submitted Instruments
             </Typography>
@@ -604,14 +679,38 @@ const QuotationsAdmin = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: "bold" }}>ID</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                      }}
+                    >
+                      ID
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                      }}
+                    >
                       Product Code
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                      }}
+                    >
                       Instrument
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                      }}
+                    >
+                      Quantity
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -621,19 +720,43 @@ const QuotationsAdmin = () => {
                     );
                     return (
                       <TableRow key={item.id}>
-                        <TableCell>{item.id}</TableCell>
-                        <TableCell>{item.product_code || "N/A"}</TableCell>
-                        <TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {item.id}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {item.product_code || "N/A"}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
                           {instrument?.name || "Unknown Instrument"}
                         </TableCell>
-                        <TableCell>{item.quantity || "N/A"}</TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {item.quantity || "N/A"}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
                 </TableBody>
               </Table>
             ) : (
-              <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
+              <Typography
+                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              >
                 No instruments submitted for this quotation.
               </Typography>
             )}
@@ -644,180 +767,226 @@ const QuotationsAdmin = () => {
   };
 
   return (
-    <ErrorBoundary>
+    <Fade in timeout={800}>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#f5f5f5",
+          bgcolor: "#f8f9fa",
         }}
+        className="quotations-admin-page"
       >
         <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
-            <Typography
-              variant="h5"
-              align="center"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "#000000",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-                mb: 6,
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              Quotations Management
-            </Typography>
-            <Snackbar
-              open={!!success}
-              autoHideDuration={3000}
-              onClose={() => setSuccess("")}
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-              <Alert severity="success" onClose={() => setSuccess("")}>
-                {success}
-              </Alert>
-            </Snackbar>
-            <Snackbar
-              open={!!error}
-              autoHideDuration={6000}
-              onClose={() => setError("")}
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-              <Alert severity="error" onClose={() => setError("")}>
-                {error}
-              </Alert>
-            </Snackbar>
-            {loading ? (
-              <Box sx={{ textAlign: "center", mt: "20vh" }}>
-                <CircularProgress size={48} sx={{ color: "#1976d2" }} />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mt: 2,
-                    fontFamily: "Helvetica, sans-serif",
-                    fontWeight: "bold",
-                    color: "#000000",
-                  }}
+          <ErrorBoundary>
+            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+              <Typography
+                variant="h6"
+                align="center"
+                gutterBottom
+                sx={{
+                  fontWeight: "bold",
+                  color: "#000000",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  textTransform: "uppercase",
+                  mb: 4,
+                  fontSize: { xs: "1.5rem", md: "2rem" },
+                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                Quotations Management
+              </Typography>
+              <Snackbar
+                open={!!success}
+                autoHideDuration={3000}
+                onClose={() => setSuccess("")}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  severity="success"
+                  onClose={() => setSuccess("")}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                 >
-                  Loading data...
-                </Typography>
-              </Box>
-            ) : (
-              <>
-                <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
-                  <TextField
-                    label={`Search by ${tabs[0].searchFields
-                      .map((field) => tabs[0].displayFields[field])
-                      .join(" or ")}`}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ flex: 1, minWidth: "200px" }}
-                    variant="outlined"
-                    size="small"
-                  />
-                  <FormControl sx={{ minWidth: "150px" }} size="small">
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      label="Status"
-                    >
-                      <MenuItem value="">All Statuses</MenuItem>
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="approved">Approved</MenuItem>
-                      <MenuItem value="rejected">Rejected</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={openAddModal}
-                    disabled={!tabs[0].permissions.includes(userRole)}
-                    sx={{
-                      bgcolor: "#1976d2",
-                      "&:hover": { bgcolor: "#115293" },
-                      textTransform: "none",
-                      px: 3,
-                      color: "#fff",
-                    }}
+                  {success}
+                </Alert>
+              </Snackbar>
+              <Snackbar
+                open={!!error}
+                autoHideDuration={6000}
+                onClose={() => setError("")}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  severity="error"
+                  onClose={() => setError("")}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+              {loading ? (
+                <Box sx={{ textAlign: "center", mt: "20vh" }}>
+                  <ToolCard
+                    sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
                   >
-                    Add Quotation
-                  </Button>
-                </Box>
-                <Paper
-                  elevation={3}
-                  sx={{
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    "&:hover": { boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)" },
-                  }}
-                >
-                  {renderTable()}
-                </Paper>
-                <Dialog
-                  open={openModal}
-                  onClose={handleModalClose}
-                  maxWidth="lg"
-                  fullWidth
-                  PaperProps={{
-                    component: "form",
-                    onSubmit: (e) => {
-                      e.preventDefault();
-                      handleSaveQuotation();
-                    },
-                    sx: { borderRadius: 2, p: 2 },
-                  }}
-                >
-                  <DialogTitle
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      fontWeight: "bold",
-                      color: "#1976d2",
-                    }}
-                  >
-                    {modalAction === "add" ? "Add Quotation" : "View Quotation"}
-                  </DialogTitle>
-                  <DialogContent>{renderModalContent()}</DialogContent>
-                  <DialogActions>
-                    <Button
-                      onClick={handleModalClose}
+                    <CircularProgress size={48} sx={{ color: "#d4a028" }} />
+                    <Typography
+                      variant="h6"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif",
-                        textTransform: "none",
-                        color: "#555",
+                        mt: 2,
+                        fontFamily: "Helvetica, sans-serif !important",
+                        fontWeight: "bold",
+                        color: "#000000",
                       }}
                     >
-                      Close
-                    </Button>
-                    {modalAction === "add" && (
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        sx={{
-                          bgcolor: "#1976d2",
-                          "&:hover": { bgcolor: "#115293" },
-                          fontFamily: "Helvetica, sans-serif",
-                          textTransform: "none",
-                          color: "#fff",
+                      Loading data...
+                    </Typography>
+                  </ToolCard>
+                </Box>
+              ) : (
+                <ToolCard>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 2,
+                      mb: 4,
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        flexWrap: "wrap",
+                        flex: 1,
+                        minWidth: "200px",
+                      }}
+                    >
+                      <TextField
+                        label={`Search by ${tabs[0].searchFields
+                          .map((field) => tabs[0].displayFields[field])
+                          .join(" or ")}`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ flex: 1, minWidth: "200px" }}
+                        variant="outlined"
+                        size="small"
+                        InputLabelProps={{
+                          sx: {
+                            fontFamily: "Helvetica, sans-serif !important",
+                          },
                         }}
-                      >
-                        Save
-                      </Button>
-                    )}
-                  </DialogActions>
-                </Dialog>
-              </>
-            )}
-          </Container>
+                        InputProps={{
+                          sx: {
+                            fontFamily: "Helvetica, sans-serif !important",
+                          },
+                        }}
+                      />
+                      <FormControl sx={{ minWidth: "150px" }} size="small">
+                        <InputLabel
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          Status
+                        </InputLabel>
+                        <Select
+                          value={statusFilter}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                          label="Status"
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          <MenuItem
+                            value=""
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            All Statuses
+                          </MenuItem>
+                          <MenuItem
+                            value="pending"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            Pending
+                          </MenuItem>
+                          <MenuItem
+                            value="approved"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            Approved
+                          </MenuItem>
+                          <MenuItem
+                            value="rejected"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            Rejected
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                    <ActionButton
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={openAddModal}
+                      disabled={!tabs[0].permissions.includes(userRole)}
+                    >
+                      Add Quotation
+                    </ActionButton>
+                  </Box>
+                  {renderTable()}
+                </ToolCard>
+              )}
+              <Dialog
+                open={openModal}
+                onClose={handleModalClose}
+                maxWidth="lg"
+                fullWidth
+                PaperProps={{
+                  component: "form",
+                  onSubmit: (e) => {
+                    e.preventDefault();
+                    handleSaveQuotation();
+                  },
+                  sx: { borderRadius: 2, p: 2 },
+                }}
+              >
+                <DialogTitle
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    fontWeight: "bold",
+                    color: "#d4a017",
+                  }}
+                >
+                  {modalAction === "add" ? "Add Quotation" : "View Quotation"}
+                </DialogTitle>
+                <DialogContent>{renderModalContent()}</DialogContent>
+                <DialogActions>
+                  <CancelButton onClick={handleModalClose}>Close</CancelButton>
+                  {modalAction === "add" && (
+                    <ActionButton type="submit" variant="contained">
+                      Save
+                    </ActionButton>
+                  )}
+                </DialogActions>
+              </Dialog>
+            </Container>
+          </ErrorBoundary>
         </main>
       </Box>
-    </ErrorBoundary>
+    </Fade>
   );
 };
 

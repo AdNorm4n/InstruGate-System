@@ -4,13 +4,13 @@ import axios from "axios";
 import {
   Container,
   Typography,
-  Card,
-  CardContent,
   Grid,
   Alert,
   Box,
   CircularProgress,
   Button,
+  Paper,
+  Fade,
 } from "@mui/material";
 import {
   People,
@@ -50,6 +50,38 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
+const ToolCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#d4a017",
+  color: "#fff",
+  padding: theme.spacing(1.5, 4),
+  fontWeight: 600,
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif !important",
+  "&:hover": {
+    backgroundColor: "#b8860b",
+    transform: "scale(1.05)",
+  },
+  transition: "all 0.3s ease",
+  "&.Mui-disabled": {
+    backgroundColor: "#bdbdbd",
+    color: "#ffffff",
+  },
+}));
+
 // ErrorBoundary Component
 class ErrorBoundary extends React.Component {
   state = { hasError: false, error: null };
@@ -62,58 +94,26 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <Box sx={{ textAlign: "center", mt: "20vh" }}>
-          <Alert
-            severity="error"
-            sx={{ maxWidth: "800px", mx: "auto", borderRadius: 2 }}
-          >
-            <Typography
-              variant="h6"
-              fontFamily="Helvetica, sans-serif"
-              fontWeight="bold"
-            >
-              Something went wrong.
-            </Typography>
-            <Typography fontFamily="Helvetica, sans-serif">
-              {this.state.error?.message || "An unexpected error occurred."}
-            </Typography>
-          </Alert>
+          <ToolCard sx={{ maxWidth: 800, mx: "auto", textAlign: "center" }}>
+            <Alert severity="error" sx={{ borderRadius: 2 }}>
+              <Typography
+                variant="h6"
+                fontFamily="Helvetica, sans-serif !important"
+                fontWeight="bold"
+              >
+                Something went wrong.
+              </Typography>
+              <Typography fontFamily="Helvetica, sans-serif !important">
+                {this.state.error?.message || "An unexpected error occurred."}
+              </Typography>
+            </Alert>
+          </ToolCard>
         </Box>
       );
     }
     return this.props.children;
   }
 }
-
-const MetricCard = styled(Card)(({ theme }) => ({
-  borderRadius: 2,
-  backgroundColor: "white",
-  elevation: 3,
-  transition: "all 0.3s ease",
-  "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-  },
-  padding: theme.spacing(3),
-  textAlign: "center",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  height: "100%",
-}));
-
-const NavigationCard = styled(Card)(({ theme }) => ({
-  borderRadius: 2,
-  backgroundColor: "white",
-  elevation: 3,
-  transition: "all 0.3s ease",
-  "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-  },
-  padding: theme.spacing(3),
-  textAlign: "center",
-  height: "100%",
-}));
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -209,7 +209,7 @@ const AdminPanel = () => {
           }
         });
 
-        console.log("Fetched Metrics:", newMetrics); // Debug log
+        console.log("Fetched Metrics:", newMetrics);
         setMetrics(newMetrics);
         if (errors.length > 0) {
           setMetricErrors(errors);
@@ -285,21 +285,25 @@ const AdminPanel = () => {
       legend: {
         position: "top",
         labels: {
-          font: { family: "Helvetica, sans-serif", size: 14 },
+          font: { family: "Helvetica, sans-serif !important", size: 14 },
           color: "#000000",
         },
       },
       title: {
         display: true,
         text: "Quotation Status Distribution",
-        font: { family: "Helvetica, sans-serif", size: 18, weight: "bold" },
+        font: {
+          family: "Helvetica, sans-serif !important",
+          size: 18,
+          weight: "bold",
+        },
         color: "#000000",
         padding: { top: 10, bottom: 20 },
       },
       tooltip: {
         backgroundColor: "#333",
-        titleFont: { family: "Helvetica, sans-serif" },
-        bodyFont: { family: "Helvetica, sans-serif" },
+        titleFont: { family: "Helvetica, sans-serif !important" },
+        bodyFont: { family: "Helvetica, sans-serif !important" },
       },
     },
     scales: {
@@ -308,189 +312,225 @@ const AdminPanel = () => {
         title: {
           display: true,
           text: "Number of Quotations",
-          font: { family: "Helvetica, sans-serif", size: 14 },
+          font: { family: "Helvetica, sans-serif !important", size: 14 },
           color: "#000000",
         },
         grid: { color: "rgba(0, 0, 0, 0.1)" },
-        ticks: { color: "#000000", font: { family: "Helvetica, sans-serif" } },
+        ticks: {
+          color: "#000000",
+          font: { family: "Helvetica, sans-serif !important" },
+        },
       },
       x: {
         title: {
           display: true,
           text: "Status",
-          font: { family: "Helvetica, sans-serif", size: 14 },
+          font: { family: "Helvetica, sans-serif !important", size: 14 },
           color: "#000000",
         },
         grid: { display: false },
-        ticks: { color: "#000000", font: { family: "Helvetica, sans-serif" } },
+        ticks: {
+          color: "#000000",
+          font: { family: "Helvetica, sans-serif !important" },
+        },
       },
     },
   };
 
   return (
-    <ErrorBoundary>
+    <Fade in timeout={800}>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#f5f5f5",
+          bgcolor: "#f8f9fa",
         }}
+        className="admin-panel-page"
       >
         <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
-            <Typography
-              variant="h5"
-              align="center"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "#000000",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-                mb: 6,
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              Admin Dashboard
-            </Typography>
-            {error && (
-              <Alert
-                severity="error"
-                sx={{ mb: 4, mx: "auto", maxWidth: "800px", borderRadius: 2 }}
+          <ErrorBoundary>
+            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+              <Typography
+                variant="h6"
+                align="center"
+                gutterBottom
+                sx={{
+                  fontWeight: "bold",
+                  color: "#000000",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  textTransform: "uppercase",
+                  mb: 4,
+                  fontSize: { xs: "1.5rem", md: "2rem" },
+                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                }}
               >
-                <Typography fontFamily="Helvetica, sans-serif">
-                  {error}
-                </Typography>
-              </Alert>
-            )}
-            {metricErrors.length > 0 && (
-              <Alert
-                severity="warning"
-                sx={{ mb: 4, mx: "auto", maxWidth: "800px", borderRadius: 2 }}
-              >
-                <Typography fontFamily="Helvetica, sans-serif">
-                  Some metrics could not be loaded:
-                </Typography>
-                <ul style={{ margin: 0, paddingLeft: 20 }}>
-                  {metricErrors.map((err, index) => (
-                    <li key={index}>
-                      <Typography fontFamily="Helvetica, sans-serif">
-                        {err}
-                      </Typography>
-                    </li>
-                  ))}
-                </ul>
-              </Alert>
-            )}
-            {loading ? (
-              <Box sx={{ textAlign: "center", mt: "20vh" }}>
-                <CircularProgress size={60} sx={{ color: "#1976d2" }} />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mt: 2,
-                    fontFamily: "Helvetica, sans-serif",
-                    fontWeight: "bold",
-                    color: "#000000",
-                  }}
-                >
-                  Loading Dashboard...
-                </Typography>
-              </Box>
-            ) : (
-              <>
-                {/* Overview Section */}
-                <Box sx={{ mb: 12 }}>
-                  <Grid container spacing={4} justifyContent="center">
-                    {[
-                      {
-                        icon: (
-                          <People sx={{ fontSize: 40, color: "#1976d2" }} />
-                        ),
-                        value: metrics.totalUsers,
-                        label: "Total Users",
-                      },
-                      {
-                        icon: (
-                          <Business sx={{ fontSize: 40, color: "#1976d2" }} />
-                        ),
-                        value: metrics.totalCompanies,
-                        label: "Total Companies",
-                      },
-                      {
-                        icon: (
-                          <Assignment sx={{ fontSize: 40, color: "#1976d2" }} />
-                        ),
-                        value: metrics.totalProjects,
-                        label: "Total Projects",
-                      },
-                      {
-                        icon: (
-                          <RequestQuote
-                            sx={{ fontSize: 40, color: "#1976d2" }}
-                          />
-                        ),
-                        value: metrics.totalQuotations,
-                        label: "Total Quotations",
-                      },
-                      {
-                        icon: <Build sx={{ fontSize: 40, color: "#1976d2" }} />,
-                        value: metrics.totalInstrumentsAvailable,
-                        label: "Instruments Available",
-                      },
-                    ].map((metric, index) => (
-                      <Grid item xs={12} sm={6} md={2.4} key={index}>
-                        <MetricCard elevation={3}>
-                          {metric.icon}
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif",
-                              fontWeight: "bold",
-                              color: "#000000",
-                              mt: 2,
-                            }}
-                          >
-                            {metric.value}
+                Admin Dashboard
+              </Typography>
+              {error && (
+                <ToolCard sx={{ mb: 4, mx: "auto", maxWidth: "800px" }}>
+                  <Alert severity="error" sx={{ borderRadius: 2 }}>
+                    <Typography fontFamily="Helvetica, sans-serif !important">
+                      {error}
+                    </Typography>
+                  </Alert>
+                </ToolCard>
+              )}
+              {metricErrors.length > 0 && (
+                <ToolCard sx={{ mb: 4, mx: "auto", maxWidth: "800px" }}>
+                  <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                    <Typography fontFamily="Helvetica, sans-serif !important">
+                      Some metrics could not be loaded:
+                    </Typography>
+                    <ul style={{ margin: 0, paddingLeft: 20 }}>
+                      {metricErrors.map((err, index) => (
+                        <li key={index}>
+                          <Typography fontFamily="Helvetica, sans-serif !important">
+                            {err}
                           </Typography>
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif",
-                              color: "text.secondary",
-                              mt: 1,
-                            }}
-                          >
-                            {metric.label}
-                          </Typography>
-                        </MetricCard>
-                      </Grid>
-                    ))}
-                  </Grid>
+                        </li>
+                      ))}
+                    </ul>
+                  </Alert>
+                </ToolCard>
+              )}
+              {loading ? (
+                <Box sx={{ textAlign: "center", mt: "20vh" }}>
+                  <ToolCard
+                    sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
+                  >
+                    <CircularProgress size={48} sx={{ color: "#d4a017" }} />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        mt: 2,
+                        fontFamily: "Helvetica, sans-serif !important",
+                        fontWeight: "bold",
+                        color: "#000000",
+                      }}
+                    >
+                      Loading Dashboard...
+                    </Typography>
+                  </ToolCard>
                 </Box>
+              ) : (
+                <>
+                  {/* Overview Section */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#000000",
+                        mb: 4,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Overview
+                    </Typography>
+                    <Grid container spacing={3} justifyContent="center">
+                      {[
+                        {
+                          icon: (
+                            <People sx={{ fontSize: 40, color: "#1976d2" }} />
+                          ),
+                          value: metrics.totalUsers,
+                          label: "Total Users",
+                        },
+                        {
+                          icon: (
+                            <Business sx={{ fontSize: 40, color: "#1976d2" }} />
+                          ),
+                          value: metrics.totalCompanies,
+                          label: "Total Companies",
+                        },
+                        {
+                          icon: (
+                            <Assignment
+                              sx={{ fontSize: 40, color: "#1976d2" }}
+                            />
+                          ),
+                          value: metrics.totalProjects,
+                          label: "Total Projects",
+                        },
+                        {
+                          icon: (
+                            <RequestQuote
+                              sx={{ fontSize: 40, color: "#1976d2" }}
+                            />
+                          ),
+                          value: metrics.totalQuotations,
+                          label: "Total Quotations",
+                        },
+                        {
+                          icon: (
+                            <Build sx={{ fontSize: 40, color: "#1976d2" }} />
+                          ),
+                          value: metrics.totalInstrumentsAvailable,
+                          label: "Instruments Available",
+                        },
+                      ].map((metric, index) => (
+                        <Grid item xs={12} sm={6} md={2.4} key={index}>
+                          <ToolCard>
+                            {metric.icon}
+                            <Typography
+                              variant="h4"
+                              sx={{
+                                fontFamily: "Helvetica, sans-serif !important",
+                                fontWeight: "bold",
+                                color: "#000000",
+                                mt: 2,
+                              }}
+                            >
+                              {metric.value}
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                fontFamily: "Helvetica, sans-serif !important",
+                                color: "text.secondary",
+                                mt: 1,
+                              }}
+                            >
+                              {metric.label}
+                            </Typography>
+                          </ToolCard>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
 
-                {/* Management Tools Section */}
-                <Box sx={{ mb: 12 }}>
-                  <Grid container spacing={4} justifyContent="center">
-                    {sections.map((section) => (
-                      <Grid item xs={12} sm={6} md={4} key={section.title}>
-                        <NavigationCard
-                          elevation={3}
-                          sx={{
-                            bgcolor: section.disabled ? "#e0e0e0" : "white",
-                          }}
-                        >
-                          <CardContent sx={{ p: 3, flex: 1 }}>
+                  {/* Management Tools Section */}
+                  <Box sx={{ mb: 6 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#000000",
+                        mb: 4,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Management Tools
+                    </Typography>
+                    <Grid container spacing={3} justifyContent="center">
+                      {sections.map((section) => (
+                        <Grid item xs={12} sm={6} md={4} key={section.title}>
+                          <ToolCard
+                            sx={{
+                              bgcolor: section.disabled ? "#e0e0e0" : "white",
+                            }}
+                          >
                             {section.icon}
                             <Typography
                               variant="h6"
                               sx={{
                                 fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Helvetica, sans-serif !important",
                                 color: section.disabled
                                   ? "text.disabled"
                                   : "#000000",
@@ -503,7 +543,7 @@ const AdminPanel = () => {
                             <Typography
                               variant="body2"
                               sx={{
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Helvetica, sans-serif !important",
                                 color: section.disabled
                                   ? "text.disabled"
                                   : "text.secondary",
@@ -513,63 +553,47 @@ const AdminPanel = () => {
                             >
                               {section.description}
                             </Typography>
-                            <Button
+                            <ActionButton
                               variant="contained"
-                              color="primary"
                               endIcon={<ArrowForward />}
                               onClick={() => handleNavigation(section.path)}
                               disabled={section.disabled}
-                              sx={{
-                                bgcolor: section.disabled
-                                  ? "#bdbdbd"
-                                  : "#1976d2",
-                                "&:hover": {
-                                  bgcolor: section.disabled
-                                    ? "#bdbdbd"
-                                    : "#115293",
-                                },
-                                textTransform: "uppercase",
-                                fontFamily: "Helvetica, sans-serif",
-                                fontWeight: "bold",
-                                px: 4,
-                                py: 1,
-                                borderRadius: 2,
-                              }}
                             >
                               Go to {section.title.split(" ")[1]}
-                            </Button>
-                          </CardContent>
-                        </NavigationCard>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
+                            </ActionButton>
+                          </ToolCard>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
 
-                {/* Chart Section */}
-                <Box>
-                  <Card
-                    elevation={3}
-                    sx={{
-                      borderRadius: 2,
-                      bgcolor: "white",
-                      p: 3,
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                      },
-                    }}
-                  >
-                    <Box sx={{ height: 400 }}>
-                      <Bar data={chartData} options={chartOptions} />
-                    </Box>
-                  </Card>
-                </Box>
-              </>
-            )}
-          </Container>
+                  {/* Chart Section */}
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#000000",
+                        mb: 4,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Quotation Status
+                    </Typography>
+                    <ToolCard>
+                      <Box sx={{ height: 400 }}>
+                        <Bar data={chartData} options={chartOptions} />
+                      </Box>
+                    </ToolCard>
+                  </Box>
+                </>
+              )}
+            </Container>
+          </ErrorBoundary>
         </main>
       </Box>
-    </ErrorBoundary>
+    </Fade>
   );
 };
 

@@ -1364,7 +1364,7 @@ const InstrumentsAdmin = () => {
                 bgcolor: "#f5f5f5",
               }}
             >
-              ACTIONS
+              Actions
             </TableCell>
           </TableRow>
         </TableHead>

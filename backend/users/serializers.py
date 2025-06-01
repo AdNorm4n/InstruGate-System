@@ -1,29 +1,53 @@
 from rest_framework import serializers
 from .models import CustomUser
-import uuid
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ["id", "username", "email", "password", "company", "first_name", "last_name", "role"]
         extra_kwargs = {
-            "password": {"write_only": True, "required": False, "allow_blank": True},
-            "role": {"read_only": True},  # role = "client" by default
-            "company": {"required": True, "allow_blank": False},  # Enforce non-empty company
+            "password": {"write_only": True, "required": True, "allow_blank": False},
+            "company": {"required": True, "allow_blank": False},
         }
 
     def create(self, validated_data):
-        validated_data["role"] = "client"  # enforce new signups as clients
-        password = validated_data.pop("password", str(uuid.uuid4()))  # Generate random password if none provided
-        user = CustomUser.objects.create_user(**validated_data, password=password)
+        validated_data["role"] = "client"
+        validated_data.setdefault("company", "Unknown")  # Ensure default
+        user = CustomUser.objects.create_user(**validated_data)
         return user
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        # Ensure company is a string, default to "Unknown" if null
         ret["company"] = instance.company if instance.company else "Unknown"
-        print("CustomUserSerializer: Serialized data:", ret)  # Debug log
+        print("CustomUserSerializer: Serialized data:", ret)
         return ret
+
+class AdminUserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, allow_blank=False)
+    confirm_password = serializers.CharField(write_only=True, required=True, allow_blank=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ["id", "username", "email", "password", "confirm_password", "company", "first_name", "last_name", "role"]
+        extra_kwargs = {
+            "username": {"required": True, "allow_blank": False},
+            "email": {"required": True, "allow_blank": False},
+            "company": {"required": True, "allow_blank": False},
+            "role": {"required": True},
+        }
+
+    def validate(self, data):
+        if data.get("password") != data.get("confirm_password"):
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        if len(data.get("password", "")) < 8:
+            raise serializers.ValidationError({"password": "Password must be at least 8 characters long."})
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop("confirm_password")
+        validated_data.setdefault("company", "Unknown")  # Ensure default
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
 
 class CustomUserUpdateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -80,7 +104,7 @@ class CustomUserUpdateSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        print("CustomUserUpdateSerializer: Updated user:", instance.__dict__)  # Debug log
+        print("CustomUserUpdateSerializer: Updated user:", instance.__dict__)
         return instance
 
 class AdminUserUpdateSerializer(serializers.ModelSerializer):
@@ -131,5 +155,5 @@ class AdminUserUpdateSerializer(serializers.ModelSerializer):
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        print("AdminUserUpdateSerializer: Updated user:", instance.__dict__)  # Debug log
+        print("AdminUserUpdateSerializer: Updated user:", instance.__dict__)
         return instance
