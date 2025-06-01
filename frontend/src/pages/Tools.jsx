@@ -563,7 +563,7 @@ function Tools() {
         <main style={{ flex: 1 }}>
           <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
             <Typography
-              variant="h4"
+              variant="h6"
               align="center"
               gutterBottom
               sx={{
@@ -575,7 +575,7 @@ function Tools() {
                 fontSize: { xs: "1.5rem", md: "2rem" },
               }}
             >
-              Instrumentation Engineering Tools
+              Instrumentation Measurement Tools
             </Typography>
             <Typography
               variant="body1"

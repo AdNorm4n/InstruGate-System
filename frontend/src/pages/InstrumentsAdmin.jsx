@@ -28,11 +28,13 @@ import {
   Tabs,
   Tab,
   Divider,
+  Fade,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
+import "../styles/InstrumentsAdmin.css";
 
 const api = axios.create({
   baseURL: "http://127.0.0.1:8000",
@@ -40,6 +42,43 @@ const api = axios.create({
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
+}));
+
+const ToolCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#d4a017",
+  color: "#fff",
+  padding: theme.spacing(1.5, 4),
+  fontWeight: 600,
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif !important",
+  "&:hover": {
+    backgroundColor: "#b8860b",
+    transform: "scale(1.05)",
+  },
+  transition: "all 0.3s ease",
+}));
+
+const CancelButton = styled(Button)(({ theme }) => ({
+  color: "#d6393a",
+  fontFamily: "Helvetica, sans-serif !important",
+  textTransform: "none",
+  "&:hover": {
+    color: "#b71c1c",
+  },
 }));
 
 const ENTITY_TYPES = {
@@ -80,6 +119,7 @@ const InstrumentsAdmin = () => {
   const [filterInstrumentId, setFilterInstrumentId] = useState("");
   const [filterCategoryId, setFilterCategoryId] = useState("");
   const [addonOptions, setAddonOptions] = useState([]);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const tabs = [
     {
@@ -266,6 +306,10 @@ const InstrumentsAdmin = () => {
       return multiplier * fieldA.toString().localeCompare(fieldB.toString());
     });
 
+    filtered = Array.from(
+      new Map(filtered.map((item) => [item.id, item])).values()
+    );
+
     console.log(`Filtered ${tab.name}:`, filtered);
 
     setFilteredData((prev) => ({
@@ -331,11 +375,12 @@ const InstrumentsAdmin = () => {
       return;
     }
     setModalAction("add");
-    setModalData({});
+    setModalData({ is_available: true });
     setModalType(tabs[activeTab].name);
     setFieldOptions([]);
     setAddonOptions([]);
     setNewOption({ label: "", code: "" });
+    setImagePreview(null);
     setOpenModal(true);
   };
 
@@ -347,38 +392,29 @@ const InstrumentsAdmin = () => {
     setModalAction("edit");
     setModalData({ ...item });
     setModalType(tabs[activeTab].name);
+    setImagePreview(item.image || null);
     try {
       const access = localStorage.getItem("access");
       const headers = { Authorization: `Bearer ${access}` };
 
       if (tabs[activeTab].name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
-        console.log("Fetching field options for field_id:", item.id);
         const response = await api.get(`/api/admin/field-options/`, {
           headers,
           params: { field_id: item.id },
         });
-        console.log("Field Options Response:", response.data);
         const options = Array.isArray(response.data)
           ? response.data.filter((opt) => opt.field_id === item.id)
           : [];
         setFieldOptions(options);
-        if (options.length === 0) {
-          console.warn("No field options found for field_id:", item.id);
-        }
       } else if (tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) {
-        console.log("Fetching addons for addon_type_id:", item.id);
         const response = await api.get(`/api/admin/addons/`, {
           headers,
           params: { addon_type_id: item.id },
         });
-        console.log("AddOns Response:", response.data);
         const addons = Array.isArray(response.data)
           ? response.data.filter((addon) => addon.addon_type_id === item.id)
           : [];
         setAddonOptions(addons);
-        if (addons.length === 0) {
-          console.warn("No addons found for addon_type_id:", item.id);
-        }
       }
     } catch (err) {
       console.error(
@@ -402,7 +438,23 @@ const InstrumentsAdmin = () => {
     setFieldOptions([]);
     setAddonOptions([]);
     setNewOption({ label: "", code: "" });
+    setImagePreview(null);
     setError("");
+  };
+
+  const validateImage = (file) => {
+    if (!file) return true;
+    const validTypes = ["image/jpeg", "image/png"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (!validTypes.includes(file.type)) {
+      setError("Image must be a JPEG or PNG file.");
+      return false;
+    }
+    if (file.size > maxSize) {
+      setError("Image size must be less than 5MB.");
+      return false;
+    }
+    return true;
   };
 
   const handleSave = async () => {
@@ -414,6 +466,10 @@ const InstrumentsAdmin = () => {
     const tab = tabs.find((t) => t.name === modalType);
     const requiredFields = tab.writableFields.filter(
       (f) =>
+        f !== "description" &&
+        f !== "specifications" &&
+        f !== "image" &&
+        f !== "is_available" &&
         f !== "order" &&
         f !== "parent_field_id" &&
         f !== "trigger_value" &&
@@ -441,53 +497,93 @@ const InstrumentsAdmin = () => {
         modalAction === "edit"
           ? `${tab.endpoint}${modalData.id}/`
           : tab.endpoint;
-      const method = modalAction === "edit" ? "patch" : "post";
+      const method = modalAction === "add" ? "post" : "patch";
       const headers = { Authorization: `Bearer ${access}` };
-      let payload = {
-        name: modalData.name || "",
-      };
-      if (tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
-        payload = {
-          instrument_id: modalData.instrument_id || null,
-          name: modalData.name || "",
-          order: modalData.order ? parseInt(modalData.order, 10) : null,
-          parent_field_id: modalData.parent_field_id || null,
-          trigger_value: modalData.trigger_value || "",
-        };
-      } else if (tab.name === ENTITY_TYPES.ADDON_TYPES) {
-        payload.instrument_ids = modalData.instrument_ids || [];
-      } else if (tab.name === ENTITY_TYPES.INSTRUMENTS) {
-        payload = {
-          name: modalData.name || "",
-          type_id: modalData.type_id || null,
-          description: modalData.description || "",
-          specifications: modalData.specifications || "",
-          image: modalData.image || null,
-          is_available: modalData.is_available || false,
-        };
-      }
-      console.log(`${modalType} Payload:`, payload);
-      const response = await api({
-        method,
-        url: endpoint,
-        data: payload,
-        headers,
-      });
-      console.log("Save Response:", response.data);
 
-      setSuccess(
-        `${modalType} ${
-          modalAction === "add" ? "created" : "updated"
-        } successfully!`
-      );
+      if (tab.name === ENTITY_TYPES.INSTRUMENTS) {
+        const formData = new FormData();
+        formData.append("name", modalData.name || "");
+        if (modalData.type_id) formData.append("type_id", modalData.type_id);
+        formData.append("description", modalData.description || "");
+        formData.append("specifications", modalData.specifications || "");
+        formData.append(
+          "is_available",
+          modalData.is_available ? "true" : "false"
+        );
+
+        if (modalData.image instanceof File) {
+          if (!validateImage(modalData.image)) return;
+          formData.append("image", modalData.image);
+        } else if (modalAction === "edit" && modalData.image === "") {
+          formData.append("image", "");
+        }
+
+        for (let [key, value] of formData.entries()) {
+          console.log(`FormData Entry: ${key}=${value}`);
+        }
+
+        const response = await api({
+          method,
+          url: endpoint,
+          data: formData,
+          headers,
+        });
+        console.log("Save Response:", response.data);
+        setSuccess(
+          `${modalType} ${
+            modalAction === "add" ? "added" : "updated"
+          } successfully!`
+        );
+      } else {
+        let payload = {};
+        if (tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
+          if (!modalData.instrument_id) {
+            setError("Instrument is required.");
+            return;
+          }
+          payload = {
+            instrument_id: parseInt(modalData.instrument_id, 10),
+            name: modalData.name || "",
+            order: modalData.order ? parseInt(modalData.order, 10) : null,
+            parent_field_id: modalData.parent_field_id
+              ? parseInt(modalData.parent_field_id, 10)
+              : null,
+            trigger_value: modalData.trigger_value || "",
+          };
+        } else if (tab.name === ENTITY_TYPES.ADDON_TYPES) {
+          payload = {
+            name: modalData.name || "",
+            instrument_ids: Array.isArray(modalData.instrument_ids)
+              ? modalData.instrument_ids.map((id) => parseInt(id, 10))
+              : [],
+          };
+        }
+        console.log(`${modalType} Payload:`, payload);
+        headers["Content-Type"] = "application/json";
+        const response = await api({
+          method,
+          url: endpoint,
+          data: payload,
+          headers,
+        });
+        console.log("Save Response:", response.data);
+        setSuccess(
+          `${modalType} ${
+            modalAction === "add" ? "added" : "updated"
+          } successfully!`
+        );
+      }
       fetchData();
       handleModalClose();
     } catch (err) {
-      console.error("Error Response:", err.response?.data);
+      console.error("Error Response:", err.response?.data || err);
       const errorMessage =
+        err.response?.data?.name?.[0] ||
+        err.response?.data?.type_id?.[0] ||
         err.response?.data?.instrument_id?.[0] ||
+        err.response?.data?.image?.[0] ||
         err.response?.data?.detail ||
-        Object.values(err.response?.data)?.[0] ||
+        Object.values(err.response?.data || {})[0]?.[0] ||
         err.message;
       setError(`Failed to save ${modalType}: ${errorMessage}`);
     }
@@ -495,17 +591,17 @@ const InstrumentsAdmin = () => {
 
   const handleAddFieldOption = async () => {
     if (!newOption.label || !newOption.code) {
-      setError("Label and Code are required for field options.");
+      setError("Label and code are required for field options.");
       return;
     }
     try {
       const access = localStorage.getItem("access");
+      const headers = { Authorization: `Bearer ${access}` };
       const payload = {
         field_id: modalData.id,
         label: newOption.label,
         code: newOption.code,
       };
-      const headers = { Authorization: `Bearer ${access}` };
       const response = await api.post("/api/admin/field-options/", payload, {
         headers,
       });
@@ -513,11 +609,11 @@ const InstrumentsAdmin = () => {
       setNewOption({ label: "", code: "" });
       setSuccess("Field option added successfully!");
     } catch (err) {
-      console.error("Error Adding Field Option:", err.response?.data);
+      console.error("Error Adding FieldOption:", err.response?.data);
       setError(
         `Failed to add field option: ${
           err.response?.data?.detail ||
-          Object.values(err.response?.data)?.[0] ||
+          Object.values(err.response?.data || {})[0]?.[0] ||
           err.message
         }`
       );
@@ -526,17 +622,17 @@ const InstrumentsAdmin = () => {
 
   const handleAddAddon = async () => {
     if (!newOption.label || !newOption.code) {
-      setError("Label and Code are required for addons.");
+      setError("Label and code are required for addons.");
       return;
     }
     try {
       const access = localStorage.getItem("access");
+      const headers = { Authorization: `Bearer ${access}` };
       const payload = {
         addon_type_id: modalData.id,
         label: newOption.label,
         code: newOption.code,
       };
-      const headers = { Authorization: `Bearer ${access}` };
       const response = await api.post("/api/admin/addons/", payload, {
         headers,
       });
@@ -544,11 +640,11 @@ const InstrumentsAdmin = () => {
       setNewOption({ label: "", code: "" });
       setSuccess("AddOn added successfully!");
     } catch (err) {
-      console.error("Error Adding AddOn:", err.response?.data);
+      console.error("Error Adding Addon:", err.response?.data);
       setError(
         `Failed to add addon: ${
           err.response?.data?.detail ||
-          Object.values(err.response?.data)?.[0] ||
+          Object.values(err.response?.data || {})[0]?.[0] ||
           err.message
         }`
       );
@@ -556,9 +652,8 @@ const InstrumentsAdmin = () => {
   };
 
   const handleDeleteFieldOption = async (optionId) => {
-    if (!window.confirm("Are you sure you want to delete this field option?")) {
+    if (!window.confirm("Are you sure you want to delete this field option?"))
       return;
-    }
     try {
       const access = localStorage.getItem("access");
       await api.delete(`/api/admin/field-options/${optionId}/`, {
@@ -576,16 +671,14 @@ const InstrumentsAdmin = () => {
   };
 
   const handleDeleteAddon = async (addonId) => {
-    if (!window.confirm("Are you sure you want to delete this addon?")) {
-      return;
-    }
+    if (!window.confirm("Are you sure you want to delete this addon?")) return;
     try {
       const access = localStorage.getItem("access");
       await api.delete(`/api/admin/addons/${addonId}/`, {
         headers: { Authorization: `Bearer ${access}` },
       });
       setAddonOptions(addonOptions.filter((opt) => opt.id !== addonId));
-      setSuccess("AddOn deleted successfully!");
+      setSuccess("Addon deleted successfully!");
     } catch (err) {
       setError(
         `Failed to delete addon: ${err.response?.data?.detail || err.message}`
@@ -604,9 +697,8 @@ const InstrumentsAdmin = () => {
           .toLowerCase()
           .replace("s", "")}?`
       )
-    ) {
+    )
       return;
-    }
     try {
       const access = localStorage.getItem("access");
       const tab = tabs[activeTab];
@@ -626,137 +718,233 @@ const InstrumentsAdmin = () => {
 
   const renderModalContent = () => {
     const tab = tabs.find((t) => t.name === modalType);
-    if (!tab)
+    if (!tab) {
       return <Alert severity="error">Invalid entity type: {modalType}</Alert>;
+    }
 
     if (tab.name === ENTITY_TYPES.INSTRUMENTS) {
       return (
-        <>
-          {tab.writableFields.map((field) => {
-            if (field === "image") {
-              return (
-                <Box key={field} sx={{ mt: 2 }}>
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    IMAGE
-                  </Typography>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setModalData({
-                        ...modalData,
-                        image: e.target.files[0] || null,
-                      })
-                    }
-                    style={{ width: "100%" }}
-                  />
-                  {modalData.image && typeof modalData.image === "string" && (
-                    <Box sx={{ mt: 1 }}>
-                      <img
-                        src={modalData.image}
-                        alt="Current"
-                        style={{ maxWidth: "100px", maxHeight: "100px" }}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              );
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "Helvetica, sans-serif !important",
+              mb: 2,
+              fontWeight: "bold",
+            }}
+          >
+            Basic Info
+          </Typography>
+          <TextField
+            label="NAME"
+            value={modalData.name || ""}
+            onChange={(e) =>
+              setModalData({ ...modalData, name: e.target.value })
             }
-            if (tab.lookups && tab.lookups[field]) {
-              const lookupKey = tab.lookups[field];
-              const lookupItems = data[lookupKey] || [];
-              return (
-                <FormControl fullWidth key={field} margin="normal" size="small">
-                  <InputLabel>
-                    {field.replace("_id", "").replace("_", " ").toUpperCase()}
-                  </InputLabel>
-                  <Select
-                    value={modalData[field] || ""}
-                    onChange={(e) =>
-                      setModalData({
-                        ...modalData,
-                        [field]: parseInt(e.target.value, 10) || null,
-                      })
-                    }
-                    required
-                  >
-                    <MenuItem value="" disabled>
-                      Select an option
-                    </MenuItem>
-                    {lookupItems.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.name || item.label || item.id}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              );
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            size="small"
+            required
+            InputLabelProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+            InputProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+          />
+          <FormControl fullWidth margin="normal" size="small">
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif !important" }}>
+              TYPE
+            </InputLabel>
+            <Select
+              value={modalData.type_id || ""}
+              onChange={(e) =>
+                setModalData({
+                  ...modalData,
+                  type_id: parseInt(e.target.value, 10) || null,
+                })
+              }
+              required
+              sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+            >
+              <MenuItem
+                value=""
+                disabled
+                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              >
+                Select a type
+              </MenuItem>
+              {data.types.map((item) => (
+                <MenuItem
+                  key={item.id}
+                  value={item.id}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" size="small">
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif !important" }}>
+              Is Available
+            </InputLabel>
+            <Select
+              value={modalData.is_available ? "true" : "false"}
+              onChange={(e) =>
+                setModalData({
+                  ...modalData,
+                  is_available: e.target.value === "true",
+                })
+              }
+              sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+            >
+              <MenuItem
+                value="true"
+                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              >
+                Yes
+              </MenuItem>
+              <MenuItem
+                value="false"
+                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              >
+                No
+              </MenuItem>
+            </Select>
+          </FormControl>
+
+          <Divider sx={{ my: 2 }} />
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "Helvetica, sans-serif !important",
+              mb: 2,
+              fontWeight: "bold",
+            }}
+          >
+            Instrument Description
+          </Typography>
+          <TextField
+            label="DESCRIPTION"
+            value={modalData.description || ""}
+            onChange={(e) =>
+              setModalData({ ...modalData, description: e.target.value })
             }
-            if (field === "is_available") {
-              return (
-                <FormControl fullWidth key={field} margin="normal" size="small">
-                  <InputLabel>Is Available</InputLabel>
-                  <Select
-                    value={modalData[field] ? "true" : "false"}
-                    onChange={(e) =>
-                      setModalData({
-                        ...modalData,
-                        [field]: e.target.value === "true",
-                      })
-                    }
-                    required
-                  >
-                    <MenuItem value="true">Yes</MenuItem>
-                    <MenuItem value="false">No</MenuItem>
-                  </Select>
-                </FormControl>
-              );
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            size="small"
+            multiline
+            rows={4}
+            InputLabelProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+            InputProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+          />
+          <TextField
+            label="SPECIFICATIONS"
+            value={modalData.specifications || ""}
+            onChange={(e) =>
+              setModalData({ ...modalData, specifications: e.target.value })
             }
-            return (
-              <TextField
-                key={field}
-                label={field.replace("_id", "").replace("_", " ").toUpperCase()}
-                value={modalData[field] || ""}
-                onChange={(e) =>
-                  setModalData({ ...modalData, [field]: e.target.value })
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            size="small"
+            multiline
+            rows={4}
+            InputLabelProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+            InputProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+          />
+
+          <Divider sx={{ my: 2 }} />
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "Helvetica, sans-serif !important",
+              mb: 2,
+              fontWeight: "bold",
+            }}
+          >
+            Media
+          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "0.875rem",
+                mb: 1,
+                fontFamily: "Helvetica, sans-serif !important",
+              }}
+            >
+              IMAGE
+            </Typography>
+            <input
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file && validateImage(file)) {
+                  setModalData({ ...modalData, image: file });
+                  setImagePreview(URL.createObjectURL(file));
                 }
-                fullWidth
-                margin="normal"
-                type={
-                  field.includes("order") || field.includes("quantity")
-                    ? "number"
-                    : "text"
-                }
-                variant="outlined"
-                size="small"
-                multiline={
-                  field === "description" || field === "specifications"
-                }
-                rows={
-                  field === "description" || field === "specifications" ? 4 : 1
-                }
-                required={
-                  field !== "description" &&
-                  field !== "specifications" &&
-                  field !== "is_available"
-                }
-              />
-            );
-          })}
-        </>
+              }}
+              style={{ width: "100%", marginBottom: "10px" }}
+            />
+            {(imagePreview ||
+              (modalData.image && typeof modalData.image === "string")) && (
+              <Box sx={{ mt: 2 }}>
+                <img
+                  src={imagePreview || modalData.image}
+                  alt="Preview"
+                  style={{
+                    maxWidth: "200px",
+                    maxHeight: "200px",
+                    objectFit: "contain",
+                    borderRadius: "8px",
+                  }}
+                />
+                <ActionButton
+                  size="small"
+                  onClick={() => {
+                    setModalData({ ...modalData, image: "" });
+                    setImagePreview(null);
+                  }}
+                  sx={{
+                    mt: 1,
+                    bgcolor: "#d6393a",
+                    "&:hover": { bgcolor: "#b71c1c" },
+                  }}
+                >
+                  Remove Image
+                </ActionButton>
+              </Box>
+            )}
+          </Box>
+        </Box>
       );
     }
 
     if (tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
       return (
-        <>
+        <Box>
           {tab.writableFields.map((field) => {
             if (tab.lookups && tab.lookups[field]) {
               const lookupKey = tab.lookups[field];
               const lookupItems = data[lookupKey] || [];
               return (
-                <FormControl fullWidth key={field} margin="normal" size="small">
-                  <InputLabel>
+                <FormControl fullWidth margin="normal" size="small" key={field}>
+                  <InputLabel
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  >
                     {field.replace("_id", "").replace("_", " ").toUpperCase()}
                   </InputLabel>
                   <Select
@@ -768,13 +956,21 @@ const InstrumentsAdmin = () => {
                       })
                     }
                     required={field === "instrument_id"}
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                   >
-                    <MenuItem value="" disabled>
+                    <MenuItem
+                      value=""
+                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                    >
                       Select an option
                     </MenuItem>
                     {lookupItems.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
-                        {item.name || item.label || item.id}
+                      <MenuItem
+                        key={item.id}
+                        value={item.id}
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        {item.name || item.id}
                       </MenuItem>
                     ))}
                   </Select>
@@ -795,35 +991,82 @@ const InstrumentsAdmin = () => {
                 variant="outlined"
                 size="small"
                 required={field === "name"}
+                InputLabelProps={{
+                  sx: { fontFamily: "Helvetica, sans-serif !important" },
+                }}
+                InputProps={{
+                  sx: { fontFamily: "Helvetica, sans-serif !important" },
+                }}
               />
             );
           })}
           {modalAction === "edit" && (
             <>
               <Divider sx={{ my: 2 }} />
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  mb: 2,
+                  fontWeight: "bold",
+                }}
+              >
                 Field Options
               </Typography>
               {fieldOptions.length > 0 ? (
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>Label</TableCell>
-                      <TableCell>Code</TableCell>
-                      <TableCell>Actions</TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        ID
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        Label
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        Code
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        Actions
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {fieldOptions.map((option) => (
                       <TableRow key={option.id}>
-                        <TableCell>{option.id}</TableCell>
-                        <TableCell>{option.label}</TableCell>
-                        <TableCell>{option.code}</TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {option.id}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {option.label}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {option.code}
+                        </TableCell>
                         <TableCell>
                           <IconButton
                             onClick={() => handleDeleteFieldOption(option.id)}
-                            sx={{ color: "#d32f2f" }}
+                            sx={{ color: "#d6393a" }}
                           >
                             <Delete />
                           </IconButton>
@@ -833,7 +1076,11 @@ const InstrumentsAdmin = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <Typography>No field options available.</Typography>
+                <Typography
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  No field options available.
+                </Typography>
               )}
               <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
                 <TextField
@@ -844,6 +1091,13 @@ const InstrumentsAdmin = () => {
                   }
                   size="small"
                   variant="outlined"
+                  sx={{ flex: 1 }}
+                  InputLabelProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                  InputProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
                 />
                 <TextField
                   label="Option Code"
@@ -853,30 +1107,40 @@ const InstrumentsAdmin = () => {
                   }
                   size="small"
                   variant="outlined"
+                  sx={{ flex: 1 }}
+                  InputLabelProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                  InputProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
                 />
-                <Button
+                <ActionButton
                   variant="contained"
                   onClick={handleAddFieldOption}
-                  sx={{ textTransform: "none" }}
                 >
                   Add Option
-                </Button>
+                </ActionButton>
               </Box>
             </>
           )}
-        </>
+        </Box>
       );
     }
 
     if (tab.name === ENTITY_TYPES.ADDON_TYPES) {
       return (
-        <>
+        <Box>
           {tab.writableFields.map((field) => {
             if (field === "instrument_ids") {
               const lookupItems = data.instruments || [];
               return (
-                <FormControl fullWidth key={field} margin="normal" size="small">
-                  <InputLabel>INSTRUMENTS</InputLabel>
+                <FormControl fullWidth margin="normal" size="small" key={field}>
+                  <InputLabel
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  >
+                    INSTRUMENTS
+                  </InputLabel>
                   <Select
                     multiple
                     value={modalData.instrument_ids || []}
@@ -896,9 +1160,14 @@ const InstrumentsAdmin = () => {
                         .filter(Boolean)
                         .join(", ")
                     }
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                   >
                     {lookupItems.map((item) => (
-                      <MenuItem key={item.id} value={item.id}>
+                      <MenuItem
+                        key={item.id}
+                        value={item.id}
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
                         {item.name || item.id}
                       </MenuItem>
                     ))}
@@ -922,35 +1191,82 @@ const InstrumentsAdmin = () => {
                 variant="outlined"
                 size="small"
                 required={field === "name"}
+                InputLabelProps={{
+                  sx: { fontFamily: "Helvetica, sans-serif !important" },
+                }}
+                InputProps={{
+                  sx: { fontFamily: "Helvetica, sans-serif !important" },
+                }}
               />
             );
           })}
           {modalAction === "edit" && (
             <>
               <Divider sx={{ my: 2 }} />
-              <Typography variant="h6" sx={{ mb: 2 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  mb: 2,
+                  fontWeight: "bold",
+                }}
+              >
                 AddOns
               </Typography>
               {addonOptions.length > 0 ? (
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>Label</TableCell>
-                      <TableCell>Code</TableCell>
-                      <TableCell>Actions</TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        ID
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        Label
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        Code
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
+                        Actions
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {addonOptions.map((addon) => (
                       <TableRow key={addon.id}>
-                        <TableCell>{addon.id}</TableCell>
-                        <TableCell>{addon.label}</TableCell>
-                        <TableCell>{addon.code}</TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {addon.id}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {addon.label}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {addon.code}
+                        </TableCell>
                         <TableCell>
                           <IconButton
                             onClick={() => handleDeleteAddon(addon.id)}
-                            sx={{ color: "#d32f2f" }}
+                            sx={{ color: "#d6393a" }}
                           >
                             <Delete />
                           </IconButton>
@@ -960,7 +1276,11 @@ const InstrumentsAdmin = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <Typography>No addons available.</Typography>
+                <Typography
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  No addons available.
+                </Typography>
               )}
               <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
                 <TextField
@@ -971,6 +1291,13 @@ const InstrumentsAdmin = () => {
                   }
                   size="small"
                   variant="outlined"
+                  sx={{ flex: 1 }}
+                  InputLabelProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                  InputProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
                 />
                 <TextField
                   label="AddOn Code"
@@ -980,18 +1307,21 @@ const InstrumentsAdmin = () => {
                   }
                   size="small"
                   variant="outlined"
+                  sx={{ flex: 1 }}
+                  InputLabelProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                  InputProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
                 />
-                <Button
-                  variant="contained"
-                  onClick={handleAddAddon}
-                  sx={{ textTransform: "none" }}
-                >
+                <ActionButton variant="contained" onClick={handleAddAddon}>
                   Add AddOn
-                </Button>
+                </ActionButton>
               </Box>
             </>
           )}
-        </>
+        </Box>
       );
     }
 
@@ -1012,7 +1342,7 @@ const InstrumentsAdmin = () => {
                 key={field}
                 sx={{
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
                   bgcolor: "#f5f5f5",
                 }}
               >
@@ -1030,7 +1360,7 @@ const InstrumentsAdmin = () => {
             <TableCell
               sx={{
                 fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Helvetica, sans-serif !important",
                 bgcolor: "#f5f5f5",
               }}
             >
@@ -1041,78 +1371,80 @@ const InstrumentsAdmin = () => {
         <TableBody>
           {items.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={tab.fields.length + 1} align="center">
-                <Typography sx={{ fontFamily: "Helvetica, sans-serif", py: 2 }}>
+              <TableCell
+                colSpan={tab.fields.length + 1}
+                align="center"
+                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              >
+                <Typography sx={{ py: 2 }}>
                   No {tab.name.toLowerCase()} found.
                 </Typography>
               </TableCell>
             </TableRow>
           ) : (
-            items.map((item) => {
-              console.log("Table Item:", item);
-              return item && item.id ? (
-                <TableRow
-                  key={item.id}
-                  sx={{
-                    "&:hover": { bgcolor: "#e3f2fd" },
-                    transition: "background-color 0.2s",
-                  }}
-                >
-                  {tab.fields.map((field) => (
-                    <TableCell
-                      key={field}
-                      sx={{
-                        fontFamily: "Helvetica, sans-serif",
-                        ...(field === "is_available" &&
-                          tab.name === ENTITY_TYPES.INSTRUMENTS && {
-                            color: item[field] ? "#388e3c" : "#d32f2f",
-                            fontWeight: "bold",
-                          }),
-                      }}
-                    >
-                      {field === "image" ? (
-                        <img
-                          src={item[field] || placeholderImage}
-                          alt={item.name || "Instrument"}
-                          style={{
-                            width: "50px",
-                            height: "50px",
-                            objectFit: "cover",
-                          }}
-                          onError={(e) => (e.target.src = placeholderImage)}
-                        />
-                      ) : field.includes(".") || field === "instruments" ? (
-                        getField(item, field) || "N/A"
-                      ) : field === "is_available" ? (
-                        item[field] ? (
-                          "Yes"
-                        ) : (
-                          "No"
-                        )
+            items.map((item) => (
+              <TableRow
+                key={item.id}
+                sx={{
+                  "&:hover": { bgcolor: "#e3f2fd" },
+                  transition: "background-color 0.2s",
+                }}
+              >
+                {tab.fields.map((field) => (
+                  <TableCell
+                    key={field}
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif !important",
+                      ...(field === "is_available" &&
+                        tab.name === ENTITY_TYPES.INSTRUMENTS && {
+                          color: item[field] ? "#388e3c" : "#d6393a",
+                          fontWeight: "bold",
+                        }),
+                    }}
+                  >
+                    {field === "image" ? (
+                      <img
+                        src={item[field] || placeholderImage}
+                        alt={item.name || "Instrument"}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                        }}
+                        onError={(e) => (e.target.src = placeholderImage)}
+                      />
+                    ) : field.includes(".") || field === "instruments" ? (
+                      getField(item, field) || "N/A"
+                    ) : field === "is_available" ? (
+                      item[field] ? (
+                        "Yes"
                       ) : (
-                        item[field] || "N/A"
-                      )}
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <IconButton
-                      onClick={() => openEditModal(item)}
-                      disabled={userRole !== "admin"}
-                      sx={{ color: "#1976d2" }}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => handleDelete(item.id)}
-                      disabled={userRole !== "admin"}
-                      sx={{ color: "#d32f2f" }}
-                    >
-                      <Delete />
-                    </IconButton>
+                        "No"
+                      )
+                    ) : (
+                      item[field] || "N/A"
+                    )}
                   </TableCell>
-                </TableRow>
-              ) : null;
-            })
+                ))}
+                <TableCell>
+                  <IconButton
+                    onClick={() => openEditModal(item)}
+                    disabled={userRole !== "admin"}
+                    sx={{ color: "#d4a017" }}
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(item.id)}
+                    disabled={userRole !== "admin"}
+                    sx={{ color: "#d6393a" }}
+                  >
+                    <Delete />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))
           )}
         </TableBody>
       </Table>
@@ -1120,212 +1452,294 @@ const InstrumentsAdmin = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        bgcolor: "#f5f5f5",
-      }}
-    >
-      <Navbar userRole={userRole} />
-      <DrawerHeader />
-      <main style={{ flex: 1 }}>
-        <ErrorBoundary>
-          <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
-            <Typography
-              variant="h5"
-              align="center"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                color: "#000000",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-                mb: 6,
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+    <Fade in timeout={800}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          bgcolor: "#f8f9fa",
+        }}
+        className="instruments-admin-page"
+      >
+        <Navbar userRole={userRole} />
+        <DrawerHeader />
+        <main style={{ flex: 1 }}>
+          <ErrorBoundary>
+            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+              <Typography
+                variant="h6"
+                align="center"
+                gutterBottom
+                sx={{
+                  fontWeight: "bold",
+                  color: "#000000",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  textTransform: "uppercase",
+                  mb: 4,
+                  fontSize: { xs: "1.5rem", md: "2rem" },
+                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                Instruments Management
+              </Typography>
+              <Snackbar
+                open={!!success}
+                autoHideDuration={3000}
+                onClose={() => setSuccess("")}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  severity="success"
+                  onClose={() => setSuccess("")}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  {success}
+                </Alert>
+              </Snackbar>
+              <Snackbar
+                open={!!error}
+                autoHideDuration={6000}
+                onClose={() => setError("")}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  severity="error"
+                  onClose={() => setError("")}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+              {loading ? (
+                <Box sx={{ textAlign: "center", mt: "20vh" }}>
+                  <ToolCard
+                    sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
+                  >
+                    <CircularProgress size={48} sx={{ color: "#d4a017" }} />
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        mt: 2,
+                        fontFamily: "Helvetica, sans-serif !important",
+                        fontWeight: "bold",
+                        color: "#000000",
+                      }}
+                    >
+                      Loading data...
+                    </Typography>
+                  </ToolCard>
+                </Box>
+              ) : (
+                <ToolCard>
+                  <Tabs
+                    value={activeTab}
+                    onChange={(e, newValue) => {
+                      setActiveTab(newValue);
+                      setFilterInstrumentId("");
+                      setFilterCategoryId("");
+                    }}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    sx={{
+                      mb: 4,
+                      "& .MuiTab-root": {
+                        fontFamily: "Helvetica, sans-serif !important",
+                        textTransform: "none",
+                        fontWeight: "bold",
+                        color: "#666",
+                        "&.Mui-selected": {
+                          color: "#d4a017",
+                        },
+                      },
+                      "& .MuiTabs-indicator": {
+                        backgroundColor: "#d4a017",
+                      },
+                    }}
+                  >
+                    {tabs.map((tab, index) => (
+                      <Tab
+                        label={tab.name}
+                        key={tab.name}
+                        value={index}
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      />
+                    ))}
+                  </Tabs>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 2,
+                      mb: 4,
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        gap: 2,
+                        flexWrap: "wrap",
+                        flex: 1,
+                        minWidth: "200px",
+                      }}
+                    >
+                      <TextField
+                        label={`Search ${tabs[activeTab].name}`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ flex: 1, minWidth: "200px" }}
+                        variant="outlined"
+                        size="small"
+                        InputLabelProps={{
+                          sx: {
+                            fontFamily: "Helvetica, sans-serif !important",
+                          },
+                        }}
+                        InputProps={{
+                          sx: {
+                            fontFamily: "Helvetica, sans-serif !important",
+                          },
+                        }}
+                      />
+                      {tabs[activeTab].name === ENTITY_TYPES.INSTRUMENTS && (
+                        <FormControl sx={{ minWidth: "200px" }} size="small">
+                          <InputLabel
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            Filter by Category
+                          </InputLabel>
+                          <Select
+                            value={filterCategoryId}
+                            onChange={(e) =>
+                              setFilterCategoryId(e.target.value)
+                            }
+                            label="Filter by Category"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            <MenuItem
+                              value=""
+                              sx={{
+                                fontFamily: "Helvetica, sans-serif !important",
+                              }}
+                            >
+                              All Categories
+                            </MenuItem>
+                            {data.categories.map((category) => (
+                              <MenuItem
+                                key={category.id}
+                                value={category.id}
+                                sx={{
+                                  fontFamily:
+                                    "Helvetica, sans-serif !important",
+                                }}
+                              >
+                                {category.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                      {(tabs[activeTab].name ===
+                        ENTITY_TYPES.CONFIGURABLE_FIELDS ||
+                        tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
+                        <FormControl sx={{ minWidth: "200px" }} size="small">
+                          <InputLabel
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            Filter by Instrument
+                          </InputLabel>
+                          <Select
+                            value={filterInstrumentId}
+                            onChange={(e) =>
+                              setFilterInstrumentId(e.target.value)
+                            }
+                            label="Filter by Instrument"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            <MenuItem
+                              value=""
+                              sx={{
+                                fontFamily: "Helvetica, sans-serif !important",
+                              }}
+                            >
+                              All Instruments
+                            </MenuItem>
+                            {data.instruments.map((instrument) => (
+                              <MenuItem
+                                key={instrument.id}
+                                value={instrument.id}
+                                sx={{
+                                  fontFamily:
+                                    "Helvetica, sans-serif !important",
+                                }}
+                              >
+                                {instrument.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Box>
+                    <ActionButton
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={openAddModal}
+                      disabled={userRole !== "admin"}
+                    >
+                      Add {tabs[activeTab].name.slice(0, -1)}
+                    </ActionButton>
+                  </Box>
+                  {renderTable()}
+                </ToolCard>
+              )}
+            </Container>
+            <Dialog
+              open={openModal}
+              onClose={handleModalClose}
+              maxWidth="md"
+              fullWidth
+              PaperProps={{
+                component: "form",
+                onSubmit: (e) => {
+                  e.preventDefault();
+                  handleSave();
+                },
+                sx: { borderRadius: 2, p: 2 },
               }}
             >
-              Instruments Management
-            </Typography>
-            <Snackbar
-              open={!!success}
-              autoHideDuration={3000}
-              onClose={() => setSuccess("")}
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-              <Alert severity="success" onClose={() => setSuccess("")}>
-                {success}
-              </Alert>
-            </Snackbar>
-            <Snackbar
-              open={!!error}
-              autoHideDuration={6000}
-              onClose={() => setError("")}
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-              <Alert severity="error" onClose={() => setError("")}>
-                {error}
-              </Alert>
-            </Snackbar>
-            {loading ? (
-              <Box sx={{ textAlign: "center", mt: "20vh" }}>
-                <CircularProgress size={48} sx={{ color: "#1976d2" }} />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mt: 2,
-                    fontFamily: "Helvetica, sans-serif",
-                    fontWeight: "bold",
-                    color: "#000000",
-                  }}
-                >
-                  Loading data...
-                </Typography>
-              </Box>
-            ) : (
-              <>
-                <Tabs
-                  value={activeTab}
-                  onChange={(e, newValue) => {
-                    setActiveTab(newValue);
-                    setFilterInstrumentId("");
-                    setFilterCategoryId("");
-                  }}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  sx={{ mb: 4 }}
-                >
-                  {tabs.map((tab, index) => (
-                    <Tab key={tab.name} label={tab.name} value={index} />
-                  ))}
-                </Tabs>
-                <Box sx={{ display: "flex", gap: 2, mb: 4, flexWrap: "wrap" }}>
-                  <TextField
-                    label={`Search ${tabs[activeTab].name}`}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    sx={{ flex: 1, minWidth: "200px" }}
-                    variant="outlined"
-                    size="small"
-                  />
-                  {tabs[activeTab].name === ENTITY_TYPES.INSTRUMENTS && (
-                    <FormControl sx={{ minWidth: "200px" }} size="small">
-                      <InputLabel>Filter by Category</InputLabel>
-                      <Select
-                        value={filterCategoryId}
-                        onChange={(e) => setFilterCategoryId(e.target.value)}
-                        label="Filter by Category"
-                      >
-                        <MenuItem value="">All Categories</MenuItem>
-                        {data.categories.map((category) => (
-                          <MenuItem key={category.id} value={category.id}>
-                            {category.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                  {(tabs[activeTab].name === ENTITY_TYPES.CONFIGURABLE_FIELDS ||
-                    tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
-                    <FormControl sx={{ minWidth: "200px" }} size="small">
-                      <InputLabel>Filter by Instrument</InputLabel>
-                      <Select
-                        value={filterInstrumentId}
-                        onChange={(e) => setFilterInstrumentId(e.target.value)}
-                        label="Filter by Instrument"
-                      >
-                        <MenuItem value="">All Instruments</MenuItem>
-                        {data.instruments.map((instrument) => (
-                          <MenuItem key={instrument.id} value={instrument.id}>
-                            {instrument.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                  <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={openAddModal}
-                    disabled={userRole !== "admin"}
-                    sx={{
-                      bgcolor: "#1976d2",
-                      "&:hover": { bgcolor: "#115293" },
-                      textTransform: "none",
-                      px: 3,
-                    }}
-                  >
-                    Add {tabs[activeTab].name.slice(0, -1)}
-                  </Button>
-                </Box>
-                <Paper
-                  elevation={3}
-                  sx={{
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    "&:hover": { boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)" },
-                  }}
-                >
-                  {renderTable()}
-                </Paper>
-                <Dialog
-                  open={openModal}
-                  onClose={handleModalClose}
-                  maxWidth="md"
-                  fullWidth
-                  PaperProps={{
-                    component: "form",
-                    onSubmit: (e) => {
-                      e.preventDefault();
-                      handleSave();
-                    },
-                    sx: { borderRadius: 2, p: 2 },
-                  }}
-                >
-                  <DialogTitle
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      fontWeight: "bold",
-                      color: "#1976d2",
-                    }}
-                  >
-                    {modalAction === "add"
-                      ? `Add ${modalType}`
-                      : `Edit ${modalType}`}
-                  </DialogTitle>
-                  <DialogContent>{renderModalContent()}</DialogContent>
-                  <DialogActions>
-                    <Button
-                      onClick={handleModalClose}
-                      sx={{
-                        fontFamily: "Helvetica, sans-serif",
-                        textTransform: "none",
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        bgcolor: "#1976d2",
-                        "&:hover": { bgcolor: "#115293" },
-                        fontFamily: "Helvetica, sans-serif",
-                        textTransform: "none",
-                      }}
-                    >
-                      {modalAction === "add" ? "Create" : "Save"}
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </>
-            )}
-          </Container>
-        </ErrorBoundary>
-      </main>
-    </Box>
+              <DialogTitle
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  color: "#d4a017",
+                }}
+              >
+                {modalAction === "add"
+                  ? `Add ${modalType}`
+                  : `Edit ${modalType}`}
+              </DialogTitle>
+              <DialogContent>{renderModalContent()}</DialogContent>
+              <DialogActions>
+                <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
+                <ActionButton type="submit" variant="contained">
+                  {modalAction === "add" ? "Create" : "Save"}
+                </ActionButton>
+              </DialogActions>
+            </Dialog>
+          </ErrorBoundary>
+        </main>
+      </Box>
+    </Fade>
   );
 };
 
