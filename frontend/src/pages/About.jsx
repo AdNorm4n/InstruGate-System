@@ -4,17 +4,83 @@ import {
   Container,
   Typography,
   Button,
-  Fade,
   Card,
   CardContent,
   Grid,
+  Divider,
+  Fade,
+  IconButton,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import Navbar from "../components/Navbar";
+import { LocationOn, Phone, Email, LinkedIn } from "@mui/icons-material";
+import Navbar from "../components/Navbar.jsx";
+import companylogo from "../assets/companylogo.png";
+import pressImage from "../assets/press.jpg";
+import tempImage from "../assets/temp.jpg";
+import testImage from "../assets/test.jpg";
 import "../styles/About.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
+}));
+
+const Section = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(6),
+  padding: theme.spacing(4),
+  backgroundColor: "#fafafa",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const HeaderSection = styled(Box)(({ theme }) => ({
+  textAlign: "center",
+  padding: theme.spacing(6, 0),
+  marginBottom: theme.spacing(4),
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#d4a017",
+  color: "#ffffff",
+  padding: theme.spacing(1.5, 4),
+  fontWeight: 600,
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif !important",
+  "&:hover": {
+    backgroundColor: "#b8860b",
+    transform: "scale(1.05)",
+  },
+  "&:focus": {
+    outline: "3px solid #d4a017",
+    outlineOffset: "2px",
+  },
+  transition: "all 0.3s ease",
+}));
+
+const ProductCard = styled(Card)(({ theme }) => ({
+  height: "360px",
+  width: "100%",
+  maxWidth: "320px",
+  display: "flex",
+  flexDirection: "column",
+  backgroundColor: "#ffffff",
+  border: "none",
+  borderRadius: "8px",
+  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "scale(1.05)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+  },
+  margin: "0 auto",
+  fontFamily: "Helvetica, sans-serif !important",
 }));
 
 function About() {
@@ -23,276 +89,477 @@ function About() {
       <Box
         className="about-page"
         sx={{
-          display: "flex",
-          flexDirection: "column",
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #f5f5f5, #e9ecef)",
+          backgroundColor: "#fafafa",
+          fontFamily: "Helvetica, sans-serif !important",
         }}
       >
         <Navbar userRole={null} />
         <DrawerHeader />
-        <main style={{ flex: 1 }}>
-          <Container maxWidth="md" sx={{ py: 4, mt: 12, mb: 8 }}>
-            <Typography
-              variant="h5"
-              align="center"
-              gutterBottom
-              sx={{
-                fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-                color: "#000000",
-                mb: 6,
-              }}
-            >
-              About Rueger Sdn. Bhd.
-            </Typography>
-
-            {/* Hero Section */}
-            <Box
-              sx={{
-                p: 3,
-                border: "4px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                mb: 4,
-                textAlign: "center",
-              }}
-            >
-              <Typography
-                variant="h6"
-                sx={{ fontFamily: "Helvetica, sans-serif", mb: 2 }}
-              >
-                Precision in Measurement Since 1942
-              </Typography>
-              <Typography
-                sx={{ fontFamily: "Helvetica, sans-serif", color: "#555" }}
-              >
-                Rueger Sdn. Bhd., a proud subsidiary of Rueger SA and an
-                Ashcroft company, is a leader in high-precision temperature and
-                pressure measurement instruments. Based in Kuala Lumpur,
-                Malaysia, we deliver innovative solutions to industries
-                worldwide.
-              </Typography>
-            </Box>
-
-            {/* Company History */}
-            <Box
-              sx={{
-                p: 3,
-                border: "4px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                mb: 4,
-              }}
-            >
-              <Typography
-                variant="h6"
+        <main>
+          <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+            <HeaderSection>
+              <Box
+                component="img"
+                src={companylogo}
+                alt="Company Logo"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
+                  maxWidth: { xs: 400, md: 400 },
+                  mb: 4,
+                  display: "block",
+                  margin: "0 auto",
+                }}
+              />
+            </HeaderSection>
+
+            <Section>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 2,
+                  mb: 3,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  fontSize: "1.25rem",
+                }}
+              >
+                About Us
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  color: "#333",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.6,
+                }}
+              >
+                Rueger Sdn. Bhd., established in 1997 as a subsidiary of Rueger
+                SA and part of the Ashcroft family, is a leading provider of
+                high-precision temperature and pressure measurement instruments
+                in Southeast Asia. Headquartered in Kuala Lumpur, Malaysia, we
+                combine Swiss engineering excellence with regional expertise to
+                deliver innovative, reliable, and customized solutions. Our
+                products serve industries such as chemical, petrochemical, oil
+                and gas, food, pharmaceuticals, and HVAC, ensuring precision and
+                durability in demanding environments. With a dedicated team of
+                engineers and technicians, we offer comprehensive services,
+                including calibration, repair, and technical support, to meet
+                the needs of our diverse clientele.
+              </Typography>
+            </Section>
+
+            <Section>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  mb: 3,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  fontSize: "1.25rem",
                 }}
               >
                 Our History
               </Typography>
-              <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
-                Founded in 1942 in Lausanne, Switzerland, Rueger SA has been at
-                the forefront of temperature and pressure measurement for over
-                eight decades. Rueger Sdn. Bhd. was established in 1997 to serve
-                Southeast Asia, bringing our expertise to the region. Now in its
-                third generation of family management, our dynamic leadership
-                continues to drive innovation. As an Ashcroft company, we
-                combine global reach with local expertise, achieving a 26.54%
-                sales revenue increase in 2023.
-              </Typography>
-            </Box>
-
-            {/* Products and Services */}
-            <Box
-              sx={{
-                p: 3,
-                border: "4px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                mb: 4,
-              }}
-            >
               <Typography
-                variant="h6"
+                variant="body1"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  color: "#333",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.6,
+                }}
+              >
+                Founded in 1942 in Lausanne, Switzerland, Rueger SA has been a
+                pioneer in high-precision temperature and pressure measurement
+                for over eight decades. In 1997, Rueger Sdn. Bhd. was
+                established in Kuala Lumpur to better serve Southeast Asia,
+                marking a significant expansion into the region’s growing
+                markets. As an Ashcroft company, we have achieved a 26.54% sales
+                revenue increase in 2023 and a 26.9% growth in total assets,
+                reflecting our strong market presence. Under third-generation
+                family leadership, with Bernard Rüeger as Managing Director and
+                Jean-Marc Rüeger as CEO since 2012, we continue to innovate,
+                producing OEM products like electronic thermostats and
+                multipoint sensors. Our ISO 9001:2015 certification underscores
+                our commitment to quality and reliability across all operations.
+              </Typography>
+            </Section>
+
+            <Section>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 2,
+                  mb: 4,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  fontSize: "1.5rem",
                 }}
               >
                 Products and Services
               </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
-                    <CardContent>
+              <Grid container spacing={3} justifyContent="center">
+                <Grid item xs={12} sm={6} md={4}>
+                  <ProductCard className="product-card">
+                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
+                      <Box className="product-image-wrapper">
+                        <img
+                          src={pressImage}
+                          alt="Pressure Instruments"
+                          className="product-image"
+                        />
+                      </Box>
                       <Typography
-                        variant="subtitle1"
+                        variant="h5"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Helvetica, sans-serif !important",
                           fontWeight: "bold",
+                          mb: 2,
+                          color: "#000000",
+                          textTransform: "uppercase",
+                          fontSize: "1.25rem",
+                          lineHeight: 1.2,
                         }}
                       >
-                        Temperature Measurement
+                        Pressure
+                        <br />
+                        Instruments
                       </Typography>
-                      <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
-                        - Electrical temperature sensors
+                      <Typography
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif !important",
+                          color: "#333",
+                          lineHeight: 1.6,
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        • Pressure Gauges
                         <br />
-                        - Bimetallic and gas pressure thermometers
+                        • Digital Gauges
                         <br />
-                        - Multipoint probes
-                        <br />- Thermowells (EN/DIN standards)
+                        • High-Purity
+                        <br />
+                        • Differential Gauges
+                        <br />
+                        • Pressure Switches
+                        <br />
+                        • Pressure Sensors
+                        <br />
+                        • Diaphragm Seals - Isolators
+                        <br />
+                        • Threaded Seals
+                        <br />
+                        • Isolation Rings
+                        <br />
+                        • Flanged Seals
+                        <br />
+                        • In-Line
+                        <br />• Accessories
                       </Typography>
                     </CardContent>
-                  </Card>
+                  </ProductCard>
                 </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
-                    <CardContent>
+                <Grid item xs={12} sm={6} md={4}>
+                  <ProductCard className="product-card">
+                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
+                      <Box className="product-image-wrapper">
+                        <img
+                          src={tempImage}
+                          alt="Temperature Instruments"
+                          className="product-image"
+                        />
+                      </Box>
                       <Typography
-                        variant="subtitle1"
+                        variant="h5"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Helvetica, sans-serif !important",
                           fontWeight: "bold",
+                          mb: 2,
+                          color: "#000000",
+                          textTransform: "uppercase",
+                          fontSize: "1.25rem",
+                          lineHeight: 1.2,
                         }}
                       >
-                        Pressure Measurement
+                        Temp
+                        <br />
+                        Instruments
                       </Typography>
-                      <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
-                        - Pressure gauges, switches, transmitters
+                      <Typography
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif !important",
+                          color: "#333",
+                          lineHeight: 1.6,
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        • Thermometers
                         <br />
-                        - Differential pressure gauges
+                        • Bimetal Thermometers
                         <br />
-                        - Chemical seals
-                        <br />- Phenolic gauges (e.g., PBPSF115)
+                        • Gas Actuated Thermometers
+                        <br />• Thermowells
                       </Typography>
                     </CardContent>
-                  </Card>
+                  </ProductCard>
                 </Grid>
-                <Grid item xs={12}>
-                  <Card sx={{ boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)" }}>
-                    <CardContent>
+                <Grid item xs={12} sm={6} md={4}>
+                  <ProductCard className="product-card">
+                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
+                      <Box className="product-image-wrapper">
+                        <img
+                          src={testImage}
+                          alt="Test Instruments"
+                          className="product-image"
+                        />
+                      </Box>
                       <Typography
-                        variant="subtitle1"
+                        variant="h5"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Helvetica, sans-serif !important",
                           fontWeight: "bold",
+                          mb: 2,
+                          color: "#000000",
+                          textTransform: "uppercase",
+                          fontSize: "1.25rem",
+                          lineHeight: 1.2,
                         }}
                       >
-                        Services
-                      </Typography>
-                      <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
-                        - Sales and distribution of Rueger & Ashcroft products
+                        Test
                         <br />
-                        - Calibration and repair
-                        <br />- Technical support and training
+                        Instruments
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif !important",
+                          color: "#333",
+                          lineHeight: 1.6,
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        • Test Gauges
+                        <br />
+                        • Calibration & Repair
+                        <br />• Technical Support & Training
                       </Typography>
                     </CardContent>
-                  </Card>
+                  </ProductCard>
                 </Grid>
               </Grid>
               <Typography
-                variant="caption"
+                variant="body2"
                 sx={{
-                  mt: 2,
-                  color: "gray",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  mt: 3,
                   display: "block",
-                  fontFamily: "Helvetica, sans-serif",
+                  color: "#333",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.6,
                 }}
               >
                 Applications: Chemical, petrochemical, power, shipbuilding,
                 food, HVAC, and more.
               </Typography>
-            </Box>
+            </Section>
 
-            {/* Global Presence */}
-            <Box
-              sx={{
-                p: 3,
-                border: "4px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                mb: 4,
-              }}
-            >
+            <Section>
               <Typography
-                variant="h6"
+                variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 2,
+                  mb: 3,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  fontSize: "1.25rem",
                 }}
               >
                 Global Presence
               </Typography>
-              <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
-                With subsidiaries in Germany, Malaysia, and China, and over 60
-                agents worldwide, Rueger Sdn. Bhd. is well-established in Europe
-                and Asia. Our ISO 9001:2008 certification ensures quality, and
-                our instruments are designed for hazardous environments, meeting
-                the needs of diverse industries.
-              </Typography>
-            </Box>
-
-            {/* Contact Information */}
-            <Box
-              sx={{
-                p: 3,
-                border: "4px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                textAlign: "center",
-              }}
-            >
               <Typography
-                variant="h6"
+                variant="body1"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  color: "#333",
+                  fontSize: "0.9rem",
+                  lineHeight: 1.6,
+                }}
+              >
+                With subsidiaries in Germany, Malaysia, and China, and over 50
+                agents worldwide, Rueger Sdn. Bhd. ensures quality with ISO
+                9001:2015 certification. Our instruments are engineered for
+                hazardous environments, serving diverse industries.
+              </Typography>
+            </Section>
+
+            <Section sx={{ textAlign: "center" }}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 2,
+                  mb: 4,
+                  color: "#000000",
+                  textTransform: "uppercase",
+                  fontSize: "1.25rem",
                 }}
               >
                 Contact Us
               </Typography>
-              <Typography sx={{ fontFamily: "Helvetica, sans-serif", mb: 1 }}>
-                Rueger Sdn. Bhd.
-                <br />
-                36, Persiaran Industri, Bandar Sri Damansara,
-                <br />
-                52200 Kuala Lumpur, Selangor
-              </Typography>
-              <Typography sx={{ fontFamily: "Helvetica, sans-serif", mb: 1 }}>
-                Phone: +603-4142 3808
-                <br />
-                Fax: +603-4142 3909
-                <br />
-                Email: my_sales@rueger.com
-              </Typography>
-              <Button
-                className="primary-button"
-                variant="contained"
-                href="http://www.rueger.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                disabled={false}
-                sx={{ mt: 2 }}
+              <Grid container spacing={3} justifyContent="center">
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{
+                      backgroundColor: "#fff",
+                      borderRadius: "12px",
+                      p: 2,
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                      },
+                      fontFamily: "Helvetica, sans-serif !important",
+                    }}
+                  >
+                    <LocationOn
+                      sx={{ fontSize: 30, mr: 1.5, color: "#d6393a" }}
+                    />
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#333",
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        textAlign: "left",
+                      }}
+                    >
+                      Rueger Sdn. Bhd., 36, Persiaran Industri, <br />
+                      Bandar Sri Damansara, 52200 Kuala Lumpur, Selangor
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{
+                      backgroundColor: "#fff",
+                      borderRadius: "12px",
+                      p: 2,
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                      },
+                      fontFamily: "Helvetica, sans-serif !important",
+                    }}
+                  >
+                    <Phone sx={{ fontSize: 30, mr: 1.5, color: "#008000" }} />
+                    <Typography
+                      variant="body1"
+                      component="a"
+                      href="tel:+60341423808"
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#333",
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        textDecoration: "none",
+                        "&:hover": { color: "#d4a017" },
+                      }}
+                      aria-label="Call Rueger Sdn. Bhd."
+                    >
+                      +603-4142 3808
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{
+                      backgroundColor: "#fff",
+                      borderRadius: "12px",
+                      p: 2,
+                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                      },
+                      fontFamily: "Helvetica, sans-serif !important",
+                    }}
+                  >
+                    <Email sx={{ fontSize: 30, mr: 1.5, color: "#d4a017" }} />
+                    <Typography
+                      variant="body1"
+                      component="a"
+                      href="mailto:my_sales@rueger.com"
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#333",
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        textDecoration: "none",
+                        "&:hover": { color: "#d4a017" },
+                      }}
+                      aria-label="Email Rueger Sdn. Bhd."
+                    >
+                      my_sales@rueger.com
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+              <Divider sx={{ my: 4 }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 3,
+                  flexWrap: "wrap",
+                  fontFamily: "Helvetica, sans-serif !important",
+                }}
               >
-                Visit Our Website
-              </Button>
-            </Box>
+                <CTAButton
+                  variant="contained"
+                  href="https://www.rueger.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Visit Rueger Website"
+                >
+                  Visit Our Website
+                </CTAButton>
+                <IconButton
+                  href="https://www.linkedin.com/company/rueger-sdn-bhd/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  sx={{
+                    color: "#0077b5",
+                    backgroundColor: "#ffffff",
+                    "&:hover": {
+                      color: "#0077b5",
+                      backgroundColor: "#f5f5f5",
+                      transform: "scale(1.1)",
+                    },
+                    transition: "all 0.3s ease",
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  <LinkedIn fontSize="large" />
+                </IconButton>
+              </Box>
+            </Section>
           </Container>
         </main>
       </Box>
