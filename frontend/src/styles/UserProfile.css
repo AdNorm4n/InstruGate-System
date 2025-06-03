@@ -1,7 +1,19 @@
-.user-profile-page {
-  font-family: "Helvetica, sans-serif";
+.user-profile-page .MuiContainer-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.user-profile-page .MuiTextField-root {
-  margin-bottom: 16px;
+.user-profile-page .MuiAlert-root {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+  .user-profile-page .MuiTypography-h6 {
+    font-size: 1.5rem;
+  }
+  .user-profile-page .MuiTypography-body1 {
+    font-size: 0.85rem;
+  }
 }

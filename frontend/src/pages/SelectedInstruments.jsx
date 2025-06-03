@@ -20,6 +20,65 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
+const ToolCard = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#1976d2",
+  color: "#ffffff",
+  padding: theme.spacing(1, 3),
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif",
+  "&:hover": {
+    backgroundColor: "#1565c0",
+    transform: "scale(1.05)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
+  transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
+}));
+
+const DangerButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#d6393a",
+  color: "#ffffff",
+  padding: theme.spacing(1, 3),
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif",
+  "&:hover": {
+    backgroundColor: "#b32d2e",
+    transform: "scale(1.05)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
+  transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
+}));
+
 function SelectedInstruments() {
   const navigate = useNavigate();
   const [selectedInstruments, setSelectedInstruments] = useState([]);
@@ -143,7 +202,7 @@ function SelectedInstruments() {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Helvetica, sans-serif !important",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -161,9 +220,8 @@ function SelectedInstruments() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Roboto, sans-serif",
+            fontFamily: "Helvetica, sans-serif !important",
             fontWeight: "bold",
-            fontSize: "1.5rem",
           }}
         >
           Failed to load user data. Please log in again.
@@ -180,176 +238,125 @@ function SelectedInstruments() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #f5f5f5, #e9ecef)",
+          bgcolor: "#f8f9fa",
         }}
       >
         <Navbar userRole={userRole} />
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>
-          <Container sx={{ py: 4, mt: 12 }}>
+          <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
             <Typography
-              variant="h5"
+              variant="h6"
               align="center"
               gutterBottom
               sx={{
+                fontFamily: "Helvetica, sans-serif !important",
                 fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
                 color: "#000000",
+                textTransform: "uppercase",
+                mb: 4,
+                fontSize: { xs: "1.5rem", md: "2rem" },
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
               }}
             >
-              selected instruments
+              Selected Instruments
+            </Typography>
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#333",
+                mb: 6,
+                fontSize: "0.9rem",
+              }}
+            >
+              Review your selected instruments and proceed to quotation.
             </Typography>
 
             {selectedInstruments.length === 0 ? (
-              <Box
-                className="action-section"
-                sx={{ textAlign: "center", mt: 20 }}
-              >
+              <ToolCard sx={{ textAlign: "center", mt: 8, mb: 6 }}>
                 <Typography
                   variant="h6"
                   color="error"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Helvetica, sans-serif !important",
                     fontWeight: "bold",
+                    mb: 4,
                   }}
                 >
                   Your cart is empty. Explore our instruments to get started.
                 </Typography>
-                <Button
-                  className="primary-button"
+                <CTAButton
                   variant="contained"
                   onClick={() => handleClick("add", "/instruments")}
                   disabled={isClicked === "add"}
-                  sx={{
-                    fontFamily: "Helvetica, sans-serif",
-                    backgroundColor: "#1976d2",
-                    color: "white",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                    "&:hover": {
-                      backgroundColor: "#34495e",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                      transform: "scale(1.05)",
-                    },
-                    "&.Mui-disabled": {
-                      opacity: 0.6,
-                      backgroundColor: "#2c3e50",
-                      color: "white",
-                    },
-                  }}
                 >
                   {isClicked === "add" ? (
-                    <CircularProgress size={24} sx={{ color: "white" }} />
+                    <CircularProgress size={24} />
                   ) : (
                     "Add Instruments"
                   )}
-                </Button>
-              </Box>
+                </CTAButton>
+              </ToolCard>
             ) : (
               <>
-                <Box
-                  className={`action-section ${
-                    isClicked ? "action-section-clicked" : ""
-                  }`}
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 8,
-                    px: 4, // optional padding
-                  }}
-                >
-                  {/* Left Button */}
-                  <Button
-                    className="primary-button"
-                    variant="contained"
-                    onClick={() => handleClick("add", "/instruments")}
-                    disabled={isClicked === "add"}
+                <ToolCard sx={{ mb: 6 }}>
+                  <Box
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      "&.Mui-disabled": { opacity: 0.6 },
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 2,
                     }}
                   >
-                    {isClicked === "add" ? (
-                      <CircularProgress size={24} sx={{ color: "white" }} />
-                    ) : (
-                      "Add More"
-                    )}
-                  </Button>
-
-                  {/* Center Button */}
-                  <Button
-                    className="primary-button"
-                    variant="contained"
-                    onClick={() =>
-                      handleClick("proceed", "/quotation", {
-                        selectedInstruments,
-                        userData,
-                      })
-                    }
-                    disabled={isClicked === "proceed"}
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      backgroundColor: "#1976d2",
-                      color: "white",
-                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                      "&:hover": {
-                        backgroundColor: "#34495e",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        transform: "scale(1.05)",
-                      },
-                      "&.Mui-disabled": {
-                        opacity: 0.6,
-                        backgroundColor: "#2c3e50",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    {isClicked === "proceed" ? (
-                      <CircularProgress size={24} sx={{ color: "white" }} />
-                    ) : (
-                      "Proceed to Quotation"
-                    )}
-                  </Button>
-
-                  {/* Right Button */}
-                  <Button
-                    className="danger-button"
-                    variant="contained"
-                    onClick={() => {
-                      setIsClicked("clear");
-                      setTimeout(() => {
-                        clearAllInstruments();
-                      }, 300);
-                    }}
-                    disabled={isClicked === "clear"}
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      backgroundColor: "#d6393a",
-                      color: "white",
-                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                      "&:hover": {
-                        backgroundColor: "#d6393a",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                        transform: "scale(1.05)",
-                      },
-                      "&.Mui-disabled": {
-                        opacity: 0.6,
-                        backgroundColor: "#d6393a",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    {isClicked === "clear" ? (
-                      <CircularProgress size={24} sx={{ color: "white" }} />
-                    ) : (
-                      "Clear Cart"
-                    )}
-                  </Button>
-                </Box>
+                    <CTAButton
+                      variant="contained"
+                      onClick={() => handleClick("add", "/instruments")}
+                      disabled={isClicked === "add"}
+                    >
+                      {isClicked === "add" ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "Add More"
+                      )}
+                    </CTAButton>
+                    <CTAButton
+                      variant="contained"
+                      onClick={() =>
+                        handleClick("proceed", "/quotation", {
+                          selectedInstruments,
+                          userData,
+                        })
+                      }
+                      disabled={isClicked === "proceed"}
+                    >
+                      {isClicked === "proceed" ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "Proceed to Quotation"
+                      )}
+                    </CTAButton>
+                    <DangerButton
+                      variant="contained"
+                      onClick={() => {
+                        setIsClicked("clear");
+                        setTimeout(() => {
+                          clearAllInstruments();
+                        }, 300);
+                      }}
+                      disabled={isClicked === "clear"}
+                    >
+                      {isClicked === "clear" ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        "Clear Cart"
+                      )}
+                    </DangerButton>
+                  </Box>
+                </ToolCard>
 
                 <Grid container spacing={4}>
                   {selectedInstruments.map((item, index) => {

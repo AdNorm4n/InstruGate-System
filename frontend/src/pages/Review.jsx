@@ -20,6 +20,42 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
+const ToolCard = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#1976d2",
+  color: "#ffffff",
+  padding: theme.spacing(1, 3),
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif",
+  "&:hover": {
+    backgroundColor: "#1565c0",
+    transform: "scale(1.05)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
+  transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
+}));
+
 function Review() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -116,7 +152,7 @@ function Review() {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Helvetica, sans-serif !important",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -134,7 +170,7 @@ function Review() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Helvetica, sans-serif !important",
             fontWeight: "bold",
           }}
         >
@@ -145,96 +181,112 @@ function Review() {
   }
 
   return (
-    <Fade in timeout={500}>
+    <Fade in timeout={800}>
       <Box
-        className="configurator-page"
+        className="review-page"
         sx={{
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          bgcolor: "#f8f9fa",
         }}
       >
         <Navbar userRole={userRole} />
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>
-          <Container sx={{ py: 4, mt: 12 }}>
-            <Box className="configurator-header">
-              <Typography
-                variant="h5"
-                align="center"
-                gutterBottom
-                sx={{
-                  fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif",
-                  textTransform: "uppercase",
-                  letterSpacing: 0,
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-                  color: "#000000",
-                }}
-              >
-                Review Your Configuration
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={instrument.name}
-                  className="instrument-image"
-                  onClick={handleImageClick}
-                  onError={(e) => {
-                    console.log("Image load error:", imageUrl);
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
-                  }}
-                  style={{ cursor: "pointer" }}
-                />
-              ) : null}
-              <Box
-                className="image-fallback"
-                sx={{
-                  width: 150,
-                  height: 150,
-                  bgcolor: "#e0e0e0",
-                  borderRadius: 2,
-                  display: imageUrl ? "none" : "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  No Image
-                </Typography>
-              </Box>
-            </Box>
+          <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
             <Typography
-              variant="body1"
+              variant="h6"
               align="center"
+              gutterBottom
               sx={{
-                mb: 4,
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Helvetica, sans-serif !important",
+                fontWeight: "bold",
                 color: "#000000",
-                fontWeight: "bold",
+                textTransform: "uppercase",
+                mb: 4,
+                fontSize: { xs: "1.5rem", md: "2rem" },
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
               }}
             >
-              {instrument.name}
+              Review Your Configuration
             </Typography>
             <Typography
-              className="product-code"
               variant="body1"
               align="center"
               sx={{
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#333",
                 mb: 6,
-                fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                color: "#0a5",
+                fontSize: "0.9rem",
               }}
             >
-              Product Code: {productCode}
+              Confirm your instrument selections and add-ons.
             </Typography>
+
+            <ToolCard sx={{ mb: 6 }}>
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={instrument.name}
+                    className="instrument-image"
+                    onClick={handleImageClick}
+                    onError={(e) => {
+                      console.log("Image load error:", imageUrl);
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
+                    }}
+                    style={{ cursor: "pointer" }}
+                  />
+                ) : null}
+                <Box
+                  className="image-fallback"
+                  sx={{
+                    width: 150,
+                    height: 150,
+                    bgcolor: "#e0e0e0",
+                    borderRadius: "8px",
+                    display: imageUrl ? "none" : "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    No Image
+                  </Typography>
+                </Box>
+              </Box>
+              <Typography
+                variant="h6"
+                align="center"
+                sx={{
+                  mb: 2,
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  color: "#000000",
+                  textTransform: "uppercase",
+                }}
+              >
+                {instrument.name}
+              </Typography>
+              <Typography
+                className="product-code"
+                variant="body1"
+                align="center"
+                sx={{
+                  mb: 4,
+                  fontWeight: "bold",
+                  fontFamily: "Helvetica, sans-serif !important",
+                  textTransform: "uppercase",
+                  color: "#0a5",
+                }}
+              >
+                Product Code: {productCode}
+              </Typography>
+            </ToolCard>
 
             {isImageEnlarged && (
               <Box className="image-overlay" onClick={handleCloseOverlay}>
@@ -251,16 +303,15 @@ function Review() {
               </Box>
             )}
 
-            <Box className="review-section">
+            <ToolCard sx={{ mb: 6 }}>
               <Typography
                 variant="subtitle1"
-                className="section-heading"
                 sx={{
                   mb: 3,
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
                   textTransform: "uppercase",
-                  color: "#2c3e50",
+                  color: "#00000",
                 }}
               >
                 Requirements Selected
@@ -272,7 +323,7 @@ function Review() {
                       <ListItemText
                         primary={`[${selection.code}] ${selection.label}`}
                         primaryTypographyProps={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Helvetica, sans-serif !important",
                           color: "#333",
                         }}
                       />
@@ -283,25 +334,24 @@ function Review() {
                     <ListItemText
                       primary="No requirements selected."
                       primaryTypographyProps={{
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Helvetica, sans-serif !important",
                         color: "#666",
                       }}
                     />
                   </ListItem>
                 )}
               </List>
-            </Box>
+            </ToolCard>
 
-            <Box className="review-section">
+            <ToolCard sx={{ mb: 6 }}>
               <Typography
                 variant="subtitle1"
-                className="section-heading"
                 sx={{
                   mb: 3,
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
                   textTransform: "uppercase",
-                  color: "#2c3e50",
+                  color: "#00000",
                 }}
               >
                 Optional Add-Ons Selected
@@ -313,7 +363,7 @@ function Review() {
                       <ListItemText
                         primary={`[${addon.code}] ${addon.label} (${addon.addon_type.name})`}
                         primaryTypographyProps={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Helvetica, sans-serif !important",
                           color: "#333",
                         }}
                       />
@@ -324,48 +374,27 @@ function Review() {
                     <ListItemText
                       primary="No add-ons selected."
                       primaryTypographyProps={{
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Helvetica, sans-serif !important",
                         color: "#666",
                       }}
                     />
                   </ListItem>
                 )}
               </List>
-            </Box>
+            </ToolCard>
 
-            <Box
-              className={`action-section ${
-                isClicked ? "action-section-clicked" : ""
-              }`}
-            >
-              <Button
-                className="next-button"
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CTAButton
                 variant="contained"
                 onClick={handleClick}
                 disabled={isClicked}
-                sx={{
-                  fontFamily: "Helvetica, sans-serif",
-                  backgroundColor: "#1976d2",
-                  color: "white",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-                  "&:hover": {
-                    backgroundColor: "#34495e",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    transform: "scale(1.05)",
-                  },
-                  "&.Mui-disabled": {
-                    opacity: 0.6,
-                    backgroundColor: "#2c3e50",
-                    color: "white",
-                  },
-                }}
               >
                 {isClicked ? (
                   <CircularProgress size={24} sx={{ color: "white" }} />
                 ) : (
                   "Add to Quotation"
                 )}
-              </Button>
+              </CTAButton>
             </Box>
           </Container>
         </main>

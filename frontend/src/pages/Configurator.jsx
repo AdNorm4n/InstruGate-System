@@ -10,9 +10,9 @@ import {
   Select,
   MenuItem,
   Checkbox,
-  FormControlLabel,
   CircularProgress,
   Fade,
+  Divider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
@@ -21,6 +21,45 @@ import Navbar from "../components/Navbar";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
+}));
+
+const ToolCard = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "12px",
+  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-2px)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif",
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2),
+  },
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#1976d2",
+  color: "#ffffff",
+  padding: theme.spacing(1, 3),
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif",
+  "&:hover": {
+    backgroundColor: "#1565c0",
+    transform: "scale(1.05)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
+  transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 function Configurator({ navigateWithLoading }) {
@@ -47,6 +86,7 @@ function Configurator({ navigateWithLoading }) {
   const [userRole, setUserRole] = useState(state?.userRole || null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [isClicked, setIsClicked] = useState(null);
+  const [showError, setShowError] = useState(false);
 
   const wrappedNavigate = navigateWithLoading
     ? navigateWithLoading(navigate)
@@ -133,6 +173,7 @@ function Configurator({ navigateWithLoading }) {
         console.log("Updated selections:", newSelections);
         return newSelections;
       });
+      setShowError(false); // Reset error when a selection is made
     } else {
       console.error(`No option found for field ${fieldId}`);
     }
@@ -180,7 +221,16 @@ function Configurator({ navigateWithLoading }) {
     setIsImageEnlarged(false);
   };
 
+  const allFieldsSelected = () => {
+    const visibleFields = fields.filter(shouldShowField);
+    return visibleFields.every((field) => selections[field.id]?.id);
+  };
+
   const handleClick = (action, path = null, state = null) => {
+    if (action === "showAddOns" && !allFieldsSelected()) {
+      setShowError(true);
+      return;
+    }
     setIsClicked(action);
     console.log("handleClick called:", { action, path, state });
     setTimeout(() => {
@@ -191,6 +241,7 @@ function Configurator({ navigateWithLoading }) {
         } else {
           console.log("Showing add-ons");
           setShowAddOns(true);
+          setShowError(false);
         }
       } catch (err) {
         console.error("Navigation error:", err);
@@ -199,7 +250,6 @@ function Configurator({ navigateWithLoading }) {
     }, 100);
   };
 
-  // Group add-ons by addon_type.name
   const groupedAddons = addons.reduce((acc, addon) => {
     const typeName = addon.addon_type.name;
     if (!acc[typeName]) {
@@ -253,83 +303,101 @@ function Configurator({ navigateWithLoading }) {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          bgcolor: "#f8f9fa",
         }}
       >
         <Navbar userRole={userRole} />
         <DrawerHeader />
-
         <main style={{ flex: 1 }}>
-          <Container sx={{ py: 4, mt: 12 }}>
-            <Box className="configurator-header">
+          <Container maxWidth="lg" sx={{ py: 6, mt: 6 }}>
+            <Box
+              sx={{
+                bgcolor: "#ffffff",
+                borderRadius: "12px",
+                p: 4,
+                mb: 4,
+                textAlign: "center",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+              }}
+            >
               <Typography
                 variant="h5"
-                align="center"
-                gutterBottom
                 sx={{
                   fontWeight: "bold",
                   fontFamily: "Helvetica, sans-serif",
-                  letterSpacing: 0,
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                  color: "#000000",
+                  mb: 4,
                   textTransform: "uppercase",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "60px",
+                    height: "3px",
+                    bgcolor: "#d6393a",
+                  },
                 }}
               >
                 {instrument.name}
               </Typography>
-            </Box>
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={instrument.name}
-                  className="instrument-image"
-                  onClick={handleImageClick}
-                  onError={(e) => {
-                    console.log("Image load error:", imageUrl);
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={instrument.name}
+                    className="instrument-image"
+                    onClick={handleImageClick}
+                    onError={(e) => {
+                      console.log("Image load error:", imageUrl);
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <Box
+                  className="image-fallback"
+                  sx={{
+                    width: 350,
+                    height: 350,
+                    bgcolor: "#e0e0e0",
+                    borderRadius: "12px",
+                    display: imageUrl ? "none" : "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
                   }}
-                  style={{ cursor: "pointer" }}
-                />
-              ) : null}
-              <Box
-                className="image-fallback"
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    No Image
+                  </Typography>
+                </Box>
+              </Box>
+              <Typography
+                variant="subtitle1"
                 sx={{
-                  width: 150,
-                  height: 150,
-                  bgcolor: "#e0e0e0",
-                  borderRadius: 2,
-                  display: imageUrl ? "none" : "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
+                  fontFamily: "Helvetica, sans-serif",
+                  color: "#333",
+                  mb: 2,
+                  letterSpacing: "0.5px",
                 }}
               >
-                <Typography variant="body2" color="text.secondary">
-                  No Image
-                </Typography>
-              </Box>
+                {instrument.description || "No description available"}
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: "bold",
+                  fontFamily: "Helvetica, sans-serif",
+                  color: "#0a5",
+                  textTransform: "uppercase",
+                }}
+              >
+                Product Code: {codeSegments.join("")}
+              </Typography>
             </Box>
-            <Typography
-              className="description"
-              variant="body1"
-              align="center"
-              sx={{ fontFamily: "Helvetica, sans-serif", mb: 3 }}
-            >
-              {instrument.description || "No description available"}
-            </Typography>
-            <Typography
-              className="product-code"
-              variant="body1"
-              align="center"
-              sx={{
-                fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-              }}
-            >
-              Product Code: {codeSegments.join("")}
-            </Typography>
 
             {isImageEnlarged && (
               <Box className="image-overlay" onClick={handleCloseOverlay}>
@@ -346,298 +414,346 @@ function Configurator({ navigateWithLoading }) {
               </Box>
             )}
 
-            {!showAddOns ? (
-              <Box
-                className={`config-form ${
-                  isClicked === "showAddOns" ? "config-form-clicked" : ""
-                }`}
-              >
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    mb: 3,
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif",
-                    textTransform: "uppercase",
-                    color: "#333",
-                    position: "relative",
-                    "&:after": {
-                      content: '""',
-                      position: "absolute",
-                      bottom: "-8px",
-                      left: 0,
-                      width: "50px",
-                      height: "3px",
-                      backgroundColor: "#0a5",
-                    },
-                  }}
-                >
-                  configure requirements
-                </Typography>
-                {fields.length === 0 ? (
+            <ToolCard>
+              {!showAddOns ? (
+                <Box>
                   <Typography
-                    variant="body1"
+                    variant="subtitle1"
                     sx={{
-                      mb: 4,
+                      mb: 3,
+                      fontWeight: "bold",
                       fontFamily: "Helvetica, sans-serif",
-                      color: "text.secondary",
+                      textTransform: "uppercase",
+                      color: "#000000",
+                      position: "relative",
+                      "&:after": {
+                        content: '""',
+                        position: "absolute",
+                        bottom: "-8px",
+                        left: 0,
+                        width: "50px",
+                        height: "3px",
+                        bgcolor: "#d6393a",
+                      },
                     }}
                   >
-                    No configuration fields available for this instrument.
+                    Configure Requirements
                   </Typography>
-                ) : (
-                  <Box className="fields-list">
-                    {fields
-                      .filter(shouldShowField)
-                      .sort((a, b) => a.order - b.order)
-                      .map((field) => (
-                        <Box
-                          key={field.id}
-                          className="field-item"
-                          sx={{
-                            p: 2,
-                            mb: 2,
-                            borderRadius: 2,
-                            border: "1px solid #e0e0e0",
-                            backgroundColor: "white",
-                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-                            transition:
-                              "transform 0.2s ease, box-shadow 0.2s ease",
-                            "&:hover": {
-                              transform: "translateY(-2px)",
-                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                            },
-                          }}
-                        >
-                          <FormControl fullWidth>
-                            <InputLabel
-                              sx={{
-                                fontFamily: "Helvetica, sans-serif",
-                                fontWeight: "bold",
-                                color: "#333",
-                              }}
-                            >
-                              {field.name}
-                            </InputLabel>
-                            <Select
-                              value={selections[field.id]?.id || ""}
-                              label={field.name}
-                              onChange={(e) => {
-                                console.log("Selected value:", e.target.value);
-                                console.log("Options:", field.options);
-                                const opt = field.options.find(
-                                  (o) =>
-                                    o.id.toString() ===
-                                    e.target.value.toString()
-                                );
-                                console.log("Selected option:", opt);
-                                handleSelect(field.id, opt);
-                              }}
-                              sx={{
-                                fontFamily: "Helvetica, sans-serif",
-                                backgroundColor: "white",
-                                borderRadius: 2,
-                                "& .MuiOutlinedInput-notchedOutline": {
-                                  borderColor: "#2c3e50",
-                                },
-                                "&:hover .MuiOutlinedInput-notchedOutline": {
-                                  borderColor: "#0a5",
-                                },
-                                "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                  {
-                                    borderColor: "#0a5",
-                                    borderWidth: "2px",
-                                  },
-                              }}
-                            >
-                              <MenuItem
-                                value=""
-                                sx={{ fontFamily: "Helvetica, sans-serif" }}
-                              >
-                                -- Select --
-                              </MenuItem>
-                              {field.options.map((opt) => (
-                                <MenuItem
-                                  key={opt.id}
-                                  value={opt.id}
-                                  sx={{ fontFamily: "Helvetica, sans-serif" }}
+                  {fields.length === 0 ? (
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        mb: 4,
+                        fontFamily: "Helvetica, sans-serif",
+                        color: "text.secondary",
+                      }}
+                    >
+                      No configuration fields available for this instrument.
+                    </Typography>
+                  ) : (
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: {
+                            xs: "1fr",
+                            md: "1fr 1fr",
+                          },
+                          gap: 2,
+                        }}
+                      >
+                        {fields
+                          .filter(shouldShowField)
+                          .sort((a, b) => a.order - b.order)
+                          .map((field) => (
+                            <Box key={field.id} className="field-item">
+                              <FormControl fullWidth>
+                                <InputLabel
+                                  sx={{
+                                    fontFamily: "Helvetica, sans-serif",
+                                    fontWeight: "bold",
+                                    color: "#2c3e50",
+                                    fontSize: "14px",
+                                  }}
                                 >
-                                  <span
-                                    style={{
-                                      fontWeight: "bold",
-                                      color: "#0a5",
+                                  {field.name}
+                                </InputLabel>
+                                <Select
+                                  value={selections[field.id]?.id || ""}
+                                  label={field.name}
+                                  onChange={(e) => {
+                                    console.log(
+                                      "Selected value:",
+                                      e.target.value
+                                    );
+                                    console.log("Options:", field.options);
+                                    const opt = field.options.find(
+                                      (o) =>
+                                        o.id.toString() ===
+                                        e.target.value.toString()
+                                    );
+                                    console.log("Selected option:", opt);
+                                    handleSelect(field.id, opt);
+                                  }}
+                                  error={showError && !selections[field.id]?.id}
+                                  sx={{
+                                    fontFamily: "Helvetica, sans-serif",
+                                    fontSize: "14px",
+                                    bgcolor: "#ffffff",
+                                    borderRadius: "8px",
+                                    "& .MuiOutlinedInput-notchedOutline": {
+                                      borderColor:
+                                        showError && !selections[field.id]?.id
+                                          ? "#d32f2f"
+                                          : "#ccc",
+                                    },
+                                    "&:hover .MuiOutlinedInput-notchedOutline":
+                                      {
+                                        borderColor:
+                                          showError && !selections[field.id]?.id
+                                            ? "#d32f2f"
+                                            : "#d6393a",
+                                      },
+                                    "&.Mui-focused .MuiOutlinedInput-notchedOutline":
+                                      {
+                                        borderColor:
+                                          showError && !selections[field.id]?.id
+                                            ? "#d32f2f"
+                                            : "#d6393a",
+                                        borderWidth: "2px",
+                                      },
+                                  }}
+                                >
+                                  <MenuItem
+                                    value=""
+                                    sx={{
+                                      fontFamily: "Helvetica, sans-serif",
+                                      fontSize: "14px",
                                     }}
                                   >
-                                    [{opt.code}]
-                                  </span>{" "}
-                                  {opt.label}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      ))}
-                  </Box>
-                )}
-                <Button
-                  className="next-button"
-                  variant="contained"
-                  onClick={() => handleClick("showAddOns")}
-                  disabled={isClicked === "showAddOns"}
-                  sx={{
-                    fontFamily: "Helvetica, sans-serif",
-                    "&.Mui-disabled": { opacity: 0.6 },
-                  }}
-                >
-                  {isClicked === "showAddOns" ? (
-                    <CircularProgress size={24} sx={{ color: "white" }} />
-                  ) : (
-                    "Next"
-                  )}
-                </Button>
-              </Box>
-            ) : (
-              <Box
-                className={`addons-section ${
-                  isClicked === "review" ? "addons-section-clicked" : ""
-                }`}
-              >
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    mb: 3,
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif",
-                    textTransform: "uppercase",
-                    color: "#333",
-                    position: "relative",
-                    "&:after": {
-                      content: '""',
-                      position: "absolute",
-                      bottom: "-8px",
-                      left: 0,
-                      width: "50px",
-                      height: "3px",
-                      backgroundColor: "#0a5",
-                    },
-                  }}
-                >
-                  optional add-ons
-                </Typography>
-                {Object.keys(groupedAddons).length > 0 ? (
-                  <Box className="addons-list">
-                    {Object.keys(groupedAddons)
-                      .sort()
-                      .map((typeName) => (
-                        <Box key={typeName} className="addon-type-group">
-                          <Typography
-                            variant="subtitle1"
-                            className="addon-type-heading"
-                            sx={{
-                              mb: 2,
-                              fontFamily: "Helvetica, sans-serif",
-                              fontWeight: "bold",
-                              textTransform: "uppercase",
-                              color: "#2c3e50",
-                            }}
-                          >
-                            {typeName}
-                          </Typography>
-                          <Box className="addon-type-items">
-                            {groupedAddons[typeName].map((addon) => (
-                              <Box
-                                key={addon.id}
-                                className="addon-item"
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  p: 2,
-                                  mb: 2,
-                                  borderRadius: 2,
-                                  border: "1px solid #e0e0e0",
-                                  backgroundColor: "white",
-                                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-                                  transition:
-                                    "transform 0.2s ease, box-shadow 0.2s ease",
-                                  "&:hover": {
-                                    transform: "translateY(-2px)",
-                                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                                  },
-                                }}
-                              >
-                                <Checkbox
-                                  checked={selectedAddOns.includes(addon)}
-                                  onChange={() => handleAddOnToggle(addon)}
-                                  sx={{
-                                    color: "#2c3e50",
-                                    "&.Mui-checked": {
-                                      color: "#0a5",
-                                    },
-                                  }}
-                                />
-                                <Box sx={{ ml: 2, flex: 1 }}>
-                                  <Typography
-                                    variant="body1"
-                                    sx={{ fontFamily: "Helvetica, sans-serif" }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontWeight: "bold",
-                                        color: "#0a5",
+                                    -- Select --
+                                  </MenuItem>
+                                  {field.options.map((opt) => (
+                                    <MenuItem
+                                      key={opt.id}
+                                      value={opt.id}
+                                      sx={{
+                                        fontFamily: "Helvetica, sans-serif",
+                                        fontSize: "14px",
                                       }}
                                     >
-                                      [{addon.code}]
-                                    </span>{" "}
-                                    {addon.label}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            ))}
-                          </Box>
-                        </Box>
-                      ))}
+                                      <Box
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: 1,
+                                        }}
+                                      >
+                                        <Box
+                                          sx={{
+                                            bgcolor: "#0a5",
+                                            color: "#ffffff",
+                                            px: 1,
+                                            borderRadius: "4px",
+                                            fontSize: "12px",
+                                            fontWeight: "bold",
+                                          }}
+                                        >
+                                          {opt.code}
+                                        </Box>
+                                        {opt.label}
+                                      </Box>
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          ))}
+                      </Box>
+                      {showError && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "#d32f2f",
+                            fontFamily: "Helvetica, sans-serif",
+                            mt: 2,
+                            textAlign: "center",
+                          }}
+                        >
+                          Please select all required fields
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+                  <Box sx={{ textAlign: "center", mt: 4 }}>
+                    <CTAButton
+                      variant="contained"
+                      onClick={() => handleClick("showAddOns")}
+                      disabled={
+                        isClicked === "showAddOns" ||
+                        (fields.length > 0 && !allFieldsSelected())
+                      }
+                    >
+                      {isClicked === "showAddOns" ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        "Next: Add-ons"
+                      )}
+                    </CTAButton>
                   </Box>
-                ) : (
+                </Box>
+              ) : (
+                <Box>
                   <Typography
-                    variant="body1"
+                    variant="subtitle1"
                     sx={{
                       mb: 4,
+                      fontWeight: "bold",
                       fontFamily: "Helvetica, sans-serif",
-                      color: "text.secondary",
+                      textTransform: "uppercase",
+                      color: "#000000",
+                      position: "relative",
+                      "&:after": {
+                        content: '""',
+                        position: "absolute",
+                        bottom: "-8px",
+                        left: 0,
+                        width: "50px",
+                        height: "3px",
+                        bgcolor: "#d6393a",
+                      },
                     }}
                   >
-                    No add-ons available for this instrument.
+                    Optional Add-ons
                   </Typography>
-                )}
-                <Button
-                  className="next-button"
-                  variant="contained"
-                  onClick={() =>
-                    handleClick(
-                      "review",
-                      `/instruments/${instrumentId}/review`,
-                      {
-                        instrument,
-                        selections,
-                        selectedAddOns,
-                        productCode: codeSegments.join(""),
-                      }
-                    )
-                  }
-                  disabled={isClicked === "review"}
-                  sx={{
-                    fontFamily: "Helvetica, sans-serif",
-                    "&.Mui-disabled": { opacity: 0.6 },
-                  }}
-                >
-                  {isClicked === "review" ? (
-                    <CircularProgress size={24} sx={{ color: "white" }} />
+                  {Object.keys(groupedAddons).length > 0 ? (
+                    <Box>
+                      {Object.keys(groupedAddons)
+                        .sort()
+                        .map((typeName, index) => (
+                          <Box key={typeName}>
+                            {index > 0 && <Divider sx={{ my: 2 }} />}
+                            <Typography
+                              variant="subtitle2"
+                              sx={{
+                                mb: 2,
+                                fontFamily: "Helvetica, sans-serif",
+                                fontWeight: "bold",
+                                textTransform: "uppercase",
+                                color: "#000000",
+                                fontSize: "14px",
+                              }}
+                            >
+                              {typeName}
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "grid",
+                                gridTemplateColumns: {
+                                  xs: "1fr",
+                                  md: "1fr 1fr",
+                                },
+                                gap: 2,
+                              }}
+                            >
+                              {groupedAddons[typeName].map((addon) => (
+                                <Box
+                                  key={addon.id}
+                                  className="addon-item"
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    p: 2,
+                                    bgcolor: "#ffffff",
+                                    borderRadius: "8px",
+                                    border: "1px solid #ccc",
+                                    transition: "background-color 0.3s ease",
+                                    "&:hover": {
+                                      bgcolor: "#f8f9fa",
+                                    },
+                                  }}
+                                >
+                                  <Checkbox
+                                    checked={selectedAddOns.includes(addon)}
+                                    onChange={() => handleAddOnToggle(addon)}
+                                    sx={{
+                                      color: "#ccc",
+                                      "&.Mui-checked": {
+                                        color: "#d6393a",
+                                      },
+                                    }}
+                                  />
+                                  <Box sx={{ flex: 1 }}>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        fontFamily: "Helvetica, sans-serif",
+                                        fontSize: "14px",
+                                      }}
+                                    >
+                                      <Box
+                                        component="span"
+                                        sx={{
+                                          bgcolor: "#0a5",
+                                          color: "#ffffff",
+                                          px: "8px",
+                                          borderRadius: "4px",
+                                          fontSize: "12px",
+                                          fontWeight: "bold",
+                                          mr: 1,
+                                        }}
+                                      >
+                                        {addon.code}
+                                      </Box>
+                                      {addon.label}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              ))}
+                            </Box>
+                          </Box>
+                        ))}
+                    </Box>
                   ) : (
-                    "Next - Review"
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        fontFamily: "Helvetica, sans-serif",
+                        fontSize: "14px",
+                        color: "text.secondary",
+                      }}
+                    >
+                      No add-ons available for this instrument.
+                    </Typography>
                   )}
-                </Button>
-              </Box>
-            )}
+                  <Box sx={{ textAlign: "center", mt: 4 }}>
+                    <CTAButton
+                      variant="contained"
+                      onClick={() =>
+                        handleClick(
+                          "review",
+                          `/instruments/${instrumentId}/review`,
+                          {
+                            instrument,
+                            selections,
+                            selectedAddOns,
+                            productCode: codeSegments.join(""),
+                          }
+                        )
+                      }
+                      disabled={isClicked === "review"}
+                    >
+                      {isClicked === "review" ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        "Review Configuration"
+                      )}
+                    </CTAButton>
+                  </Box>
+                </Box>
+              )}
+            </ToolCard>
           </Container>
         </main>
       </Box>

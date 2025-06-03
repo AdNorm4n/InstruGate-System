@@ -158,7 +158,7 @@ export default function Navbar({ userRole }) {
               textTransform: "none",
               fontWeight: "bold",
               bgcolor: "#ffffff",
-              "&:hover": { bgcolor: "#f5f5f5" },
+              "&:hover": { bgcolor: "#e0e0e0" },
             }}
           >
             Profile
@@ -171,7 +171,7 @@ export default function Navbar({ userRole }) {
               textTransform: "none",
               fontWeight: "bold",
               bgcolor: "#ffffff",
-              "&:hover": { bgcolor: "#f5f5f5" },
+              "&:hover": { bgcolor: "#e0e0e0" },
             }}
           >
             Logout
@@ -201,6 +201,7 @@ export default function Navbar({ userRole }) {
                 color: "#ffffff",
                 textTransform: "none",
                 fontWeight: 500,
+                "&:hover": { bgcolor: "#b32b2e" },
               }}
             >
               {item.text}

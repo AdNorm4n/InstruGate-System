@@ -51,7 +51,7 @@ function QuotationForm() {
 
         // Check token expiration
         const decoded = jwtDecode(access);
-        const now = Date.now() / 1000;
+        const now = Date.now();
         if (decoded.exp < now) {
           const res = await api.post("/api/token/refresh/", { refresh });
           access = res.data.access;
@@ -199,6 +199,7 @@ function QuotationForm() {
       setTimeout(() => setIsClicked(false), 300);
     }
   };
+
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", mt: "20vh" }}>
@@ -254,22 +255,34 @@ function QuotationForm() {
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>
-          <Container maxWidth="xl" sx={{ py: 4, mt: 12 }}>
+          <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
             <Typography
-              variant="h5"
+              variant="h6"
               align="center"
               gutterBottom
               sx={{
+                fontFamily: "Helvetica, sans-serif !important",
                 fontWeight: "bold",
                 color: "#000000",
-                fontFamily: "Helvetica, sans-serif",
                 textTransform: "uppercase",
-                letterSpacing: 0,
-                mb: 6,
+                mb: 4,
+                fontSize: { xs: "1.5rem", md: "2rem" },
                 textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
               }}
             >
-              Quotation Summary
+              Quotation Submission
+            </Typography>
+            <Typography
+              variant="body1"
+              align="center"
+              sx={{
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#333",
+                mb: 6,
+                fontSize: "0.9rem",
+              }}
+            >
+              Review and submit your quotation details.
             </Typography>
 
             <Box
@@ -434,31 +447,36 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
-                          mb: 1,
                         }}
                       >
                         {item.instrument.name}
                       </Typography>
-                      <Typography
-                        variant="subtitle1"
+                      <Box
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
-                          color: "#0a5",
-                          mb: 1,
-                        }}
-                      >
-                        <strong>Product Code:</strong> {item.productCode}
-                      </Typography>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontFamily: "Helvetica, sans-serif",
-                          color: "#0a5",
+                          display: "flex",
+                          flexDirection: "column",
                           mb: 2,
                         }}
                       >
-                        <strong>Quantity:</strong> {item.quantity || 1}
-                      </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "#0a5",
+                          }}
+                        >
+                          <strong>Product Code:</strong> {item.productCode}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "#0a5",
+                          }}
+                        >
+                          <strong>Quantity:</strong> {item.quantity || 1}
+                        </Typography>
+                      </Box>
 
                       <Typography
                         variant="subtitle1"
@@ -466,14 +484,14 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
-                          mb: 1,
+                          mb: 0,
                         }}
                       >
-                        Requirements
+                        Requirements:
                       </Typography>
-                      <List>
+                      <List dense sx={{ mb: 2 }}>
                         {Object.values(item.selections).map((sel, idx) => (
-                          <ListItem key={idx} disablePadding>
+                          <ListItem key={idx} disablePadding sx={{ py: 0 }}>
                             <ListItemText
                               primary={`[${sel.code}] ${sel.label}`}
                               sx={{
@@ -491,15 +509,15 @@ function QuotationForm() {
                           fontWeight: "bold",
                           fontFamily: "Helvetica, sans-serif",
                           color: "#000000",
-                          mb: 1,
+                          mb: 0,
                         }}
                       >
-                        Add-Ons
+                        Add-Ons:
                       </Typography>
-                      <List>
+                      <List dense>
                         {item.selectedAddOns.length > 0 ? (
                           item.selectedAddOns.map((addon, idx) => (
-                            <ListItem key={idx} disablePadding>
+                            <ListItem key={idx} disablePadding sx={{ py: 0 }}>
                               <ListItemText
                                 primary={`[${addon.code}] ${addon.label} (${addon.addon_type.name})`}
                                 sx={{
@@ -510,7 +528,7 @@ function QuotationForm() {
                             </ListItem>
                           ))
                         ) : (
-                          <ListItem disablePadding>
+                          <ListItem disablePadding sx={{ py: 0 }}>
                             <ListItemText
                               primary="No Add-Ons selected"
                               sx={{
@@ -527,12 +545,37 @@ function QuotationForm() {
               </Box>
             )}
 
-            <Box className="action-section" sx={{ mt: 4 }}>
+            <Box
+              className="action-section"
+              sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}
+            >
               <Button
                 className="primary-button"
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={isSubmitDisabled}
+                sx={{
+                  backgroundColor: "#1976d2",
+                  color: "#ffffff",
+                  padding: "8px 24px",
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  textTransform: "none",
+                  borderRadius: "8px",
+                  fontFamily: "Helvetica, sans-serif",
+                  "&:hover": {
+                    backgroundColor: "#1565c0",
+                    transform: "scale(1.05)",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "#e0e0e0",
+                    color: "#999",
+                  },
+                  transition: "all 0.3s ease",
+                  "& .MuiCircularProgress-root": {
+                    color: "#ffffff",
+                  },
+                }}
               >
                 {isClicked ? (
                   <CircularProgress size={24} sx={{ color: "white" }} />

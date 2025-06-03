@@ -16,8 +16,8 @@ const Footer = () => {
     >
       <Typography variant="body2" sx={{ color: "#ffffff", fontWeight: 500 }}>
         © {new Date().getFullYear()} Rüeger Malaysia Sdn Bhd, An Ashcroft
-        Company. All rights reserved. Developed by Adrian Norman, Software
-        Engineering student at Universiti Teknologi Malaysia.
+        Company. All rights reserved. Developed by Adrian Norman Khusairi,
+        Software Engineering student at Universiti Teknologi Malaysia.
       </Typography>
     </Box>
   );

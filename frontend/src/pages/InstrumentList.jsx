@@ -32,7 +32,7 @@ const CategoryCard = styled(Card)(({ theme, active }) => ({
   "&:hover": {
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-    borderColor: "#d4a017",
+    borderColor: "#d6393a",
   },
   fontFamily: "Helvetica, sans-serif !important",
 }));
@@ -132,31 +132,6 @@ const InstrumentList = () => {
   const handleCategoryClick = (category) => {
     setSelectedCategory(category === selectedCategory ? null : category);
   };
-
-  // Loading fallback
-  if (loading) {
-    return (
-      <Fade in timeout={800}>
-        <Box sx={{ display: "flex", justifyContent: "center", mt: "20vh" }}>
-          <ToolCard sx={{ maxWidth: 400, textAlign: "center" }}>
-            <CircularProgress />
-            <Typography
-              variant="h6"
-              sx={{
-                mt: 2,
-                fontFamily: "Helvetica, sans-serif !important",
-                fontWeight: "bold",
-                color: "#000000",
-                fontSize: "0.9rem",
-              }}
-            >
-              Loading instruments...
-            </Typography>
-          </ToolCard>
-        </Box>
-      </Fade>
-    );
-  }
 
   // Error fallback
   if (userRole === "error") {

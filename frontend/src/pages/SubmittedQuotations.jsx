@@ -274,17 +274,6 @@ function SubmittedQuotations() {
       ? quotations
       : quotations.filter((q) => q.status === statusFilter);
 
-  if (loading) {
-    return (
-      <Box className="loading-container">
-        <CircularProgress size={48} />
-        <Typography variant="h6" className="loading-text">
-          Loading quotations...
-        </Typography>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Box className="error-container">

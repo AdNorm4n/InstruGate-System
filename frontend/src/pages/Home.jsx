@@ -46,23 +46,26 @@ const Section = styled(Box)(({ theme }) => ({
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#d4a017",
+  backgroundColor: "#1976d2",
   color: "#ffffff",
   padding: theme.spacing(1, 3),
   fontWeight: 600,
+  fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
-  fontSize: "0.9rem",
+  fontFamily: "Helvetica, sans-serif",
   "&:hover": {
-    backgroundColor: "#b8860b",
+    backgroundColor: "#1565c0",
     transform: "scale(1.05)",
   },
-  "&:focus": {
-    outline: "3px solid #d4a017",
-    outlineOffset: "2px",
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
   },
   transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 const RoleCard = styled(Card)(({ theme }) => ({
@@ -136,22 +139,6 @@ function Home() {
   };
 
   if (userRole === null) {
-    return (
-      <Box sx={{ textAlign: "center", mt: "20vh" }}>
-        <CircularProgress size={48} sx={{ color: "#d4a017" }} />
-        <Typography
-          variant="h6"
-          sx={{
-            mt: 2,
-            fontFamily: "Helvetica, sans-serif !important",
-            fontWeight: "bold",
-            color: "#000000",
-          }}
-        >
-          Loading...
-        </Typography>
-      </Box>
-    );
   }
 
   return (
@@ -190,8 +177,8 @@ function Home() {
                   color: "white",
                 }}
               >
-                Keep your business running with reliable Pressure, Temperature
-                and Test Instruments
+                Keep your operations smooth and dependable with Rueger’s trusted
+                measurement instruments.
               </Typography>
             </div>
           </section>
@@ -218,7 +205,7 @@ function Home() {
                       <RoleCard className="role-card">
                         <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
                           <AdminPanelSettingsIcon
-                            sx={{ fontSize: 32, mb: 1, color: "#d6393a" }}
+                            sx={{ fontSize: 32, mb: 1, color: "#1976d2" }}
                           />
                           <Typography
                             variant="h5"
@@ -271,7 +258,7 @@ function Home() {
                       <RoleCard className="role-card">
                         <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
                           <ArchiveIcon
-                            sx={{ fontSize: 32, mb: 1, color: "#d6393a" }}
+                            sx={{ fontSize: 32, mb: 1, color: "#1976d2" }}
                           />
                           <Typography
                             variant="h5"
@@ -325,7 +312,7 @@ function Home() {
                       <RoleCard className="role-card">
                         <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
                           <StorefrontIcon
-                            sx={{ fontSize: 32, mb: 1, color: "#d6393a" }}
+                            sx={{ fontSize: 32, mb: 1, color: "#1976d2" }}
                           />
                           <Typography
                             variant="h5"

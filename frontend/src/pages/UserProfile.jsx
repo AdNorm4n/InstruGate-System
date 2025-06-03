@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Fade,
   Alert,
+  Paper,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
@@ -19,6 +20,61 @@ import "../styles/UserProfile.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
+}));
+
+const ProfileCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(3),
+  },
+}));
+
+const ToolCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  backgroundColor: "#ffffff",
+  borderRadius: "16px",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+  },
+  fontFamily: "Helvetica, sans-serif !important",
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(3),
+  },
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#1976d2",
+  color: "#ffffff",
+  padding: theme.spacing(1.5, 3),
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "Helvetica, sans-serif !important",
+  "&:hover": {
+    backgroundColor: "#1565c0",
+    transform: "scale(1.01)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
+  transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 function UserProfile() {
@@ -36,7 +92,6 @@ function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const getToken = () => localStorage.getItem(ACCESS_TOKEN);
@@ -102,7 +157,7 @@ function UserProfile() {
         userRes.data.last_name === null
       ) {
         console.warn(
-          "UserProfile: last_name is undefined or null in GET response"
+          "UserProfile: last_name is undefined or null in userRes.data"
         );
       }
 
@@ -140,14 +195,13 @@ function UserProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
     setSubmitting(true);
 
     const confirmed = window.confirm(
       "Are you sure you want to update your profile?"
     );
     if (!confirmed) {
-      console.log("UserProfile: Profile update canceled by user");
+      console.log("UserProfile: Profile update canceled by user.");
       setSubmitting(false);
       return;
     }
@@ -157,7 +211,7 @@ function UserProfile() {
       let access = getToken();
       const refresh = getRefreshToken();
 
-      if (!access || !refresh) {
+      if (!access) {
         throw new Error("No access token found");
       }
 
@@ -165,7 +219,7 @@ function UserProfile() {
       const now = Date.now() / 1000;
       if (decoded.exp < now) {
         console.log(
-          "UserProfile: Token expired for submit, attempting refresh..."
+          "UserProfile: Token expired for update, attempting refresh..."
         );
         const res = await api.post("/api/users/token/", { refresh });
         if (!res.data.access) {
@@ -173,7 +227,7 @@ function UserProfile() {
         }
         access = res.data.access;
         localStorage.setItem(ACCESS_TOKEN, access);
-        console.log("UserProfile: Token refreshed for submit");
+        console.log("UserProfile: Token refreshed for update");
       }
 
       const payload = {
@@ -216,7 +270,7 @@ function UserProfile() {
       });
       setPassword("");
       setConfirmPassword("");
-      setSuccess("Profile updated successfully!");
+      window.alert("Successfully updated");
     } catch (err) {
       console.error("UserProfile: Error updating profile:", {
         message: err.message,
@@ -240,20 +294,32 @@ function UserProfile() {
 
   if (loading) {
     return (
-      <Box sx={{ textAlign: "center", mt: "20vh" }}>
-        <CircularProgress size={48} sx={{ color: "#d6393a" }} />
-        <Typography
-          variant="h6"
+      <Fade in>
+        <Box
           sx={{
-            mt: 2,
-            fontFamily: "Helvetica, sans-serif",
-            fontWeight: "bold",
-            color: "#000000",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            mt: "20vh",
           }}
         >
-          Loading profile...
-        </Typography>
-      </Box>
+          <ToolCard sx={{ maxWidth: "500px", mx: "auto", p: 4 }}>
+            <CircularProgress size={48} sx={{ color: "#1976d2" }} />
+            <Typography
+              variant="h6"
+              sx={{
+                mt: 2,
+                fontFamily: "Helvetica, sans-serif !important",
+                fontWeight: "bold",
+                color: "#000000",
+              }}
+            >
+              Loading profile...
+            </Typography>
+          </ToolCard>
+        </Box>
+      </Fade>
     );
   }
 
@@ -265,62 +331,70 @@ function UserProfile() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          background: "linear-gradient(to bottom, #f5f5f5, #e9ecef)",
+          bgcolor: "#f8f9fa",
         }}
       >
         <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="sm" sx={{ py: 4, mt: 12, mb: 8 }}>
+          <Container maxWidth="md" sx={{ py: 6, mt: 8 }}>
             <Typography
-              variant="h5"
+              variant="h6"
               align="center"
               gutterBottom
               sx={{
+                fontFamily: "Helvetica, sans-serif !important",
                 fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif",
-                textTransform: "uppercase",
-                letterSpacing: 0,
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
                 color: "#000000",
-                mb: 6,
+                textTransform: "uppercase",
+                mb: 2,
+                fontSize: { xs: "1.5rem", md: "2rem" },
+                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
               }}
             >
               User Profile
             </Typography>
-
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
-
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
+            <Typography
+              variant="body1"
+              align="center"
               sx={{
-                p: 3,
-                border: "4px solid #e0e0e0",
-                borderRadius: "8px",
-                backgroundColor: "#fff",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-                "&:hover": {
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                },
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#333",
+                mb: 6,
+                fontSize: "0.9rem",
               }}
             >
+              Update your personal information and account settings.
+            </Typography>
+
+            {error && (
+              <ToolCard sx={{ mb: 4, mx: "auto", maxWidth: "500px" }}>
+                <Alert severity="error" sx={{ borderRadius: 2 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif !important",
+                      fontSize: "0.9rem",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {error}
+                  </Typography>
+                </Alert>
+              </ToolCard>
+            )}
+
+            <ProfileCard component="form" onSubmit={handleSubmit}>
               <TextField
                 label="Username"
                 value={userData.username}
                 disabled
                 fullWidth
                 margin="normal"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="Role"
@@ -328,7 +402,10 @@ function UserProfile() {
                 disabled
                 fullWidth
                 margin="normal"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="First Name"
@@ -338,7 +415,10 @@ function UserProfile() {
                 }
                 fullWidth
                 margin="normal"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="Last Name"
@@ -348,7 +428,10 @@ function UserProfile() {
                 }
                 fullWidth
                 margin="normal"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="Email"
@@ -360,7 +443,10 @@ function UserProfile() {
                 fullWidth
                 margin="normal"
                 type="email"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="Company"
@@ -371,7 +457,10 @@ function UserProfile() {
                 disabled={isAdminOrEngineer}
                 fullWidth
                 margin="normal"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="Password"
@@ -381,7 +470,10 @@ function UserProfile() {
                 margin="normal"
                 type="password"
                 placeholder="Leave blank to keep unchanged"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
               <TextField
                 label="Confirm Password"
@@ -391,26 +483,21 @@ function UserProfile() {
                 margin="normal"
                 type="password"
                 placeholder="Leave blank to keep unchanged"
-                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                InputLabelProps={{
+                  style: { fontFamily: "Helvetica, sans-serif" },
+                }}
+                InputProps={{ style: { fontFamily: "Helvetica, sans-serif" } }}
               />
-              <Button
+              <CTAButton
                 type="submit"
                 variant="contained"
                 disabled={submitting}
                 fullWidth
-                sx={{
-                  mt: 3,
-                  fontFamily: "Helvetica, sans-serif",
-                  "&:hover": { bgcolor: "#2c3e50" },
-                }}
+                sx={{ mt: 3 }}
               >
-                {submitting ? (
-                  <CircularProgress size={24} sx={{ color: "white" }} />
-                ) : (
-                  "Update Profile"
-                )}
-              </Button>
-            </Box>
+                {submitting ? <CircularProgress size={24} /> : "Update Profile"}
+              </CTAButton>
+            </ProfileCard>
           </Container>
         </main>
       </Box>

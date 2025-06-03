@@ -57,19 +57,27 @@ const ToolCard = styled(Paper)(({ theme }) => ({
   fontFamily: "Helvetica, sans-serif !important",
 }));
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#d4a017",
-  color: "#fff",
-  padding: theme.spacing(1.5, 4),
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#1976d2",
+  color: "#ffffff",
+  padding: theme.spacing(1, 3),
   fontWeight: 600,
+  fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
   "&:hover": {
-    backgroundColor: "#b8860b",
+    backgroundColor: "#1565c0",
     transform: "scale(1.05)",
   },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
   transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 const CancelButton = styled(Button)(({ theme }) => ({
@@ -937,14 +945,14 @@ const QuotationsAdmin = () => {
                         </Select>
                       </FormControl>
                     </Box>
-                    <ActionButton
+                    <CTAButton
                       variant="contained"
                       startIcon={<Add />}
                       onClick={openAddModal}
                       disabled={!tabs[0].permissions.includes(userRole)}
                     >
                       Add Quotation
-                    </ActionButton>
+                    </CTAButton>
                   </Box>
                   {renderTable()}
                 </ToolCard>
@@ -967,7 +975,7 @@ const QuotationsAdmin = () => {
                   sx={{
                     fontFamily: "Helvetica, sans-serif !important",
                     fontWeight: "bold",
-                    color: "#d4a017",
+                    color: "#1976d2",
                   }}
                 >
                   {modalAction === "add" ? "Add Quotation" : "View Quotation"}
@@ -976,9 +984,9 @@ const QuotationsAdmin = () => {
                 <DialogActions>
                   <CancelButton onClick={handleModalClose}>Close</CancelButton>
                   {modalAction === "add" && (
-                    <ActionButton type="submit" variant="contained">
+                    <CTAButton type="submit" variant="contained">
                       Save
-                    </ActionButton>
+                    </CTAButton>
                   )}
                 </DialogActions>
               </Dialog>

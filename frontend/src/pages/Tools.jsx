@@ -42,22 +42,26 @@ const ToolButton = styled(Button)(({ theme, active }) => ({
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#d4a017",
+  backgroundColor: "#1976d2",
   color: "#ffffff",
-  padding: theme.spacing(1.5, 4),
+  padding: theme.spacing(1, 3),
   fontWeight: 600,
+  fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
   "&:hover": {
-    backgroundColor: "#b8860b",
+    backgroundColor: "#1565c0",
     transform: "scale(1.05)",
   },
-  "&:focus": {
-    outline: "3px solid #d4a017",
-    outlineOffset: "2px",
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
   },
   transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 const ResetButton = styled(Button)(({ theme }) => ({

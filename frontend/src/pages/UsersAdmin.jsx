@@ -54,19 +54,27 @@ const ToolCard = styled(Paper)(({ theme }) => ({
   fontFamily: "Helvetica, sans-serif !important",
 }));
 
-const ActionButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#d4a017",
-  color: "#fff",
-  padding: theme.spacing(1.5, 4),
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#1976d2",
+  color: "#ffffff",
+  padding: theme.spacing(1, 3),
   fontWeight: 600,
+  fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
   "&:hover": {
-    backgroundColor: "#b8860b",
+    backgroundColor: "#1565c0",
     transform: "scale(1.05)",
   },
+  "&.Mui-disabled": {
+    backgroundColor: "#e0e0e0",
+    color: "#999",
+  },
   transition: "all 0.3s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 const CancelButton = styled(Button)(({ theme }) => ({
@@ -420,7 +428,7 @@ const UsersAdmin = () => {
                   <ToolCard
                     sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
                   >
-                    <CircularProgress size={48} sx={{ color: "#d4a017" }} />
+                    <CircularProgress size={48} sx={{ color: "#1976d2" }} />
                     <Typography
                       variant="h6"
                       sx={{
@@ -524,14 +532,14 @@ const UsersAdmin = () => {
                         </Select>
                       </FormControl>
                     </Box>
-                    <ActionButton
+                    <CTAButton
                       variant="contained"
                       startIcon={<Add />}
                       onClick={openAddModal}
                       disabled={userRole !== "admin"}
                     >
                       Add User
-                    </ActionButton>
+                    </CTAButton>
                   </Box>
                   <Table>
                     <TableHead>
@@ -617,7 +625,7 @@ const UsersAdmin = () => {
                               <IconButton
                                 onClick={() => openEditModal(user)}
                                 disabled={userRole !== "admin"}
-                                sx={{ color: "#d4a017" }}
+                                sx={{ color: "#1976d2" }}
                               >
                                 <Edit />
                               </IconButton>
@@ -654,7 +662,7 @@ const UsersAdmin = () => {
                   sx={{
                     fontFamily: "Helvetica, sans-serif !important",
                     fontWeight: "bold",
-                    color: "#d4a017",
+                    color: "#1976d2",
                   }}
                 >
                   {modalAction === "add" ? "Add New User" : "Edit User"}
@@ -850,9 +858,9 @@ const UsersAdmin = () => {
                 </DialogContent>
                 <DialogActions>
                   <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
-                  <ActionButton type="submit" variant="contained">
+                  <CTAButton type="submit" variant="contained">
                     {modalAction === "add" ? "Create" : "Save"}
-                  </ActionButton>
+                  </CTAButton>
                 </DialogActions>
               </Dialog>
             </Container>

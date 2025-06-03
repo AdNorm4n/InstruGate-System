@@ -6,7 +6,6 @@ import {
   Card,
   CardActionArea,
   CircularProgress,
-  Button,
   TextField,
 } from "@mui/material";
 import "../styles/InstrumentCard.css";
@@ -166,6 +165,7 @@ const InstrumentCard = ({
             fontWeight={600}
             color="text.primary"
             fontFamily="Helvetica, sans-serif"
+            textTransform="uppercase"
           >
             {instrument.name}
           </Typography>
