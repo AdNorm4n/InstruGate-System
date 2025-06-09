@@ -658,7 +658,7 @@ const ChatComponent = () => {
                       p: 0.5,
                     }}
                   >
-                    <ChevronLeft fontSize="medium" />
+                    <ChevronLeft sx={{ fontSize: "big", color: "#ffffff" }} />
                   </IconButton>
                 )}
               <Typography
@@ -688,7 +688,7 @@ const ChatComponent = () => {
                 alignItems: "center",
               }}
             >
-              <KeyboardArrowDown fontSize="medium" />
+              <KeyboardArrowDown sx={{ fontSize: "big", color: "#ffffff" }} />
             </IconButton>
           </Box>
           {error && (
@@ -1020,7 +1020,7 @@ const ChatComponent = () => {
                       }
                       endIcon={
                         wsConnected ? (
-                          <Send sx={{ fontSize: 18 }} />
+                          <Send sx={{ fontSize: 18, color: "#ffffff" }} />
                         ) : (
                           <CircularProgress
                             size={18}
