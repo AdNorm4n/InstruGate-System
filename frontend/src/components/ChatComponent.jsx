@@ -18,12 +18,43 @@ import {
   Close,
   Send,
   Visibility as VisibilityIcon,
-  ChevronLeft,
   KeyboardArrowDown,
+  AttachFile,
 } from "@mui/icons-material";
 import api from "../api";
 import { ACCESS_TOKEN } from "../constants";
 import "../styles/ChatComponent.css";
+
+// Utility function to normalize file_url to /media/chat_files/YYYY/MM/DD/filename.pdf
+const normalizeFileUrl = (fileUrl) => {
+  if (!fileUrl) return null;
+
+  // Strip any leading /media/ prefixes to avoid duplication
+  let cleanedUrl = fileUrl.replace(/^\/+media\//, "");
+
+  // Handle nested chat_files/YYYY/MM/DD/ paths
+  cleanedUrl = cleanedUrl.replace(
+    /^chat_files\/\d{4}\/\d{2}\/\d{2}\/chat_files\/\d{4}\/\d{2}\/\d{2}\//,
+    "chat_files/2025/06/10/"
+  );
+
+  // Ensure the URL starts with /media/
+  if (!cleanedUrl.startsWith("media/")) {
+    cleanedUrl = `media/${
+      cleanedUrl.startsWith("chat_files/") ? "" : "chat_files/2025/06/10/"
+    }${cleanedUrl}`;
+  }
+
+  // Remove any double /media/media/ occurrences
+  cleanedUrl = cleanedUrl.replace(/\/media\/media\//g, "/media/");
+
+  // Ensure single leading slash
+  cleanedUrl = `/${cleanedUrl.replace(/^\/+/, "")}`;
+
+  const finalUrl = `http://127.0.0.1:8000${cleanedUrl}`;
+  console.log("Original file_url:", fileUrl, "Normalized:", finalUrl);
+  return finalUrl;
+};
 
 const ChatComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,13 +66,16 @@ const ChatComponent = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState({});
   const [error, setError] = useState("");
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const ws = useRef(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
   const reconnectDelay = 3000;
   const messagesEndRef = useRef(null);
   const pendingMarkRead = useRef([]);
+  const fileInputRef = useRef(null);
+  const processedMessageIds = useRef(new Set());
 
   // Authenticate user and fetch profile
   useEffect(() => {
@@ -56,7 +90,7 @@ const ChatComponent = () => {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp * 1000;
       if (Date.now() > exp) {
-        setError("Session has expired. Please log in again.");
+        setError("Session expired. Please log in again.");
         localStorage.removeItem(ACCESS_TOKEN);
         window.location.href = "/login";
         return;
@@ -89,12 +123,24 @@ const ChatComponent = () => {
       });
   }, []);
 
+  // Auto-hide error message after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // Handle WebSocket connection
   const connectWebSocket = () => {
     if (!user || ws.current?.readyState === WebSocket.OPEN) return;
 
     const token = localStorage.getItem(ACCESS_TOKEN);
-    const socketUrl = `ws://localhost:8000/ws/chat/${user.username}/?token=${token}`;
+    const socketUrl = `ws://127.0.0.1:8000/ws/chat/${
+      user.username
+    }/?token=${encodeURIComponent(token)}`;
     ws.current = new WebSocket(socketUrl);
 
     ws.current.onopen = () => {
@@ -139,7 +185,15 @@ const ChatComponent = () => {
           return;
         }
 
-        if (!data.message || !data.sender_type || !data.client) return;
+        // Allow messages with file_url and file_name even if message is empty
+        if (
+          (!data.message && !(data.file_url && data.file_name)) ||
+          !data.sender_type ||
+          !data.client
+        ) {
+          console.log("Invalid message format:", data);
+          return;
+        }
 
         const {
           message,
@@ -149,8 +203,24 @@ const ChatComponent = () => {
           is_read,
           timestamp,
           message_id,
+          file_url,
+          file_name,
         } = data;
         const key = user.senderType === "client" ? user.username : client;
+        const normalizedFileUrl = normalizeFileUrl(file_url);
+
+        console.log("Processed message:", {
+          message,
+          sender,
+          sender_type,
+          client,
+          is_read,
+          timestamp,
+          message_id,
+          file_url,
+          file_name,
+          normalizedFileUrl,
+        });
 
         if (sender_type === "system") {
           let modifiedMessage = message;
@@ -171,10 +241,18 @@ const ChatComponent = () => {
               });
               if (selectedClient === client) setSelectedClient(null);
             }
+            return;
           }
 
-          if (message.includes("is with")) {
-            const match = message.match(/(\w+) is with (\w+)/);
+          if (
+            message.includes("is with") ||
+            message.includes("already assisting")
+          ) {
+            const matchWith = message.match(/(\w+) is with (\w+)/);
+            const matchAssisting = message.match(
+              /(\w+) already assisting (\w+)/
+            );
+            const match = matchWith || matchAssisting;
             if (match) {
               const [, clientName, engineer] = match;
               if (
@@ -236,6 +314,8 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
+              fileUrl: normalizedFileUrl,
+              fileName: file_name,
             };
             return {
               ...prev,
@@ -243,6 +323,12 @@ const ChatComponent = () => {
             };
           });
         } else {
+          if (processedMessageIds.current.has(message_id)) {
+            console.log("Skipping duplicate message_id:", message_id);
+            return;
+          }
+          processedMessageIds.current.add(message_id);
+
           setMessages((prev) => {
             const existingMessages = prev[key] || [];
             const messageExists = existingMessages.some(
@@ -268,7 +354,10 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
+              fileUrl: normalizedFileUrl,
+              fileName: file_name,
             };
+            console.log("Adding new message to state:", newMessage);
             return {
               ...prev,
               [key]: [...existingMessages, newMessage],
@@ -306,10 +395,10 @@ const ChatComponent = () => {
     ws.current.onclose = () => {
       console.log("WebSocket closed");
       setWsConnected(false);
+      processedMessageIds.current.clear();
       if (user?.senderType === "agent") {
         setClients([]);
         setSelectedClient(null);
-        setShowSidebar(true);
         setUnreadMessages({});
       }
       if (reconnectAttempts.current < maxReconnectAttempts) {
@@ -398,18 +487,103 @@ const ChatComponent = () => {
     }
   }, [messages, selectedClient]);
 
+  // Handle file selection
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      fileInputRef.current.value = null;
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Only PDF files are allowed.");
+      setSelectedFile(null);
+      fileInputRef.current.value = null;
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("File size exceeds 10 MB limit.");
+      setSelectedFile(null);
+      fileInputRef.current.value = null;
+      return;
+    }
+
+    setSelectedFile(file);
+    setError("");
+  };
+
+  // Handle file upload
+  const handleFileUpload = async () => {
+    if (!ws.current || !wsConnected || !user || !selectedFile) return;
+    if (user.senderType === "agent" && !selectedClient) {
+      setError("Please select a client to send the file to.");
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    if (user.senderType === "agent") {
+      formData.append("room_name", selectedClient);
+    }
+
+    try {
+      const response = await api.post("/api/chat/upload/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+        },
+      });
+      const { file_url, file_name, room_name, sender, sender_type } =
+        response.data;
+      console.log("Backend file_url:", file_url);
+      const receiver = user.senderType === "client" ? "" : selectedClient || "";
+      const effectiveRoom =
+        user.senderType === "client" ? user.username : room_name;
+
+      const payload = {
+        message: input || "",
+        sender_type: user.senderType,
+        receiver,
+        room_name: effectiveRoom,
+        file_url,
+        file_name,
+      };
+
+      ws.current.send(JSON.stringify(payload));
+      console.log("Sent file message:", payload);
+      setInput("");
+      setSelectedFile(null);
+      fileInputRef.current.value = null;
+    } catch (err) {
+      console.error("File upload error:", err);
+      setError("Failed to upload file. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Send user message
   const sendMessage = () => {
     if (!ws.current || !wsConnected || !input.trim() || !user) return;
 
     const receiver = user.senderType === "client" ? "" : selectedClient || "";
-    if (user.senderType === "agent" && !receiver) return;
+    if (user.senderType === "agent" && !receiver) {
+      setError("Please select a client to send the message.");
+      return;
+    }
 
     const payload = {
       message: input,
       sender_type: user.senderType,
       receiver,
+      room_name: receiver || user.username,
     };
+
     try {
       ws.current.send(JSON.stringify(payload));
       console.log("Sent message:", payload);
@@ -425,14 +599,18 @@ const ChatComponent = () => {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      if (selectedFile) {
+        handleFileUpload();
+      } else {
+        sendMessage();
+      }
     }
   };
 
-  // Handle double-click
-  const handleDoubleClick = (client) => {
+  // Handle client selection
+  const handleClientSelect = (client) => {
+    setSelectedClient(client);
     if (user.senderType === "agent") {
-      console.log("Double-clicked client:", client);
       const payload = {
         message_type: "mark_read",
         sender_type: user.senderType,
@@ -443,15 +621,8 @@ const ChatComponent = () => {
         ...prev,
         [client]: 0,
       }));
-      setSelectedClient(client);
-      setShowSidebar(false);
     }
-  };
-
-  // Handle back button click
-  const handleBackClick = () => {
-    setShowSidebar(true);
-    setSelectedClient(null);
+    console.log("Selected client:", client);
   };
 
   // Close chat session
@@ -470,13 +641,13 @@ const ChatComponent = () => {
       });
       if (selectedClient === client) {
         setSelectedClient(null);
-        setShowSidebar(true);
       }
     }
   };
 
   // Confirm chat closure
-  const handleCloseChat = (client) => {
+  const handleCloseChat = (client, event) => {
+    event?.stopPropagation();
     if (window.confirm(`Close chat with ${client}?`)) {
       closeChat(client);
     }
@@ -490,59 +661,43 @@ const ChatComponent = () => {
   ) {
     return (
       <Box
-        className="chat-widget"
         sx={{
           position: "fixed",
           bottom: 24,
           right: 24,
           zIndex: 1300,
-          fontFamily: "Helvetica, sans-serif",
+          fontFamily: "inherit",
         }}
       >
         <Paper
           sx={{
-            p: 2.5,
+            padding: 2.5,
             borderRadius: 3,
             maxWidth: 320,
-            boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-            bgcolor: "#ffffff",
+            boxShadow: "0 10px 24px rgba(0,0,0,0.15)",
+            bgcolor: "background.paper",
           }}
         >
           <Typography
             sx={{
-              color: "#0288d1",
-              mb: 1.5,
-              fontSize: "0.9rem",
+              color: "error.main",
+              marginBottom: 1.5,
+              fontSize: "0.875rem",
               fontWeight: 500,
-              fontFamily: "Helvetica, sans-serif",
             }}
           >
             {error}
           </Typography>
           <Button
             variant="contained"
+            color="primary"
             onClick={() => {
               localStorage.removeItem(ACCESS_TOKEN);
               window.location.href = "/login";
             }}
             sx={{
-              backgroundColor: "#1976d2",
-              color: "#ffffff",
-              padding: "8px 24px",
-              fontWeight: 600,
-              fontSize: "0.9rem",
+              width: "100%",
               textTransform: "none",
-              borderRadius: "8px",
-              fontFamily: "Helvetica, sans-serif",
-              "&:hover": {
-                backgroundColor: "#1565c0",
-                transform: "scale(1.05)",
-              },
-              "&.Mui-disabled": {
-                backgroundColor: "#e0e0e0",
-                color: "#999",
-              },
-              transition: "all 0.3s ease",
             }}
           >
             Go to Login
@@ -555,9 +710,9 @@ const ChatComponent = () => {
   if (!user) return null;
 
   const unreadCount =
-    user.senderType === "agent"
-      ? Object.values(unreadMessages).reduce((sum, count) => sum + count, 0)
-      : unreadMessages[user.username] || 0;
+    user.senderType === "client"
+      ? unreadMessages[user.username] || 0
+      : Object.values(unreadMessages).reduce((sum, count) => sum + count, 0);
 
   // Render chat UI
   return (
@@ -568,7 +723,7 @@ const ChatComponent = () => {
         bottom: 24,
         right: 24,
         zIndex: 1300,
-        fontFamily: "Helvetica, sans-serif",
+        fontFamily: "inherit",
       }}
     >
       {!isOpen ? (
@@ -579,177 +734,136 @@ const ChatComponent = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#1976d2",
+            bgcolor: "primary.main",
             borderRadius: "50%",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            color: "white",
             width: 60,
             height: 60,
             cursor: "pointer",
             transition: "all 0.3s ease",
             "&:hover": {
-              backgroundColor: "#1565c0",
+              bgcolor: "primary.dark",
               transform: "scale(1.05)",
             },
           }}
         >
           <Badge
             badgeContent={unreadCount}
-            className="chat-icon-badge"
+            color="error"
             sx={{
               "& .MuiBadge-badge": {
-                backgroundColor: "#d32f2f",
-                color: "#ffffff",
                 height: 16,
                 minWidth: 16,
                 borderRadius: "50%",
                 top: -6,
                 right: -6,
-                fontWeight: 600,
-                animation:
-                  unreadCount > 0 ? "pulse 2s ease-in-out infinite" : "none",
+                fontWeight: "bold",
+                animation: unreadCount > 0 ? "pulse 2s infinite" : "none",
+                "@keyframes pulse": {
+                  "0%": { transform: "scale(1)", opacity: 1 },
+                  "50%": { transform: "scale(1.2)", opacity: 0.7 },
+                  "100%": { transform: "scale(1)", opacity: 1 },
+                },
               },
             }}
             invisible={unreadCount === 0}
           >
-            <Chat sx={{ color: "#ffffff", fontSize: 24 }} />
+            <Chat sx={{ color: "white", fontSize: 24 }} />
           </Badge>
         </Box>
       ) : (
         <Paper
           className="chat-container"
           sx={{
-            width:
-              user.senderType === "agent" ? (showSidebar ? 600 : 400) : 350,
+            width: 400,
             height: 500,
-            borderRadius: "12px",
+            borderRadius: 3,
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            bgcolor: "#ffffff",
-            boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
-            transform: isOpen ? "translateY(0)" : "translateY(100%)",
-            transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
           }}
         >
           <Box
             className="chat-header"
             sx={{
-              backgroundColor: "#1976d2",
-              color: "#ffffff",
-              padding: "12px 16px",
+              bgcolor: "primary.main",
+              color: "white",
+              padding: 1.5,
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              borderTopLeftRadius: "12px",
-              borderTopRightRadius: "12px",
+              borderTopLeftRadius: 3,
+              borderTopRightRadius: 3,
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {user.senderType === "agent" &&
-                !showSidebar &&
-                selectedClient && (
-                  <IconButton
-                    className="back-button"
-                    onClick={handleBackClick}
-                    sx={{
-                      color: "#ffffff",
-                      "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" },
-                      transition: "background-color 0.2s ease",
-                      p: 0.5,
-                    }}
-                  >
-                    <ChevronLeft sx={{ fontSize: "big", color: "#ffffff" }} />
-                  </IconButton>
-                )}
-              <Typography
-                sx={{
-                  fontSize: "1.15rem",
-                  fontWeight: 60,
-                  fontFamily: "Helvetica, sans-serif",
-                }}
-              >
-                {user.senderType === "agent" && !showSidebar && selectedClient
-                  ? selectedClient
-                  : wsConnected
-                  ? "Chat Support"
-                  : "Connecting..."}
-              </Typography>
-            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {user.senderType === "agent" && selectedClient
+                ? selectedClient
+                : wsConnected
+                ? "Chat Support"
+                : "Connecting..."}
+            </Typography>
             <IconButton
-              className="downward-button"
-              onClick={() => setIsOpen(false)}
-              sx={{
-                color: "#ffffff",
-                "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" },
-                transition: "background-color 0.2s ease",
-                p: 0.5,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+              onClick={() => {
+                setIsOpen(false);
+                if (user.senderType === "agent") setSelectedClient(null);
               }}
+              color="inherit"
+              size="small"
             >
-              <KeyboardArrowDown sx={{ fontSize: "big", color: "#ffffff" }} />
+              <KeyboardArrowDown sx={{ fontSize: 24 }} />
             </IconButton>
           </Box>
           {error && (
             <Box
               sx={{
-                padding: "8px",
-                backgroundColor: "#e1f5fe",
+                padding: 1,
+                bgcolor: "error.light",
                 textAlign: "center",
               }}
             >
-              <Typography
-                sx={{
-                  color: "#0288d1",
-                  fontSize: "0.85rem",
-                  fontWeight: 500,
-                  fontFamily: "Helvetica, sans-serif",
-                }}
-              >
+              <Typography sx={{ color: "white", fontSize: "0.875rem" }}>
                 {error}
               </Typography>
             </Box>
           )}
           <Box
-            className="chat-body"
-            sx={{ display: "flex", flex: 1, overflow: "hidden" }}
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
           >
-            {user.senderType === "agent" && showSidebar && (
+            {user.senderType === "agent" && !selectedClient ? (
               <Box
-                className="sidebar"
                 sx={{
-                  width: 200,
-                  borderRight: 1,
-                  borderColor: "#e0e0e0",
+                  flex: 1,
                   overflowY: "auto",
-                  backgroundColor: "#f9f9f9",
-                  padding: "8px 4px",
+                  bgcolor: "grey.100",
+                  padding: 1,
                 }}
               >
                 <Typography
-                  className="sidebar-title"
+                  variant="h6"
                   sx={{
-                    padding: "12px 16px",
+                    padding: 1,
                     fontSize: "1rem",
+                    color: "#28a745",
                     fontWeight: 600,
-                    color: "#212121",
-                    fontFamily: "Helvetica, sans-serif",
                   }}
                 >
-                  Clients
+                  Available Clients
                 </Typography>
-                <Divider sx={{ borderColor: "#e0e0e0" }} />
-                <List className="client-list" sx={{ padding: 0 }}>
+                <Divider />
+                <List sx={{ padding: 0 }}>
                   {clients.length === 0 ? (
-                    <ListItem className="no-clients">
+                    <ListItem>
                       <ListItemText
                         primary="No clients available"
-                        primaryTypographyProps={{
-                          color: "#757575",
-                          fontSize: "0.9rem",
-                          fontFamily: "Helvetica, sans-serif",
-                        }}
+                        primaryTypographyProps={{ color: "text.secondary" }}
                       />
                     </ListItem>
                   ) : (
@@ -757,66 +871,28 @@ const ChatComponent = () => {
                       <ListItem
                         key={client}
                         button
-                        className="client-item"
-                        selected={selectedClient === client}
-                        onClick={() => setSelectedClient(client)}
-                        onDoubleClick={() => handleDoubleClick(client)}
+                        onClick={() => handleClientSelect(client)}
                         sx={{
-                          borderRadius: "8px",
-                          "&.Mui-selected": {
-                            backgroundColor: "#e3f2fd",
-                            "&:hover": { backgroundColor: "#bbdefb" },
-                          },
-                          "&:hover": { backgroundColor: "#f1f5f9" },
-                          margin: "4px 6px",
-                          padding: "8px 12px",
-                          transition: "background-color 0.2s ease",
+                          marginY: 0.5,
+                          marginX: 0.5,
+                          borderRadius: 2,
+                          "&:hover": { bgcolor: "action.hover" },
                         }}
                       >
                         <ListItemText
                           primary={
                             <Badge
                               badgeContent={unreadMessages[client] || 0}
-                              sx={{
-                                "& .MuiBadge-badge": {
-                                  backgroundColor: "#0288d1",
-                                  color: "#ffffff",
-                                  fontSize: "0.7rem",
-                                  height: 16,
-                                  minWidth: 16,
-                                  borderRadius: "8px",
-                                  fontWeight: 600,
-                                  right: -8,
-                                },
-                              }}
+                              color="primary"
                               invisible={!unreadMessages[client]}
                             >
-                              <Typography
-                                sx={{
-                                  fontSize: "0.95rem",
-                                  fontWeight:
-                                    selectedClient === client ? 600 : 500,
-                                  color: "#212121",
-                                  fontFamily: "Helvetica, sans-serif",
-                                }}
-                              >
-                                {client}
-                              </Typography>
+                              {client}
                             </Badge>
                           }
                         />
                         <IconButton
-                          className="close-chat-button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCloseChat(client);
-                          }}
-                          sx={{
-                            padding: 0.5,
-                            color: "#9ca3af",
-                            "&:hover": { color: "#1976d2" },
-                            transition: "color 0.2s",
-                          }}
+                          size="small"
+                          onClick={(e) => handleCloseChat(client, e)}
                         >
                           <Close fontSize="small" />
                         </IconButton>
@@ -825,169 +901,227 @@ const ChatComponent = () => {
                   )}
                 </List>
               </Box>
-            )}
-            <Box
-              className="chat-main"
-              sx={{ flex: 1, display: "flex", flexDirection: "column" }}
-            >
-              {user.senderType === "agent" && !selectedClient && showSidebar ? (
+            ) : (
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
                 <Box
-                  className="status-message"
+                  className="message-area"
                   sx={{
                     flex: 1,
+                    overflowY: "auto",
+                    padding: 2,
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "20px",
-                    backgroundColor: "#f9f9f5",
+                    flexDirection: "column",
+                    gap: 2,
+                    bgcolor: "grey.50",
                   }}
                 >
-                  <Typography
-                    className="status-text"
-                    sx={{
-                      color: "#6b7280",
-                      fontSize: "0.9rem",
-                      fontFamily: "Helvetica, sans-serif",
-                    }}
-                  >
-                    Select a client to start chatting
-                  </Typography>
-                </Box>
-              ) : (
-                <>
-                  <Box
-                    className="message-area"
-                    sx={{
-                      flex: 1,
-                      overflowY: "auto",
-                      padding: "12px 16px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                      backgroundColor: "#f9f9f5",
-                    }}
-                  >
-                    {(user.senderType === "client"
-                      ? messages[user.username] || []
-                      : messages[selectedClient] || []
-                    ).map((msg, idx) => (
-                      <Box
-                        key={msg.messageId || `msg-${user.username}-${idx}`}
-                        className={`message ${
+                  {(user.senderType === "client"
+                    ? messages[user.username] || []
+                    : messages[selectedClient] || []
+                  ).map((msg, idx) => (
+                    <Box
+                      key={msg.messageId || `msg-${idx}`}
+                      sx={{
+                        display: "flex",
+                        justifyContent:
                           msg.senderType === "system"
-                            ? "message-system"
+                            ? "center"
                             : msg.from === user.username
-                            ? "message-self"
-                            : "message-other"
-                        }`}
+                            ? "flex-end"
+                            : "flex-start",
+                        maxWidth: "100%",
+                      }}
+                    >
+                      <Paper
                         sx={{
-                          display: "flex",
-                          justifyContent:
+                          padding: 1.5,
+                          borderRadius: 3,
+                          maxWidth: msg.senderType === "system" ? "80%" : "70%",
+                          bgcolor:
                             msg.senderType === "system"
-                              ? "center"
+                              ? "grey.200"
                               : msg.from === user.username
-                              ? "flex-end"
-                              : "flex-start",
-                          maxWidth: "100%",
+                              ? "primary.main"
+                              : "white",
+                          color:
+                            msg.from === user.username
+                              ? "white"
+                              : "text.primary",
+                          boxShadow: 1,
                         }}
                       >
-                        <Paper
-                          className="message-bubble"
-                          elevation={1}
+                        <Box
                           sx={{
-                            padding: "10px 14px",
-                            borderRadius: "12px",
-                            maxWidth:
-                              msg.senderType === "system" ? "80%" : "70%",
-                            backgroundColor:
-                              msg.senderType === "system"
-                                ? "#e0e0e0"
-                                : msg.from === user.username
-                                ? "#1976d2"
-                                : "#ffffff",
-                            color:
-                              msg.senderType === "system"
-                                ? "#424242"
-                                : msg.from === user.username
-                                ? "#ffffff"
-                                : "#1f2a44",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                            transition: "transform 0.2s ease",
-                            "&:hover": { transform: "translateY(-1px)" },
-                            textAlign:
-                              msg.senderType === "system" ? "center" : "left",
+                            fontSize: "0.9rem",
+                            wordBreak: "break-word",
                           }}
                         >
-                          <Typography
-                            className="message-text"
-                            sx={{
-                              fontSize: "0.95rem",
-                              wordBreak: "break-word",
-                              fontFamily: "Helvetica, sans-serif",
-                              lineHeight: 1.5,
-                            }}
-                          >
-                            {msg.senderType === "system" ? (
-                              msg.text
-                            ) : (
-                              <>
-                                <strong>
-                                  {msg.from === user.username
-                                    ? "You"
-                                    : `${msg.from} (${msg.senderType})`}
-                                </strong>
-                                : {msg.text}
-                              </>
-                            )}
-                          </Typography>
-                          {msg.senderType !== "system" && (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                marginTop: "4px",
-                              }}
-                            >
-                              {msg.timestamp && (
-                                <Typography
-                                  sx={{
-                                    color:
-                                      msg.from === user.username
-                                        ? "#e0e7ff"
-                                        : "#6b7280",
-                                    fontSize: "0.75rem",
-                                    marginRight: "4px",
-                                    fontFamily: "Helvetica, sans-serif",
-                                  }}
-                                >
-                                  {new Date(msg.timestamp).toLocaleString()}
+                          {msg.senderType === "system" ? (
+                            <Typography sx={{ color: "inherit" }}>
+                              {msg.text}
+                            </Typography>
+                          ) : (
+                            <Box>
+                              {msg.text && (
+                                <Typography sx={{ color: "inherit" }}>
+                                  {msg.text}
                                 </Typography>
                               )}
-                              {msg.from === user.username && msg.isRead && (
-                                <VisibilityIcon
-                                  sx={{ fontSize: 14, color: "#e0e7ff" }}
-                                />
+                              {msg.fileName && msg.fileUrl ? (
+                                <Box
+                                  sx={{
+                                    marginTop: 1,
+                                    display: "flex",
+                                    gap: 1,
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <Typography
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                      color:
+                                        msg.from === user.username
+                                          ? "white"
+                                          : "primary.main",
+                                    }}
+                                  >
+                                    {msg.fileName}
+                                  </Typography>
+                                  <Button
+                                    variant="outlined"
+                                    size="small"
+                                    href={msg.fileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    sx={{
+                                      color:
+                                        msg.from === user.username
+                                          ? "white"
+                                          : "primary.main",
+                                      borderColor:
+                                        msg.from === user.username
+                                          ? "white"
+                                          : "primary.main",
+                                      fontSize: "0.625rem",
+                                    }}
+                                  >
+                                    View
+                                  </Button>
+                                </Box>
+                              ) : (
+                                msg.fileName && (
+                                  <Typography
+                                    sx={{
+                                      fontSize: "0.75rem",
+                                      color: "error.main",
+                                    }}
+                                  >
+                                    (File unavailable)
+                                  </Typography>
+                                )
                               )}
                             </Box>
                           )}
-                        </Paper>
-                      </Box>
-                    ))}
-                    <div ref={messagesEndRef} />
+                        </Box>
+                        {msg.senderType !== "system" && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              marginTop: 0.5,
+                            }}
+                          >
+                            <Typography
+                              sx={{
+                                fontSize: "0.75rem",
+                                color:
+                                  msg.from === user.username
+                                    ? "white"
+                                    : "text.secondary",
+                                marginRight: 1,
+                              }}
+                            >
+                              {new Date(msg.timestamp).toLocaleString()}
+                            </Typography>
+                            {msg.from === user.username && msg.isRead && (
+                              <VisibilityIcon
+                                sx={{ fontSize: 14, color: "white" }}
+                              />
+                            )}
+                          </Box>
+                        )}
+                      </Paper>
+                    </Box>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </Box>
+                <Box
+                  className="input-area"
+                  sx={{
+                    padding: 2,
+                    borderTop: 1,
+                    borderColor: "divider",
+                    bgcolor: "white",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      style={{ display: "none" }}
+                      onChange={handleFileChange}
+                      accept=".pdf"
+                    />
+                    <IconButton
+                      onClick={() => fileInputRef.current.click()}
+                      disabled={
+                        uploading ||
+                        !wsConnected ||
+                        (user.senderType === "agent" && !selectedClient)
+                      }
+                      color="primary"
+                    >
+                      <AttachFile fontSize="small" />
+                    </IconButton>
+                    {selectedFile && (
+                      <Typography
+                        sx={{
+                          fontSize: "0.75rem",
+                          color: "primary.main",
+                          maxWidth: 150,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {selectedFile.name}
+                      </Typography>
+                    )}
                   </Box>
                   <Box
-                    className="input-area"
                     sx={{
-                      padding: "12px 16px",
-                      borderTop: 1,
-                      borderColor: "#e5e7eb",
                       display: "flex",
-                      gap: "10px",
-                      backgroundColor: "#ffffff",
+                      alignItems: "center",
+                      gap: 1,
                     }}
                   >
                     <TextField
-                      className="message-input"
                       fullWidth
                       size="small"
                       value={input}
@@ -995,67 +1129,41 @@ const ChatComponent = () => {
                       onKeyPress={handleKeyPress}
                       placeholder="Type your message..."
                       disabled={
-                        (user?.senderType === "agent" && !selectedClient) ||
-                        !wsConnected
+                        uploading ||
+                        !wsConnected ||
+                        (user.senderType === "agent" && !selectedClient)
                       }
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: "8px",
-                          backgroundColor: "#f9fafb",
-                          fontSize: "0.9rem",
-                          fontFamily: "Helvetica, sans-serif",
-                          "& fieldset": { borderColor: "#d1d5db" },
-                          "&:hover fieldset": { borderColor: "#1976d2" },
-                          "&.Mui-focused fieldset": { borderColor: "#1976d2" },
+                          borderRadius: 2,
+                          bgcolor: "white",
                         },
                       }}
                     />
                     <Button
-                      className="send-button"
                       variant="contained"
-                      onClick={sendMessage}
+                      color="primary"
+                      onClick={selectedFile ? handleFileUpload : sendMessage}
                       disabled={
+                        uploading ||
                         !wsConnected ||
-                        (user?.senderType === "agent" && !selectedClient)
+                        (user.senderType === "agent" && !selectedClient)
                       }
                       endIcon={
-                        wsConnected ? (
-                          <Send sx={{ fontSize: 18, color: "#ffffff" }} />
+                        wsConnected && !uploading ? (
+                          <Send fontSize="small" />
                         ) : (
-                          <CircularProgress
-                            size={18}
-                            sx={{ color: "#ffffff" }}
-                          />
+                          <CircularProgress size={16} />
                         )
                       }
-                      sx={{
-                        backgroundColor: "#1976d2",
-                        color: "#ffffff",
-                        padding: "8px 24px",
-                        fontSize: "0.9rem",
-                        textTransform: "none",
-                        borderRadius: "8px",
-                        fontFamily: "Helvetica, sans-serif",
-                        "&:hover": {
-                          backgroundColor: "#1565c0",
-                          transform: "scale(1.05)",
-                        },
-                        "&.Mui-disabled": {
-                          backgroundColor: "#e0e0e0",
-                          color: "#999",
-                        },
-                        transition: "all 0.3s ease",
-                        "& .MuiCircularProgress-root": {
-                          color: "#ffffff",
-                        },
-                      }}
+                      sx={{ textTransform: "none" }}
                     >
-                      Send
+                      {uploading ? "Sending..." : "Send"}
                     </Button>
                   </Box>
-                </>
-              )}
-            </Box>
+                </Box>
+              </Box>
+            )}
           </Box>
         </Paper>
       )}

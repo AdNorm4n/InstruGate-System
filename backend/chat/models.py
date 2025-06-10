@@ -23,7 +23,9 @@ class ChatMessage(models.Model):
         ('system', 'System'),
     )
     sender_type = models.CharField(max_length=10, choices=SENDER_CHOICES)
-    content = models.TextField()
+    content = models.TextField(blank=True)  # Allow blank for file-only messages
+    file = models.FileField(upload_to='chat_files/%Y/%m/%d/', null=True, blank=True)
+    file_name = models.CharField(max_length=255, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
@@ -34,5 +36,7 @@ class ChatMessage(models.Model):
         ]
 
     def __str__(self):
+        if self.file_name:
+            return f'{self.sender.username} ({self.sender_type}): File "{self.file_name}"'
         snippet = self.content[:20] + ("…" if len(self.content) > 20 else "")
         return f'{self.sender.username} ({self.sender_type}): "{snippet}"'
