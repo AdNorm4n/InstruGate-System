@@ -798,7 +798,7 @@ const ChatComponent = () => {
               borderTopRightRadius: 3,
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontWeight: 500 }}>
               {user.senderType === "agent" && selectedClient
                 ? selectedClient
                 : wsConnected
@@ -813,7 +813,7 @@ const ChatComponent = () => {
               color="inherit"
               size="small"
             >
-              <KeyboardArrowDown sx={{ fontSize: 24 }} />
+              <KeyboardArrowDown sx={{ color: "white", fontSize: 24 }} />
             </IconButton>
           </Box>
           {error && (
@@ -1151,7 +1151,7 @@ const ChatComponent = () => {
                       }
                       endIcon={
                         wsConnected && !uploading ? (
-                          <Send fontSize="small" />
+                          <Send sx={{ color: "white" }} />
                         ) : (
                           <CircularProgress size={16} />
                         )
