@@ -41,7 +41,7 @@ const QuotationCard = styled(Card)(({ theme }) => ({
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
   fontFamily: "Helvetica, sans-serif !important",
   width: "100%",
@@ -56,7 +56,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
   fontFamily: "Helvetica, sans-serif !important",
   width: "100%",
@@ -148,55 +148,55 @@ function SubmittedQuotations() {
   const handleDownloadPDF = (quotation) => {
     try {
       console.log("Generating PDF for quotation:", quotation.id);
+      console.log("Quotation items:", JSON.stringify(quotation.items, null, 2));
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 20;
-      const lineHeight = 10;
-      let y = 40;
+      const margin = 15;
+      const lineHeight = 5;
+      let y = 40; // Top padding for title
 
       // Add Letterhead
-      console.log("Adding letterhead image");
-      doc.addImage("/images/letterhead.jpg", "JPEG", 0, 0, 210, 297);
-
-      // White background
-      doc.setFillColor(255, 255, 255);
-      doc.rect(margin, y - 10, pageWidth - 2 * margin, 230, "F");
+      try {
+        doc.addImage("/images/letterhead.jpg", "JPEG", 0, 0, 210, 297);
+      } catch (imgError) {
+        console.warn("Letterhead image failed to load:", imgError);
+      }
 
       // Title
-      doc.setFont("times", "bold");
-      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
       doc.text(
         `Purchase Order Quotation #${quotation.id || "Unknown"}`,
         margin,
         y
       );
-      y += lineHeight;
+      console.log("Added title at y:", y);
+      y += lineHeight + 2;
 
       // Status
-      doc.setFont("times", "normal");
-      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
       doc.text(`Status: Approved`, margin, y);
-      y += 15;
+      console.log("Added status at y:", y);
+      y += lineHeight + 4;
 
       // Separator Line
       doc.setDrawColor(100, 100, 100);
-      doc.setLineWidth(0.5);
+      doc.setLineWidth(0.3);
       doc.line(margin, y, pageWidth - margin, y);
-      y += 10;
+      console.log("Added separator at y:", y);
+      y += lineHeight + 2;
 
       // Details Section
-      doc.setFont("times", "bold");
-      doc.setFontSize(14);
-      doc.text("Details", margin, y);
-      y += 10;
-
-      // Gray background for Details
-      doc.setFillColor(240, 240, 240);
-      doc.rect(margin, y - 8, pageWidth - 2 * margin, 50, "F");
-
-      doc.setFont("times", "normal");
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
+      doc.text("Details", margin, y);
+      console.log("Added Details header at y:", y);
+      y += lineHeight + 8;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
       const details = [
         {
           label: "Submitted by:",
@@ -207,96 +207,98 @@ function SubmittedQuotations() {
         {
           label: "Submitted at:",
           value: quotation.submitted_at
-            ? (() => {
-                try {
-                  return format(parseISO(quotation.submitted_at), "PPp");
-                } catch {
-                  return "Unknown";
-                }
-              })()
+            ? format(parseISO(quotation.submitted_at), "MMM dd, yyyy, h:mm a")
             : "Unknown",
         },
         {
           label: "Approved at:",
           value: quotation.approved_at
-            ? (() => {
-                try {
-                  return format(parseISO(quotation.approved_at), "PPp");
-                } catch {
-                  return "Unknown";
-                }
-              })()
+            ? format(parseISO(quotation.approved_at), "MMM dd, yyyy, h:mm a")
             : "N/A",
         },
       ];
 
-      details.forEach((item) => {
-        doc.text(`${item.label} ${item.value}`, margin + 5, y);
-        y += lineHeight;
+      // Two-column layout for Details
+      const colWidth = 90;
+      const indent = 5;
+      console.log("Adding Details content at y:", y);
+      const midPoint = Math.ceil(details.length / 2);
+      details.slice(0, midPoint).forEach((item, index) => {
+        doc.text(
+          `${item.label} ${item.value}`,
+          margin + indent,
+          y + index * (lineHeight + 1)
+        );
       });
-      y += 5;
-
-      // Separator Line
-      doc.setDrawColor(100, 100, 100);
-      doc.setLineWidth(0.5);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += 10;
+      details.slice(midPoint).forEach((item, index) => {
+        doc.text(
+          `${item.label} ${item.value}`,
+          margin + colWidth + indent,
+          y + index * (lineHeight + 1)
+        );
+      });
+      y += Math.max(midPoint, details.length - midPoint) * (lineHeight + 1) + 8;
 
       // Instruments Section
-      doc.setFont("times", "bold");
-      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
       doc.text("Instruments", margin, y);
-      y += 15;
+      console.log("Added Instruments header at y:", y);
+      y += lineHeight + 8;
 
       // Instruments List
-      doc.setFontSize(12);
-      quotation.items.forEach((item, index) => {
-        console.log("Adding instrument:", item.instrument?.name || "N/A");
-        // Gray background for each item
-        doc.setFillColor(240, 240, 240);
-        doc.rect(margin, y - 8, pageWidth - 2 * margin, 38, "F");
-
-        // Item Number
-        doc.setFont("times", "bold");
-        doc.text(`Item #${index + 1}`, margin, y);
-        y += lineHeight;
-
-        // Item Details
-        doc.setFont("times", "normal");
-        doc.text(
-          `Instrument Name: ${item.instrument?.name || "N/A"}`,
-          margin + 5,
-          y
-        );
-        y += lineHeight;
-        doc.text(`Product Code: ${item.product_code || "N/A"}`, margin + 5, y);
-        y += lineHeight;
-        doc.text(`Quantity: ${item.quantity || "1"}`, margin + 5, y);
-        y += 10;
-
-        // Separator Line
-        doc.setDrawColor(100, 100, 100);
-        doc.setLineWidth(0.5);
-        doc.line(margin, y - 5, pageWidth - margin, y - 5);
-        y += 5;
-      });
-
-      // Page Number
-      doc.setFont("times", "italic");
+      doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(
-        `Page 1 of ${doc.internal.getNumberOfPages()}`,
-        pageWidth - margin,
-        pageHeight - 10,
-        { align: "right" }
-      );
-
+      const items = Array.isArray(quotation.items) ? quotation.items : [];
+      if (items.length === 0) {
+        console.warn("No instruments found for quotation:", quotation.id);
+        doc.text("No instruments listed.", margin + indent, y);
+        y += lineHeight + 8;
+      } else {
+        items.forEach((item, index) => {
+          const itemHeight = 4 * (lineHeight + 1) + 8;
+          if (y + itemHeight > pageHeight - margin) {
+            doc.addPage();
+            try {
+              doc.addImage("/images/letterhead.jpg", "JPEG", 0, 0, 210, 40);
+            } catch (imgError) {
+              console.warn(
+                "Letterhead image failed to load on new page:",
+                imgError
+              );
+            }
+            y = 40;
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text("Instruments (Continued)", margin, y);
+            y += lineHeight + 8;
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            console.log("Added new page for Instruments at y:", y);
+          }
+          const instrumentName =
+            item.instrument?.name || item.name || "Unknown";
+          const productCode = item.product_code || "N/A";
+          const quantity = item.quantity || "1";
+          console.log(`Adding instrument ${index + 1}:`, instrumentName);
+          doc.setFont("helvetica", "bold");
+          doc.text(`Item #${index + 1}`, margin + indent, y);
+          y += lineHeight + 1;
+          doc.setFont("helvetica", "normal");
+          doc.text(`Instrument Name: ${instrumentName}`, margin + indent, y);
+          y += lineHeight + 1;
+          doc.text(`Product Code: ${productCode}`, margin + indent, y);
+          y += lineHeight + 1;
+          doc.text(`Qty: ${quantity}`, margin + indent, y);
+          y += lineHeight + 8;
+        });
+      }
       // Save PDF
       console.log("Saving PDF");
-      doc.save(`Purchase_Order_Quotation_${quotation.id || ""}.pdf`);
+      doc.save(`Purchase_Order_Quotation_${quotation.id || "Unknown"}.pdf`);
     } catch (err) {
       console.error("Error generating PDF:", err);
-      alert("Failed to generate PDF. Please try again.");
+      alert("Failed to generate PDF. Please check the console for details.");
     }
   };
 
@@ -317,7 +319,7 @@ function SubmittedQuotations() {
         const res = await api.post("/api/token/refresh/", { refresh });
         access = res.data.access;
         localStorage.setItem(ACCESS_TOKEN, access);
-        console.log("Token refreshed:", access);
+        console.log("Token refreshed:", res.data.access);
       }
 
       const userRes = await api.get("/api/users/me/", {
@@ -338,11 +340,11 @@ function SubmittedQuotations() {
         "Quotations data:",
         JSON.stringify(quotationsRes.data, null, 2)
       );
-      quotationsRes.data.forEach((q) =>
+      quotationsRes.data.forEach((item, index) =>
         console.log(
-          `Quotation ${q.id} created_by_first_name:`,
-          q.created_by_first_name,
-          typeof q.created_by_first_name
+          `Quotation ${item.id} created_by_first_name:`,
+          item.created_by_first_name || "N/A",
+          index
         )
       );
 
@@ -880,122 +882,140 @@ function SubmittedQuotations() {
                                   gap: 2,
                                 }}
                               >
-                                {quotation.items.map((item, iIndex) => {
-                                  const imageUrl = item.instrument?.image
-                                    ? new URL(item.instrument.image, baseUrl)
-                                        .href
-                                    : null;
-                                  const imageIndex = `${qIndex}-${iIndex}`;
-                                  return (
-                                    <Box
-                                      key={imageIndex}
-                                      sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        p: 2,
-                                        bgcolor: "#f9fafb",
-                                        borderRadius: "8px",
-                                        border: "1px solid #e0e0e0",
-                                        transition: "all 0.2s ease",
-                                        "&:hover": {
-                                          bgcolor: "#f1f3f5",
-                                          borderColor: "#d6393a",
-                                        },
-                                      }}
-                                    >
-                                      {imageUrl ? (
-                                        <img
-                                          src={imageUrl}
-                                          alt={
-                                            item.instrument?.name ||
-                                            "Instrument"
-                                          }
-                                          style={{
-                                            width: "80px",
-                                            height: "80px",
-                                            objectFit: "cover",
-                                            borderRadius: "8px",
-                                            marginRight: "20px",
-                                            cursor: "pointer",
-                                            boxShadow:
-                                              "0 2px 4px rgba(0,0,0,0.1)",
-                                          }}
-                                          onClick={() =>
-                                            handleImageClick(imageIndex)
-                                          }
-                                          onError={(e) => {
-                                            e.target.style.display = "none";
-                                            e.target.nextSibling.style.display =
-                                              "flex";
-                                          }}
-                                        />
-                                      ) : (
-                                        <Box
-                                          sx={{
-                                            width: "80px",
-                                            height: "80px",
-                                            bgcolor: "#e0e0e0",
-                                            borderRadius: "8px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            mr: 2.5,
-                                          }}
-                                        >
+                                {quotation.items &&
+                                Array.isArray(quotation.items) &&
+                                quotation.items.length > 0 ? (
+                                  quotation.items.map((item, iIndex) => {
+                                    const imageUrl = item.instrument?.image
+                                      ? new URL(item.instrument.image, baseUrl)
+                                          .href
+                                      : null;
+                                    const imageIndex = `${qIndex}-${iIndex}`;
+                                    return (
+                                      <Box
+                                        key={imageIndex}
+                                        sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                          p: 2,
+                                          bgcolor: "#f9fafb",
+                                          borderRadius: "8px",
+                                          border: "1px solid #e0e0e0",
+                                          transition: "all 0.2s ease",
+                                          "&:hover": {
+                                            bgcolor: "#f1f3f5",
+                                            borderColor: "#d6393a",
+                                          },
+                                        }}
+                                      >
+                                        {imageUrl ? (
+                                          <img
+                                            src={imageUrl}
+                                            alt={
+                                              item.instrument?.name ||
+                                              "Instrument"
+                                            }
+                                            style={{
+                                              width: "80px",
+                                              height: "80px",
+                                              objectFit: "cover",
+                                              borderRadius: "8px",
+                                              marginRight: "20px",
+                                              cursor: "pointer",
+                                              boxShadow:
+                                                "0 2px 4px rgba(0,0,0,0.1)",
+                                            }}
+                                            onClick={() =>
+                                              handleImageClick(imageIndex)
+                                            }
+                                            onError={(e) => {
+                                              e.target.style.display = "none";
+                                              e.target.nextSibling.style.display =
+                                                "flex";
+                                            }}
+                                          />
+                                        ) : (
+                                          <Box
+                                            sx={{
+                                              width: "80px",
+                                              height: "80px",
+                                              bgcolor: "#e0e0e0",
+                                              borderRadius: "8px",
+                                              display: "flex",
+                                              alignItems: "center",
+                                              justifyContent: "center",
+                                              mr: 2.5,
+                                            }}
+                                          >
+                                            <Typography
+                                              variant="body2"
+                                              color="text.secondary"
+                                              sx={{
+                                                fontFamily:
+                                                  "Helvetica, sans-serif !important",
+                                                fontSize: "0.9rem",
+                                              }}
+                                            >
+                                              No Image
+                                            </Typography>
+                                          </Box>
+                                        )}
+                                        <Box sx={{ flex: 1 }}>
                                           <Typography
-                                            variant="body2"
-                                            color="text.secondary"
+                                            variant="body1"
                                             sx={{
                                               fontFamily:
                                                 "Helvetica, sans-serif !important",
-                                              fontSize: "0.9rem",
+                                              fontWeight: "600",
+                                              color: "#333",
+                                              mb: 1,
+                                              fontSize: "1rem",
                                             }}
                                           >
-                                            No Image
+                                            {item.instrument?.name ||
+                                              item.name ||
+                                              "N/A"}
+                                          </Typography>
+                                          <Typography
+                                            variant="body2"
+                                            sx={{
+                                              fontFamily:
+                                                "Helvetica, sans-serif !important",
+                                              color: "#666",
+                                              fontSize: "0.95rem",
+                                            }}
+                                          >
+                                            Product Code:{" "}
+                                            {item.product_code || "N/A"}
+                                          </Typography>
+                                          <Typography
+                                            variant="body2"
+                                            sx={{
+                                              fontFamily:
+                                                "Helvetica, sans-serif !important",
+                                              color: "#666",
+                                              fontSize: "0.95rem",
+                                            }}
+                                          >
+                                            Quantity: {item.quantity || "1"}
                                           </Typography>
                                         </Box>
-                                      )}
-                                      <Box sx={{ flex: 1 }}>
-                                        <Typography
-                                          variant="body1"
-                                          sx={{
-                                            fontFamily:
-                                              "Helvetica, sans-serif !important",
-                                            fontWeight: "600",
-                                            color: "#333",
-                                            mb: 1,
-                                            fontSize: "1rem",
-                                          }}
-                                        >
-                                          {item.instrument?.name || "N/A"}
-                                        </Typography>
-                                        <Typography
-                                          variant="body2"
-                                          sx={{
-                                            fontFamily:
-                                              "Helvetica, sans-serif !important",
-                                            color: "#666",
-                                            fontSize: "0.95rem",
-                                          }}
-                                        >
-                                          Product Code:{" "}
-                                          {item.product_code || "N/A"}
-                                        </Typography>
-                                        <Typography
-                                          variant="body2"
-                                          sx={{
-                                            fontFamily:
-                                              "Helvetica, sans-serif !important",
-                                            color: "#666",
-                                            fontSize: "0.95rem",
-                                          }}
-                                        >
-                                          Quantity: {item.quantity || "1"}
-                                        </Typography>
                                       </Box>
-                                    </Box>
-                                  );
-                                })}
+                                    );
+                                  })
+                                ) : (
+                                  <Typography
+                                    variant="body1"
+                                    sx={{
+                                      fontFamily:
+                                        "Helvetica, sans-serif !important",
+                                      color: "#666",
+                                      fontSize: "1rem",
+                                    }}
+                                  >
+                                    No instruments found.
+                                  </Typography>
+                                )}
                               </Box>
                             </Grid>
                           </Grid>
@@ -1016,7 +1036,7 @@ function SubmittedQuotations() {
                                 Rejection Remarks
                               </Typography>
                               <TextField
-                                label="Remarks (Required)"
+                                label="Remarks (required)"
                                 multiline
                                 rows={5}
                                 value={rejectRemarks}
@@ -1024,10 +1044,10 @@ function SubmittedQuotations() {
                                   setRejectRemarks(e.target.value)
                                 }
                                 fullWidth
-                                placeholder="Please provide reasons for rejection"
+                                placeholder="Please provide reasons for rejection."
                                 required
                                 sx={{
-                                  mb: 3,
+                                  mb: 2,
                                   "& .MuiInputBase-root": {
                                     fontFamily:
                                       "Helvetica, sans-serif !important",
@@ -1037,14 +1057,14 @@ function SubmittedQuotations() {
                                   "& .MuiInputLabel-root": {
                                     fontFamily:
                                       "Helvetica, sans-serif !important",
-                                    fontSize: "0.95rem",
+                                    fontSize: "1rem",
                                   },
                                 }}
                               />
                               <Box
                                 sx={{
                                   display: "flex",
-                                  gap: 2,
+                                  gap: "10px",
                                   justifyContent: "flex-end",
                                 }}
                               >
@@ -1070,7 +1090,7 @@ function SubmittedQuotations() {
                                 sx={{
                                   mt: 5,
                                   display: "flex",
-                                  gap: 2,
+                                  gap: "10px",
                                   justifyContent: "flex-end",
                                 }}
                               >
@@ -1116,65 +1136,63 @@ function SubmittedQuotations() {
                   zIndex: 1200,
                 }}
               >
-                {quotations.map((quotation, qIndex) =>
-                  quotation.items.map((item, iIndex) => {
-                    const imageIndex = `${qIndex}-${iIndex}`;
-                    const imageUrl = item.instrument?.image
-                      ? new URL(item.instrument.image, baseUrl).href
-                      : null;
-                    if (imageIndex === isImageEnlarged && imageUrl) {
-                      return (
-                        <Box
-                          key={imageIndex}
-                          sx={{
-                            p: 3,
-                            bgcolor: "#f9fafb",
-                            borderRadius: "8px",
-                            border: "1px solid #e0e0e0",
-                            transition: "all 0.2s ease",
-                            "&:hover": {
-                              bgcolor: "#f1f3f5",
-                              borderColor: "#d6393a",
-                            },
-                            position: "relative",
-                            maxWidth: "80vw",
-                            maxHeight: "80vh",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <img
-                            src={imageUrl}
-                            alt={item.instrument?.name || "Instrument"}
-                            style={{
-                              maxWidth: "100%",
-                              maxHeight: "70vh",
-                              borderRadius: "8px",
-                              objectFit: "contain",
-                            }}
-                          />
-                          <Button
-                            onClick={handleCloseOverlay}
+                {quotations.map(
+                  (quotation, qIndex) =>
+                    quotation.items &&
+                    Array.isArray(quotation.items) &&
+                    quotation.items.map((item, iIndex) => {
+                      const imageIndex = `${qIndex}-${iIndex}`;
+                      const imageUrl = item.instrument?.image
+                        ? new URL(item.instrument.image, baseUrl).href
+                        : null;
+                      if (imageIndex === isImageEnlarged && imageUrl) {
+                        return (
+                          <Box
+                            key={imageIndex}
                             sx={{
-                              position: "absolute",
-                              top: -25,
-                              right: -25,
-                              color: "#fff",
-                              fontSize: "1.5rem",
-                              fontFamily: "Helvetica, sans-serif !important",
-                              "&:hover": {
-                                color: "#d6393a",
-                              },
+                              p: 3,
+                              bgcolor: "#f9fafb",
+                              borderRadius: "8px",
+                              border: "1px solid #e0e0e0",
+                              position: "relative",
+                              maxWidth: "80vw",
+                              maxHeight: "80vh",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
                             }}
                           >
-                            ×
-                          </Button>
-                        </Box>
-                      );
-                    }
-                    return null;
-                  })
+                            <img
+                              src={imageUrl}
+                              alt={item.instrument?.name || "Instrument"}
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "70vh",
+                                borderRadius: "8px",
+                                objectFit: "contain",
+                              }}
+                            />
+                            <Button
+                              onClick={handleCloseOverlay}
+                              sx={{
+                                position: "absolute",
+                                top: -25,
+                                right: -25,
+                                color: "#fff",
+                                fontSize: "1.5rem",
+                                fontFamily: "Helvetica, sans-serif",
+                                "&:hover": {
+                                  color: "#d6393a",
+                                },
+                              }}
+                            >
+                              ×
+                            </Button>
+                          </Box>
+                        );
+                      }
+                      return null;
+                    })
                 )}
               </Box>
             )}
