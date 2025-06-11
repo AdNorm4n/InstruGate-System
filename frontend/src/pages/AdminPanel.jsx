@@ -360,7 +360,7 @@ const AdminPanel = () => {
           metrics.quotationStatuses.rejected,
         ],
         backgroundColor: [
-          "linear-gradient(180deg, #42A5F5 0%, #1976D2 100%)",
+          "linear-gradient(180deg, #FFE082 0%, #FFCE56 100%)",
           "linear-gradient(180deg, #66BB6A 0%, #388E3C 100%)",
           "linear-gradient(180deg, #F06292 0%, #d6393a 100%)",
         ].map((gradient) => {
@@ -371,7 +371,7 @@ const AdminPanel = () => {
           grad.addColorStop(1, end);
           return grad;
         }),
-        borderColor: ["#1565C0", "#2E7D32", "#AD1457"],
+        borderColor: ["#B8860B", "#2E7D32", "#AD1457"],
         borderWidth: 1,
         borderRadius: 6,
       },
@@ -720,7 +720,7 @@ const AdminPanel = () => {
                           </Typography>
                           <CTAButton
                             variant="contained"
-                            endIcon={<ArrowForward />}
+                            endIcon={<ArrowForward sx={{ color: "white" }} />}
                             onClick={() => handleNavigation(section.path)}
                             disabled={section.disabled}
                           >

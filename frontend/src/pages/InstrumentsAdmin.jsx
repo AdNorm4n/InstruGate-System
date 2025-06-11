@@ -1697,7 +1697,7 @@ const InstrumentsAdmin = () => {
                     </Box>
                     <CTAButton
                       variant="contained"
-                      startIcon={<Add />}
+                      startIcon={<Add sx={{ color: "white" }} />}
                       onClick={openAddModal}
                       disabled={userRole !== "admin"}
                     >
