@@ -12,6 +12,8 @@ import {
   Stack,
   TextField,
   Typography,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -31,9 +33,18 @@ function Form({ route, method }) {
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [openError, setOpenError] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const navigate = useNavigate();
 
   const name = method === "login" ? "Login" : "Register";
+
+  const description =
+    method === "login"
+      ? "Enter your credentials to access your account."
+      : "Create a new account to get started.";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,21 +79,37 @@ function Form({ route, method }) {
 
         const userProfileRes = await api.get("/api/users/me/");
         const userProfile = userProfileRes.data;
-
         localStorage.setItem("user", JSON.stringify(userProfile));
 
-        if (role === "admin") {
-          window.location.href = "/admin";
-        } else {
-          navigate("/");
-        }
+        setSuccessMessage("Login successful!");
+        setOpenSuccess(true);
+
+        setTimeout(() => {
+          if (role === "admin") {
+            window.location.href = "/admin";
+          } else {
+            navigate("/");
+          }
+        }, 1500);
       } else {
-        alert("Registration successful! Please log in.");
-        navigate("/login");
+        setSuccessMessage("Registration successful! Please log in.");
+        setOpenSuccess(true);
+        setTimeout(() => navigate("/login"), 1500);
       }
     } catch (error) {
-      alert(method === "login" ? "Login failed." : "Registration failed.");
-      console.error("Auth error:", error);
+      let message = "An error occurred. Please try again.";
+      if (error.response && error.response.data) {
+        const data = error.response.data;
+        if (data.email) {
+          message = "Email has already been used.";
+        } else if (data.username) {
+          message = "Username has already been taken.";
+        } else if (typeof data.detail === "string") {
+          message = data.detail;
+        }
+      }
+      setErrorMessage(message);
+      setOpenError(true);
     } finally {
       setLoading(false);
     }
@@ -92,160 +119,248 @@ function Form({ route, method }) {
   const handleMouseDownPassword = (e) => e.preventDefault();
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
-      <Typography
-        variant="h5"
-        align="center"
-        gutterBottom
-        sx={{
-          fontWeight: "bold",
-          color: "#000000",
-          fontFamily: "Helvetica, sans-serif",
-          textTransform: "uppercase",
-          letterSpacing: 0,
-          mb: 4,
-          textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        {name}
-      </Typography>
-
-      <Stack spacing={4} sx={{ mt: 5 }}>
-        <TextField
-          label="Username"
-          variant="standard"
-          fullWidth
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <AccountCircle sx={{ color: "#333" }} />
-              </InputAdornment>
-            ),
-          }}
-          required
-        />
-
-        {method === "register" && (
-          <>
-            <TextField
-              label="Email"
-              type="email"
-              variant="standard"
-              fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email sx={{ color: "#333" }} />
-                  </InputAdornment>
-                ),
-              }}
-              required
-            />
-            <Stack direction="row" spacing={2}>
-              <TextField
-                label="First Name"
-                variant="standard"
-                fullWidth
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-              <TextField
-                label="Last Name"
-                variant="standard"
-                fullWidth
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-            </Stack>
-            <TextField
-              label="Company"
-              variant="standard"
-              fullWidth
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Business sx={{ color: "#333" }} />
-                  </InputAdornment>
-                ),
-              }}
-              required
-            />
-          </>
-        )}
-
-        <TextField
-          label="Password"
-          type={showPassword ? "text" : "password"}
-          variant="standard"
-          fullWidth
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <LockRounded sx={{ color: "#333" }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  edge="end"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
-        {loading && (
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <CircularProgress />
-          </Box>
-        )}
-
-        <Button
-          variant="contained"
-          type="submit"
-          fullWidth
+    <>
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+        <Typography
+          variant="h5"
+          align="center"
+          gutterBottom
           sx={{
-            backgroundColor: "#d6393a",
-            ":hover": {
-              backgroundColor: "#ffffff",
-              color: "#d6393a",
-              border: "1px solid #d6393a",
-            },
+            fontWeight: "bold",
+            color: "#000000",
+            fontFamily: "Helvetica, sans-serif",
+            textTransform: "uppercase",
+            letterSpacing: 0,
+            mb: 4,
+            textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
           }}
         >
           {name}
-        </Button>
+        </Typography>
+        <Typography
+          variant="body2"
+          align="center"
+          sx={{ mb: 3, color: "#333", fontSize: "0.875rem" }}
+        >
+          {description}
+        </Typography>
 
-        <div className="register-link">
-          {method === "register" ? (
-            <p>
-              Already have an account? <Link to="/login">Login</Link>
-            </p>
-          ) : (
+        <Stack spacing={4} sx={{ mt: 5 }}>
+          <TextField
+            label="Username"
+            variant="standard"
+            fullWidth
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AccountCircle sx={{ color: "#333" }} />
+                </InputAdornment>
+              ),
+            }}
+            required
+          />
+
+          {method === "register" && (
             <>
-              <p>
-                Don't have an account? <Link to="/register">Register</Link>
-              </p>
+              <TextField
+                label="Email"
+                type="email"
+                variant="standard"
+                fullWidth
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ color: "#333" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                required
+              />
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  label="First Name"
+                  variant="standard"
+                  fullWidth
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+                <TextField
+                  label="Last Name"
+                  variant="standard"
+                  fullWidth
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </Stack>
+              <TextField
+                label="Company"
+                variant="standard"
+                fullWidth
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Business sx={{ color: "#333" }} />
+                    </InputAdornment>
+                  ),
+                }}
+                required
+              />
             </>
           )}
-        </div>
-      </Stack>
-    </Box>
+
+          <TextField
+            label="Password"
+            type={showPassword ? "text" : "password"}
+            variant="standard"
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockRounded sx={{ color: "#333" }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CircularProgress />
+            </Box>
+          )}
+
+          <Button
+            variant="contained"
+            type="submit"
+            fullWidth
+            sx={{
+              backgroundColor: "#d6393a",
+              ":hover": {
+                backgroundColor: "#ffffff",
+                color: "#d6393a",
+                border: "1px solid #d6393a",
+              },
+            }}
+          >
+            {name}
+          </Button>
+
+          <div className="register-link">
+            {method === "register" ? (
+              <p>
+                Already have an account? <Link to="/login">Login</Link>
+              </p>
+            ) : (
+              <>
+                <p>
+                  Don't have an account? <Link to="/register">Register</Link>
+                </p>
+                <p>
+                  <Link to="/forgot-password">Forgot Password</Link>
+                </p>
+              </>
+            )}
+          </div>
+        </Stack>
+      </Box>
+
+      {/* Snackbar Messages */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 20,
+          left: 0,
+          right: 0,
+          display: "flex",
+          justifyContent: "center",
+          zIndex: 1400,
+        }}
+      >
+        <Snackbar
+          open={openError}
+          autoHideDuration={6000}
+          onClose={() => setOpenError(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setOpenError(false)}
+            severity="error"
+            variant="filled"
+            sx={{
+              width: "100%",
+              color: "white",
+              backgroundColor: "#d32f2f",
+              "& .MuiAlert-icon": {
+                color: "white !important",
+                svg: {
+                  fill: "white !important",
+                },
+              },
+              "& .MuiAlert-action": {
+                color: "white !important", // Makes CloseIcon white
+                svg: {
+                  fill: "white !important", // Ensures SVG path is white
+                },
+              },
+            }}
+          >
+            {errorMessage}
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={openSuccess}
+          autoHideDuration={6000}
+          onClose={() => setOpenSuccess(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setOpenSuccess(false)}
+            severity="success"
+            variant="filled"
+            sx={{
+              width: "100%",
+              color: "white",
+              backgroundColor: "#d32f2f",
+              "& .MuiAlert-icon": {
+                color: "white !important",
+                svg: {
+                  fill: "white !important",
+                },
+              },
+              "& .MuiAlert-action": {
+                color: "white !important", // Makes CloseIcon white
+                svg: {
+                  fill: "white !important", // Ensures SVG path is white
+                },
+              },
+            }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </>
   );
 }
 

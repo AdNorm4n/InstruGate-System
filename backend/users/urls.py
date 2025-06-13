@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterClientView, UserDetailsView, UserProfileUpdateView, UserListView, LogoutView, UserDetailView, AdminUserCreateView
+from .views import RegisterClientView, UserDetailsView, UserProfileUpdateView, UserListView, LogoutView, UserDetailView, AdminUserCreateView, ForgotPasswordView, ResetPasswordView
 from .token_serializers import CustomTokenObtainPairView
 
 urlpatterns = [
@@ -11,4 +11,6 @@ urlpatterns = [
     path("<int:pk>/", UserDetailView.as_view(), name="user-detail"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("admin/users/", AdminUserCreateView.as_view(), name="admin-user-create"),
+    path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
+    path("reset-password/", ResetPasswordView.as_view(), name="reset-password"),
 ]

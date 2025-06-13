@@ -10,6 +10,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "company": {"required": True, "allow_blank": False},
         }
 
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email has already been used.")
+        return value
+
     def create(self, validated_data):
         validated_data["role"] = "client"
         validated_data.setdefault("company", "Unknown")  # Ensure default
@@ -21,6 +26,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         ret["company"] = instance.company if instance.company else "Unknown"
         print("CustomUserSerializer: Serialized data:", ret)
         return ret
+
 
 class AdminUserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, allow_blank=False)
@@ -157,3 +163,11 @@ class AdminUserUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         print("AdminUserUpdateSerializer: Updated user:", instance.__dict__)
         return instance
+    
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No user is registered with this email.")
+        return value

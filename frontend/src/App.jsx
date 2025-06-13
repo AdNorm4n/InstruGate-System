@@ -26,6 +26,8 @@ import InstrumentsAdmin from "./pages/InstrumentsAdmin";
 import QuotationsAdmin from "./pages/QuotationsAdmin";
 import Footer from "./components/Footer";
 import ChatComponent from "./components/ChatComponent";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const Layout = () => {
   return (
@@ -168,6 +170,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<RegisterAndLogout />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
