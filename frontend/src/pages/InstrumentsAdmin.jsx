@@ -1076,7 +1076,7 @@ const InstrumentsAdmin = () => {
                             onClick={() => handleDeleteFieldOption(option.id)}
                             sx={{ color: "#d6393a" }}
                           >
-                            <Delete />
+                            <Delete sx={{ color: "#d32f2f" }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -1273,7 +1273,7 @@ const InstrumentsAdmin = () => {
                             onClick={() => handleDeleteAddon(addon.id)}
                             sx={{ color: "#d6393a" }}
                           >
-                            <Delete />
+                            <Delete sx={{ color: "#d32f2f" }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -1445,7 +1445,7 @@ const InstrumentsAdmin = () => {
                     disabled={userRole !== "admin"}
                     sx={{ color: "#d6393a" }}
                   >
-                    <Delete />
+                    <Delete sx={{ color: "#d32f2f" }} />
                   </IconButton>
                 </TableCell>
               </TableRow>

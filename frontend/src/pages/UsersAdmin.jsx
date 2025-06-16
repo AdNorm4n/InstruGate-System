@@ -634,7 +634,7 @@ const UsersAdmin = () => {
                                 disabled={userRole !== "admin"}
                                 sx={{ color: "#d6393a" }}
                               >
-                                <Delete />
+                                <Delete sx={{ color: "#d32f2f" }} />
                               </IconButton>
                             </TableCell>
                           </TableRow>

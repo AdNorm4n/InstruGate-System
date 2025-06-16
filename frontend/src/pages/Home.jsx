@@ -282,12 +282,13 @@ function Home() {
                               fontSize: "0.9rem",
                             }}
                           >
-                            Browse instruments and prepare technical proposals.
+                            Review and approve submitted quotations to proceed
+                            to the Purchase Order (PO) stage.
                           </Typography>
                           <CTAButton
                             variant="contained"
                             onClick={() =>
-                              handleClick("engineer", "/instruments")
+                              handleClick("engineer", "/quotations/submitted")
                             }
                             disabled={isClicked === "engineer"}
                             aria-label="Browse Instruments"
@@ -336,7 +337,7 @@ function Home() {
                               fontSize: "0.9rem",
                             }}
                           >
-                            Search instruments and submit requests for your
+                            Browse instruments and submit quotations for your
                             projects.
                           </Typography>
                           <CTAButton

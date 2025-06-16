@@ -1068,8 +1068,8 @@ function Tools() {
                       backgroundColor: "#e3f2fd",
                     }}
                   >
-                    This guide is for general information only. Consult a
-                    corrosion engineer for critical applications.
+                    This guide is for general information only. Consult project
+                    proposal engineers for critical applications.
                   </Alert>
                 </Box>
               )}

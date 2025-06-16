@@ -11,6 +11,8 @@ import {
   Fade,
   Alert,
   Paper,
+  Snackbar,
+  Backdrop,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
@@ -92,6 +94,9 @@ function UserProfile() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
+  const [openConfirmUpdate, setOpenConfirmUpdate] = useState(false);
   const navigate = useNavigate();
 
   const getToken = () => localStorage.getItem(ACCESS_TOKEN);
@@ -183,6 +188,7 @@ function UserProfile() {
         status: err.response?.status,
       });
       setError("Failed to load profile. Please try again or log in.");
+      setOpenError(true);
       setLoading(false);
       navigate("/login");
     }
@@ -197,14 +203,12 @@ function UserProfile() {
     setError("");
     setSubmitting(true);
 
-    const confirmed = window.confirm(
-      "Are you sure you want to update your profile?"
-    );
-    if (!confirmed) {
-      console.log("UserProfile: Profile update canceled by user.");
-      setSubmitting(false);
-      return;
-    }
+    setOpenConfirmUpdate(true);
+    console.log("UserProfile: Showing confirmation Snackbar");
+  };
+
+  const handleConfirmUpdate = async () => {
+    setOpenConfirmUpdate(false);
     console.log("UserProfile: User confirmed profile update");
 
     try {
@@ -270,7 +274,7 @@ function UserProfile() {
       });
       setPassword("");
       setConfirmPassword("");
-      window.alert("Successfully updated");
+      setOpenSuccess(true);
     } catch (err) {
       console.error("UserProfile: Error updating profile:", {
         message: err.message,
@@ -285,9 +289,25 @@ function UserProfile() {
           err.message
         }`
       );
+      setOpenError(true);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleCancelUpdate = () => {
+    setOpenConfirmUpdate(false);
+    setSubmitting(false);
+    console.log("UserProfile: Profile update canceled by user.");
+  };
+
+  const handleCloseSuccess = () => {
+    setOpenSuccess(false);
+  };
+
+  const handleCloseError = () => {
+    setOpenError(false);
+    setError("");
   };
 
   const isAdminOrEngineer = ["admin", "proposal_engineer"].includes(userRole);
@@ -366,23 +386,6 @@ function UserProfile() {
             >
               Update your personal information and account settings.
             </Typography>
-
-            {error && (
-              <ToolCard sx={{ mb: 4, mx: "auto", maxWidth: "500px" }}>
-                <Alert severity="error" sx={{ borderRadius: 2 }}>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      fontSize: "0.9rem",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    {error}
-                  </Typography>
-                </Alert>
-              </ToolCard>
-            )}
 
             <ProfileCard component="form" onSubmit={handleSubmit}>
               <TextField
@@ -498,6 +501,131 @@ function UserProfile() {
                 {submitting ? <CircularProgress size={24} /> : "Update Profile"}
               </CTAButton>
             </ProfileCard>
+
+            {/* Snackbar Messages */}
+            <Box
+              sx={{
+                position: "fixed",
+                top: 20,
+                left: 0,
+                right: 0,
+                display: "flex",
+                justifyContent: "center",
+                zIndex: 1400,
+              }}
+            >
+              <Backdrop
+                sx={{
+                  bgcolor: "rgba(0, 0, 0, 0.8)",
+                  zIndex: (theme) => theme.zIndex.modal - 1,
+                }}
+                open={openConfirmUpdate}
+              />
+              <Snackbar
+                open={openConfirmUpdate}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  severity="warning"
+                  variant="filled"
+                  sx={{
+                    width: "100%",
+                    color: "white",
+                    backgroundColor: "#d32f2f",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                  }}
+                  action={
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      <Button
+                        color="inherit"
+                        size="small"
+                        onClick={handleConfirmUpdate}
+                        sx={{
+                          color: "white",
+                          fontFamily: "Helvetica, sans-serif",
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        color="inherit"
+                        size="small"
+                        onClick={handleCancelUpdate}
+                        sx={{
+                          color: "white",
+                          fontFamily: "Helvetica, sans-serif",
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </Box>
+                  }
+                >
+                  Are you sure you want to update your profile?
+                </Alert>
+              </Snackbar>
+              <Snackbar
+                open={openSuccess}
+                autoHideDuration={6000}
+                onClose={handleCloseSuccess}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  onClose={handleCloseSuccess}
+                  severity="success"
+                  variant="filled"
+                  sx={{
+                    width: "100%",
+                    color: "white",
+                    backgroundColor: "#28a745",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                  }}
+                >
+                  Successfully updated!
+                </Alert>
+              </Snackbar>
+              <Snackbar
+                open={openError}
+                autoHideDuration={6000}
+                onClose={handleCloseError}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+              >
+                <Alert
+                  onClose={handleCloseError}
+                  severity="error"
+                  variant="filled"
+                  sx={{
+                    width: "100%",
+                    color: "white",
+                    backgroundColor: "#d32f2f",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                  }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+            </Box>
           </Container>
         </main>
       </Box>

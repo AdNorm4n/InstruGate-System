@@ -8,9 +8,13 @@ import {
   Fade,
   Container,
   Grid,
+  IconButton,
+  Snackbar,
+  Alert,
+  Backdrop,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
+import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import InstrumentCard from "../components/InstrumentCard";
@@ -91,6 +95,7 @@ function SelectedInstruments() {
   const [loading, setLoading] = useState(true);
   const [isClicked, setIsClicked] = useState(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(null);
+  const [openConfirmClear, setOpenConfirmClear] = useState(false);
 
   const baseUrl = "http://127.0.0.1:8000";
 
@@ -151,17 +156,21 @@ function SelectedInstruments() {
   };
 
   const clearAllInstruments = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to clear your cart?"
-    );
-    if (confirmed) {
-      setSelectedInstruments([]);
-      localStorage.setItem("selectedInstruments", JSON.stringify([]));
-      console.log("Cleared all selectedInstruments");
-    } else {
-      console.log("Cart clear canceled");
-      setIsClicked(null);
-    }
+    setOpenConfirmClear(true);
+  };
+
+  const handleConfirmClear = () => {
+    setSelectedInstruments([]);
+    localStorage.setItem("selectedInstruments", JSON.stringify([]));
+    console.log("Cleared all selectedInstruments");
+    setOpenConfirmClear(false);
+    setIsClicked(null);
+  };
+
+  const handleCancelClear = () => {
+    console.log("Cart clear canceled");
+    setOpenConfirmClear(false);
+    setIsClicked(null);
   };
 
   const handleClick = (action, path = null, state = null) => {
@@ -343,9 +352,7 @@ function SelectedInstruments() {
                       variant="contained"
                       onClick={() => {
                         setIsClicked("clear");
-                        setTimeout(() => {
-                          clearAllInstruments();
-                        }, 300);
+                        clearAllInstruments();
                       }}
                       disabled={isClicked === "clear"}
                     >
@@ -365,21 +372,42 @@ function SelectedInstruments() {
                       : null;
                     return (
                       <Grid item xs={12} sm={6} md={4} key={index}>
-                        <InstrumentCard
-                          instrument={item.instrument}
-                          userRole={userRole}
-                          configData={null}
-                          productCode={item.productCode}
-                          requirements={Object.values(item.selections)}
-                          addOns={item.selectedAddOns}
-                          quantity={item.quantity}
-                          onQuantityChange={(newQuantity) =>
-                            updateInstrumentQuantity(index, newQuantity)
-                          }
-                          onRemove={() => removeInstrument(index)}
-                          onImageClick={() => handleImageClick(index)}
-                          isSelectedInstrument
-                        />
+                        <Box sx={{ position: "relative" }}>
+                          <InstrumentCard
+                            instrument={item.instrument}
+                            userRole={userRole}
+                            configData={null}
+                            productCode={item.productCode}
+                            requirements={Object.values(item.selections)}
+                            addOns={item.selectedAddOns}
+                            quantity={item.quantity}
+                            onQuantityChange={(newQuantity) =>
+                              updateInstrumentQuantity(index, newQuantity)
+                            }
+                            onRemove={() => removeInstrument(index)}
+                            onImageClick={() => handleImageClick(index)}
+                            isSelectedInstrument
+                          />
+                          <IconButton
+                            onClick={() => removeInstrument(index)}
+                            sx={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              color: "#d6393a",
+                              bgcolor: "#ffffff",
+                              borderRadius: "50%",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                              "&:hover": {
+                                bgcolor: "#f5f5f5",
+                                color: "#b32d2e",
+                              },
+                            }}
+                            aria-label="Remove instrument"
+                          >
+                            <RemoveCircleOutline sx={{ color: "#d32f2f" }} />
+                          </IconButton>
+                        </Box>
                         {isImageEnlarged === index && (
                           <Box
                             className="image-overlay"
@@ -408,6 +436,75 @@ function SelectedInstruments() {
             )}
           </Container>
         </main>
+
+        {/* Confirmation Snackbar */}
+        <Box
+          sx={{
+            position: "fixed",
+            top: 20,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "center",
+            zIndex: 1400,
+          }}
+        >
+          <Backdrop
+            sx={{
+              bgcolor: "rgba(0, 0, 0, 0.8)",
+              zIndex: (theme) => theme.zIndex.modal - 1,
+            }}
+            open={openConfirmClear}
+          />
+          <Snackbar
+            open={openConfirmClear}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Alert
+              severity="warning"
+              variant="filled"
+              sx={{
+                width: "100%",
+                color: "white",
+                backgroundColor: "#d32f2f",
+                "& .MuiAlert-icon": {
+                  color: "white !important",
+                  svg: {
+                    fill: "white !important",
+                  },
+                },
+                "& .MuiAlert-action": {
+                  color: "white !important",
+                  svg: {
+                    fill: "white !important",
+                  },
+                },
+              }}
+              action={
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleConfirmClear}
+                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                  >
+                    Confirm
+                  </Button>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleCancelClear}
+                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              }
+            >
+              Please confirm to clear selected instruments.
+            </Alert>
+          </Snackbar>
+        </Box>
       </Box>
     </Fade>
   );

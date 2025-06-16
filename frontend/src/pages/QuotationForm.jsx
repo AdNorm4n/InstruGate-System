@@ -12,6 +12,9 @@ import {
   CircularProgress,
   Fade,
   TextField,
+  Snackbar,
+  Alert,
+  Backdrop,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
@@ -33,6 +36,8 @@ function QuotationForm() {
   const [isClicked, setIsClicked] = useState(false);
   const [error, setError] = useState(null);
   const [projectName, setProjectName] = useState("");
+  const [openConfirmSubmit, setOpenConfirmSubmit] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
 
   const baseUrl = "http://127.0.0.1:8000";
 
@@ -107,12 +112,10 @@ function QuotationForm() {
       return;
     }
 
-    const confirmed = window.confirm("Are you sure you want to submit?");
-    if (!confirmed) {
-      console.log("Submission canceled by user");
-      return;
-    }
+    setOpenConfirmSubmit(true);
+  };
 
+  const handleConfirmSubmit = async () => {
     console.log("User confirmed submission");
     console.log("Project Name:", projectName);
     console.log(
@@ -121,6 +124,7 @@ function QuotationForm() {
     );
 
     setIsClicked(true);
+    setOpenConfirmSubmit(false);
     try {
       let access = getToken();
       const refresh = getRefreshToken();
@@ -183,8 +187,8 @@ function QuotationForm() {
 
       console.log("Submission response:", response.data);
       localStorage.removeItem("selectedInstruments");
-      alert("Quotation submitted successfully!");
-      navigate("/");
+      setOpenSuccess(true);
+      setTimeout(() => navigate("/quotations/submitted"), 1500);
     } catch (error) {
       console.error("Submission failed:", error);
       console.error(
@@ -198,6 +202,15 @@ function QuotationForm() {
     } finally {
       setTimeout(() => setIsClicked(false), 300);
     }
+  };
+
+  const handleCancelSubmit = () => {
+    console.log("Submission canceled by user");
+    setOpenConfirmSubmit(false);
+  };
+
+  const handleCloseSuccess = () => {
+    setOpenSuccess(false);
   };
 
   if (loading) {
@@ -586,6 +599,106 @@ function QuotationForm() {
             </Box>
           </Container>
         </main>
+
+        {/* Confirmation and Success Snackbars */}
+        <Box
+          sx={{
+            position: "fixed",
+            top: 20,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "center",
+            zIndex: 1400,
+          }}
+        >
+          <Backdrop
+            sx={{
+              bgcolor: "rgba(0, 0, 0, 0.8)",
+              zIndex: (theme) => theme.zIndex.modal - 1,
+            }}
+            open={openConfirmSubmit}
+          />
+          <Snackbar
+            open={openConfirmSubmit}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Alert
+              severity="warning"
+              variant="filled"
+              sx={{
+                width: "100%",
+                color: "white",
+                backgroundColor: "#d32f2f",
+                "& .MuiAlert-icon": {
+                  color: "white !important",
+                  svg: {
+                    fill: "white !important",
+                  },
+                },
+                "& .MuiAlert-action": {
+                  color: "white !important",
+                  svg: {
+                    fill: "white !important",
+                  },
+                },
+              }}
+              action={
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleConfirmSubmit}
+                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                  >
+                    Confirm
+                  </Button>
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={handleCancelSubmit}
+                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              }
+            >
+              Please confirm your submission.
+            </Alert>
+          </Snackbar>
+          <Snackbar
+            open={openSuccess}
+            autoHideDuration={6000}
+            onClose={handleCloseSuccess}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          >
+            <Alert
+              onClose={handleCloseSuccess}
+              severity="success"
+              variant="filled"
+              sx={{
+                width: "100%",
+                color: "white",
+                backgroundColor: "#28a745",
+                "& .MuiAlert-icon": {
+                  color: "white !important",
+                  svg: {
+                    fill: "white !important",
+                  },
+                },
+                "& .MuiAlert-action": {
+                  color: "white !important",
+                  svg: {
+                    fill: "white !important",
+                  },
+                },
+              }}
+            >
+              Quotation submitted successfully!
+            </Alert>
+          </Snackbar>
+        </Box>
       </Box>
     </Fade>
   );

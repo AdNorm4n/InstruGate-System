@@ -208,7 +208,7 @@ function ForgotPassword() {
             sx={{
               width: "100%",
               color: "white",
-              backgroundColor: "#d32f2f",
+              backgroundColor: "#28a745",
               "& .MuiAlert-icon": {
                 color: "white !important",
                 svg: {

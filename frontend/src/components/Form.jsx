@@ -14,6 +14,7 @@ import {
   Typography,
   Snackbar,
   Alert,
+  Backdrop,
 } from "@mui/material";
 import {
   AccountCircle,
@@ -37,6 +38,7 @@ function Form({ route, method }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [openError, setOpenError] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [openConfirmRegister, setOpenConfirmRegister] = useState(false);
   const navigate = useNavigate();
 
   const name = method === "login" ? "Login" : "Register";
@@ -48,6 +50,10 @@ function Form({ route, method }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (method === "register") {
+      setOpenConfirmRegister(true);
+      return;
+    }
     setLoading(true);
 
     try {
@@ -113,6 +119,48 @@ function Form({ route, method }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConfirmRegister = async () => {
+    setOpenConfirmRegister(false);
+    setLoading(true);
+
+    try {
+      const payload = {
+        username,
+        password,
+        email,
+        company,
+        first_name: firstName,
+        last_name: lastName,
+      };
+
+      const res = await api.post(route, payload);
+
+      setSuccessMessage("Registration successful! Please log in.");
+      setOpenSuccess(true);
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (error) {
+      let message = "An error occurred. Please try again.";
+      if (error.response && error.response.data) {
+        const data = error.response.data;
+        if (data.email) {
+          message = "Email has already been used.";
+        } else if (data.username) {
+          message = "Username has already been taken.";
+        } else if (typeof data.detail === "string") {
+          message = data.detail;
+        }
+      }
+      setErrorMessage(message);
+      setOpenError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelRegister = () => {
+    setOpenConfirmRegister(false);
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -297,6 +345,61 @@ function Form({ route, method }) {
           zIndex: 1400,
         }}
       >
+        <Backdrop
+          sx={{
+            bgcolor: "rgba(0, 0, 0, 0.8)",
+            zIndex: (theme) => theme.zIndex.modal - 1,
+          }}
+          open={openConfirmRegister}
+        />
+        <Snackbar
+          open={openConfirmRegister}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            severity="warning"
+            variant="filled"
+            sx={{
+              width: "100%",
+              color: "white",
+              backgroundColor: "#d32f2f",
+              "& .MuiAlert-icon": {
+                color: "white !important",
+                svg: {
+                  fill: "white !important",
+                },
+              },
+              "& .MuiAlert-action": {
+                color: "white !important",
+                svg: {
+                  fill: "white !important",
+                },
+              },
+            }}
+            action={
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={handleConfirmRegister}
+                  sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                >
+                  Confirm
+                </Button>
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={handleCancelRegister}
+                  sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            }
+          >
+            Please confirm your registration.
+          </Alert>
+        </Snackbar>
         <Snackbar
           open={openError}
           autoHideDuration={6000}
@@ -318,9 +421,9 @@ function Form({ route, method }) {
                 },
               },
               "& .MuiAlert-action": {
-                color: "white !important", // Makes CloseIcon white
+                color: "white !important",
                 svg: {
-                  fill: "white !important", // Ensures SVG path is white
+                  fill: "white !important",
                 },
               },
             }}
@@ -341,7 +444,7 @@ function Form({ route, method }) {
             sx={{
               width: "100%",
               color: "white",
-              backgroundColor: "#d32f2f",
+              backgroundColor: "#28a745",
               "& .MuiAlert-icon": {
                 color: "white !important",
                 svg: {
@@ -349,9 +452,9 @@ function Form({ route, method }) {
                 },
               },
               "& .MuiAlert-action": {
-                color: "white !important", // Makes CloseIcon white
+                color: "white !important",
                 svg: {
-                  fill: "white !important", // Ensures SVG path is white
+                  fill: "white !important",
                 },
               },
             }}

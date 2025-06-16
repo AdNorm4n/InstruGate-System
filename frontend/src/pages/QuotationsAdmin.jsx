@@ -29,8 +29,9 @@ import {
   Fade,
   Tabs,
   Tab,
+  Link,
 } from "@mui/material";
-import { Add, Visibility, Delete, Check, Close } from "@mui/icons-material";
+import { Visibility, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -57,29 +58,6 @@ const ToolCard = styled(Paper)(({ theme }) => ({
   fontFamily: "Helvetica, sans-serif !important",
 }));
 
-const CTAButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#1976d2",
-  color: "#ffffff",
-  padding: theme.spacing(1, 3),
-  fontWeight: 600,
-  fontSize: "0.9rem",
-  textTransform: "none",
-  borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
-  "&:hover": {
-    backgroundColor: "#1565c0",
-    transform: "scale(1.05)",
-  },
-  "&.Mui-disabled": {
-    backgroundColor: "#e0e0e0",
-    color: "#999",
-  },
-  transition: "all 0.3s ease",
-  "& .MuiCircularProgress-root": {
-    color: "#ffffff",
-  },
-}));
-
 const CancelButton = styled(Button)(({ theme }) => ({
   color: "#d6393a",
   fontFamily: "Helvetica, sans-serif !important",
@@ -103,7 +81,7 @@ const QuotationsAdmin = () => {
   const [success, setSuccess] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [modalData, setModalData] = useState({});
-  const [modalAction, setModalAction] = useState("add");
+  const [modalAction, setModalAction] = useState("view");
   const [userRole, setUserRole] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -112,6 +90,8 @@ const QuotationsAdmin = () => {
     direction: "asc",
   });
   const [quotationItems, setQuotationItems] = useState([]);
+  const [openRemarksDialog, setOpenRemarksDialog] = useState(false);
+  const [selectedRemarks, setSelectedRemarks] = useState("");
 
   const tabs = [
     {
@@ -288,17 +268,6 @@ const QuotationsAdmin = () => {
     }));
   };
 
-  const openAddModal = () => {
-    if (!tabs[0].permissions.includes(userRole)) {
-      setError("You do not have permission to add quotations.");
-      return;
-    }
-    setModalAction("add");
-    setModalData({});
-    setQuotationItems([]);
-    setOpenModal(true);
-  };
-
   const openViewModal = async (item) => {
     if (!tabs[0].permissions.includes(userRole)) {
       setError("You do not have permission to view quotations.");
@@ -342,60 +311,6 @@ const QuotationsAdmin = () => {
     setModalData({});
     setQuotationItems([]);
     setError("");
-  };
-
-  const handleSaveQuotation = async () => {
-    if (!tabs[0].permissions.includes(userRole)) {
-      setError("You do not have permission to save quotations.");
-      return;
-    }
-    const tab = tabs[0];
-    const requiredFields = tab.writableFields.filter((f) => f !== "remarks");
-    for (const field of requiredFields) {
-      if (
-        !modalData[field] &&
-        modalData[field] !== 0 &&
-        modalData[field] !== false
-      ) {
-        setError(
-          `${field
-            .replace("_id", "")
-            .replace("_", " ")
-            .toUpperCase()} is required.`
-        );
-        return;
-      }
-    }
-
-    try {
-      const access = localStorage.getItem("access");
-      const endpoint = tab.endpoint;
-      const method = "post";
-      const payload = {
-        created_by_id: modalData.created_by_id,
-        company: modalData.company,
-        project_name: modalData.project_name,
-      };
-      console.log("Quotation Payload:", payload);
-      const response = await api({
-        method,
-        url: endpoint,
-        data: payload,
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      console.log("Save Quotation Response:", response.data);
-
-      setSuccess(`Quotation created successfully!`);
-      fetchData();
-      handleModalClose();
-    } catch (err) {
-      console.error("Error Response:", err.response?.data);
-      const errorMessage =
-        err.response?.data?.detail ||
-        Object.values(err.response?.data)?.[0] ||
-        err.message;
-      setError(`Failed to save quotation: ${errorMessage}`);
-    }
   };
 
   const handleDelete = async (id) => {
@@ -453,6 +368,22 @@ const QuotationsAdmin = () => {
     }
   };
 
+  const handleOpenRemarksDialog = (remarks) => {
+    setSelectedRemarks(remarks || "N/A");
+    setOpenRemarksDialog(true);
+  };
+
+  const handleCloseRemarksDialog = () => {
+    setOpenRemarksDialog(false);
+    setSelectedRemarks("");
+  };
+
+  const truncateRemarks = (text, maxLength = 50) => {
+    if (text === "N/A" || !text) return text;
+    if (text.length <= maxLength) return text;
+    return `${text.substring(0, maxLength - 3)}...`;
+  };
+
   const renderTable = () => {
     const tab = tabs[0];
     const items = filteredData.quotations || [];
@@ -468,6 +399,7 @@ const QuotationsAdmin = () => {
                   fontWeight: "bold",
                   fontFamily: "Helvetica, sans-serif !important",
                   bgcolor: "#f5f5f5",
+                  ...(field === "remarks" && { width: "200px" }),
                 }}
               >
                 <TableSortLabel
@@ -528,9 +460,38 @@ const QuotationsAdmin = () => {
                             : "inherit",
                         fontWeight: field === "status" ? "bold" : "normal",
                       }),
+                      ...(field === "remarks" && {
+                        maxWidth: "200px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }),
                     }}
                   >
-                    {getField(item, field)}
+                    {field === "remarks" ? (
+                      getField(item, field).length > 50 ? (
+                        <span>
+                          {truncateRemarks(getField(item, field))}
+                          <Link
+                            component="button"
+                            onClick={() =>
+                              handleOpenRemarksDialog(getField(item, field))
+                            }
+                            sx={{
+                              ml: 1,
+                              color: "#1976d2",
+                              textDecoration: "underline",
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            View More
+                          </Link>
+                        </span>
+                      ) : (
+                        getField(item, field)
+                      )
+                    ) : (
+                      getField(item, field)
+                    )}
                   </TableCell>
                 ))}
                 <TableCell>
@@ -544,7 +505,7 @@ const QuotationsAdmin = () => {
                         sx={{ color: "#1976d2" }}
                         title="View Quotation"
                       >
-                        <Visibility />
+                        <Visibility sx={{ color: "#1976d2" }} />
                       </IconButton>
                       <IconButton
                         onClick={() => handleDelete(item.id)}
@@ -552,7 +513,7 @@ const QuotationsAdmin = () => {
                         sx={{ color: "#d32f2f" }}
                         title="Delete Quotation"
                       >
-                        <Delete />
+                        <Delete sx={{ color: "#d32f2f" }} />
                       </IconButton>
                     </Box>
                     <Box sx={{ display: "flex", gap: 0.5 }}>
@@ -565,7 +526,7 @@ const QuotationsAdmin = () => {
                           sx={{ color: "#388e3c" }}
                           title="Approve Quotation"
                         >
-                          <Check />
+                          <Check sx={{ color: "#388e3c" }} />
                         </IconButton>
                       )}
                       {tab.actions.includes("reject") && (
@@ -581,7 +542,7 @@ const QuotationsAdmin = () => {
                           sx={{ color: "#d32f2f" }}
                           title="Reject Quotation"
                         >
-                          <Close />
+                          <Close sx={{ color: "#d32f2f" }} />
                         </IconButton>
                       )}
                     </Box>
@@ -862,7 +823,6 @@ const QuotationsAdmin = () => {
                       mb: 4,
                       flexWrap: "wrap",
                       alignItems: "center",
-                      justifyContent: "space-between",
                     }}
                   >
                     <Box
@@ -871,7 +831,7 @@ const QuotationsAdmin = () => {
                         gap: 2,
                         flexWrap: "wrap",
                         flex: 1,
-                        minWidth: "200px",
+                        width: "100%",
                       }}
                     >
                       <TextField
@@ -880,7 +840,7 @@ const QuotationsAdmin = () => {
                           .join(" or ")}`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        sx={{ flex: 1, minWidth: "200px" }}
+                        sx={{ flex: 2, minWidth: "300px" }}
                         variant="outlined"
                         size="small"
                         InputLabelProps={{
@@ -894,7 +854,10 @@ const QuotationsAdmin = () => {
                           },
                         }}
                       />
-                      <FormControl sx={{ minWidth: "150px" }} size="small">
+                      <FormControl
+                        sx={{ flex: 1, minWidth: "200px" }}
+                        size="small"
+                      >
                         <InputLabel
                           sx={{
                             fontFamily: "Helvetica, sans-serif !important",
@@ -945,14 +908,6 @@ const QuotationsAdmin = () => {
                         </Select>
                       </FormControl>
                     </Box>
-                    <CTAButton
-                      variant="contained"
-                      startIcon={<Add sx={{ color: "white" }} />}
-                      onClick={openAddModal}
-                      disabled={!tabs[0].permissions.includes(userRole)}
-                    >
-                      Add Quotation
-                    </CTAButton>
                   </Box>
                   {renderTable()}
                 </ToolCard>
@@ -964,10 +919,6 @@ const QuotationsAdmin = () => {
                 fullWidth
                 PaperProps={{
                   component: "form",
-                  onSubmit: (e) => {
-                    e.preventDefault();
-                    handleSaveQuotation();
-                  },
                   sx: { borderRadius: 2, p: 2 },
                 }}
               >
@@ -978,16 +929,46 @@ const QuotationsAdmin = () => {
                     color: "#1976d2",
                   }}
                 >
-                  {modalAction === "add" ? "Add Quotation" : "View Quotation"}
+                  View Quotation
                 </DialogTitle>
                 <DialogContent>{renderModalContent()}</DialogContent>
                 <DialogActions>
                   <CancelButton onClick={handleModalClose}>Close</CancelButton>
-                  {modalAction === "add" && (
-                    <CTAButton type="submit" variant="contained">
-                      Save
-                    </CTAButton>
-                  )}
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openRemarksDialog}
+                onClose={handleCloseRemarksDialog}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                  sx: { borderRadius: 2, p: 2 },
+                }}
+              >
+                <DialogTitle
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    fontWeight: "bold",
+                    color: "#1976d2",
+                  }}
+                >
+                  Full Remarks
+                </DialogTitle>
+                <DialogContent>
+                  <Typography
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif !important",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {selectedRemarks}
+                  </Typography>
+                </DialogContent>
+                <DialogActions>
+                  <CancelButton onClick={handleCloseRemarksDialog}>
+                    Close
+                  </CancelButton>
                 </DialogActions>
               </Dialog>
             </Container>

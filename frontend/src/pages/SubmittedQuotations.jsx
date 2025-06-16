@@ -16,6 +16,15 @@ import {
   ToggleButtonGroup,
   Divider,
   IconButton,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Link,
+  Snackbar,
+  Alert,
+  Backdrop,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Pie } from "react-chartjs-2";
@@ -132,18 +141,51 @@ function SubmittedQuotations() {
     datasets: [
       {
         data: [0, 0, 0],
-        backgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
-        hoverBackgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
+        backgroundColor: ["#fbc02d", "#388e3c", "#d32f2f"],
+        hoverBackgroundColor: ["#fbc02d", "#388e3c", "#d32f2f"],
       },
     ],
   });
-  const [pageLoaded, setPageLoaded] = useState(false);
+  const [openRemarksDialog, setOpenRemarksDialog] = useState(false);
+  const [selectedRemarks, setSelectedRemarks] = useState("");
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [openError, setOpenError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [openConfirmApprove, setOpenConfirmApprove] = useState(null);
+  const [openConfirmReject, setOpenConfirmReject] = useState(null);
   const navigate = useNavigate();
 
   const baseUrl = "http://127.0.0.1:8000";
 
   const getToken = () => localStorage.getItem(ACCESS_TOKEN);
   const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN);
+
+  const truncateRemarks = (text, maxLength = 50) => {
+    if (!text) return "N/A";
+    if (text.length <= maxLength) return text;
+    return `${text.substring(0, maxLength - 3)}...`;
+  };
+
+  const handleOpenRemarksDialog = (remarks) => {
+    setSelectedRemarks(remarks || "N/A");
+    setOpenRemarksDialog(true);
+  };
+
+  const handleCloseRemarksDialog = () => {
+    setOpenRemarksDialog(false);
+    setSelectedRemarks("");
+  };
+
+  const handleCloseSuccess = () => {
+    setOpenSuccess(false);
+    setSuccessMessage("");
+  };
+
+  const handleCloseError = () => {
+    setOpenError(false);
+    setErrorMessage("");
+  };
 
   const handleDownloadPDF = (quotation) => {
     try {
@@ -295,10 +337,21 @@ function SubmittedQuotations() {
       }
       // Save PDF
       console.log("Saving PDF");
-      doc.save(`Purchase_Order_Quotation_${quotation.id || "Unknown"}.pdf`);
+      const safeCompany = (quotation.company || "Unknown").replace(
+        /[^a-zA-Z0-9]/g,
+        "_"
+      );
+      doc.save(
+        `Purchase Order ${safeCompany} #${quotation.id || "Unknown"}.pdf`
+      );
+      setSuccessMessage("PDF generated successfully!");
+      setOpenSuccess(true);
     } catch (err) {
       console.error("Error generating PDF:", err);
-      alert("Failed to generate PDF. Please check the console for details.");
+      setErrorMessage(
+        "Failed to generate PDF. Please check the console for details."
+      );
+      setOpenError(true);
     }
   };
 
@@ -364,14 +417,13 @@ function SubmittedQuotations() {
         datasets: [
           {
             data: [pending, approved, rejected],
-            backgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
-            hoverBackgroundColor: ["#FFCE56", "#36A2EB", "#FF6384"],
+            backgroundColor: ["#ffc107", "#28a745", "#dc3545"],
+            hoverBackgroundColor: ["#ffc107", "#28a745", "#dc3545"],
           },
         ],
       });
 
       setLoading(false);
-      setPageLoaded(true);
     } catch (err) {
       console.error("Error fetching data:", err);
       setError(
@@ -380,7 +432,6 @@ function SubmittedQuotations() {
         }`
       );
       setLoading(false);
-      setPageLoaded(true);
     }
   };
 
@@ -397,14 +448,15 @@ function SubmittedQuotations() {
 
   const handleConfirmReject = async () => {
     if (!rejectRemarks.trim()) {
-      alert("Remarks are required for rejection.");
+      setErrorMessage("Remarks are required for rejection.");
+      setOpenError(true);
       return;
     }
-    const confirmed = window.confirm(
-      "Are you sure you want to reject this quotation?"
-    );
-    if (!confirmed) return;
+    setOpenConfirmReject(rejectingQuotationId);
+  };
 
+  const handleConfirmRejectAction = async () => {
+    setOpenConfirmReject(null);
     const payload = { status: "rejected", remarks: rejectRemarks };
     console.log("Sending PATCH payload:", JSON.stringify(payload, null, 2));
     try {
@@ -421,26 +473,36 @@ function SubmittedQuotations() {
       );
       setRejectingQuotationId(null);
       setRejectRemarks("");
-      alert("Quotation rejected successfully.");
+      setSuccessMessage("Quotation rejected successfully.");
+      setOpenSuccess(true);
       fetchData();
     } catch (err) {
       console.error("Error rejecting quotation:", err.response?.data || err);
-      alert(
+      setErrorMessage(
         `Failed to reject quotation. Error: ${
           err.response?.data?.detail ||
           err.response?.data?.status?.[0] ||
           err.message
         }`
       );
+      setOpenError(true);
+      setRejectingQuotationId(null); // Reset to re-enable buttons on error
     }
   };
 
-  const handleApproveClick = async (quotationId) => {
-    const confirmed = window.confirm(
-      "Are you sure to approve this quotation? Clients will be able to download the purchase order quotation sheet."
-    );
-    if (!confirmed) return;
+  const handleCancelReject = () => {
+    setOpenConfirmReject(null);
+    setRejectingQuotationId(null);
+    setRejectRemarks("");
+  };
 
+  const handleApproveClick = async (quotationId) => {
+    setOpenConfirmApprove(quotationId);
+  };
+
+  const handleConfirmApprove = async () => {
+    const quotationId = openConfirmApprove;
+    setOpenConfirmApprove(null);
     const payload = { status: "approved", remarks: "" };
     console.log("Sending PATCH payload:", JSON.stringify(payload, null, 2));
     try {
@@ -453,18 +515,24 @@ function SubmittedQuotations() {
       setQuotations((prev) =>
         prev.map((q) => (q.id === quotationId ? { ...q, ...response.data } : q))
       );
+      setSuccessMessage("Quotation has been approved.");
+      setOpenSuccess(true);
       fetchData();
-      alert("Quotation has been approved.");
     } catch (err) {
       console.error("Error approving quotation:", err.response?.data || err);
-      alert(
+      setErrorMessage(
         `Failed to approve quotation. Error: ${
           err.response?.data?.detail ||
           err.response?.data?.status?.[0] ||
           err.message
         }`
       );
+      setOpenError(true);
     }
+  };
+
+  const handleCancelApprove = () => {
+    setOpenConfirmApprove(null);
   };
 
   const handleImageClick = (index) => {
@@ -504,12 +572,8 @@ function SubmittedQuotations() {
       ? quotations
       : quotations.filter((q) => q.status === statusFilter);
 
-  if (!pageLoaded) {
-    return null;
-  }
-
   return (
-    <Fade in={pageLoaded} timeout={800}>
+    <Fade in timeout={800}>
       <Box
         className="submitted-quotations-page"
         sx={{
@@ -553,648 +617,950 @@ function SubmittedQuotations() {
               updates.
             </Typography>
 
-            <ToolCard sx={{ mb: 6, p: 4 }}>
-              <Grid container spacing={4} justifyContent="center">
-                <Grid item xs={12} md={8}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      fontWeight: "bold",
-                      mb: 3,
-                      textAlign: "center",
-                      color: "#333",
-                    }}
-                  >
-                    Total Quotations: {quotations.length}
-                  </Typography>
-                  <Box sx={{ maxWidth: 600, mx: "auto" }}>
-                    <Pie
-                      data={chartData}
-                      options={{
-                        responsive: true,
-                        plugins: {
-                          legend: { position: "top" },
-                          tooltip: {
-                            callbacks: {
-                              label: (context) =>
-                                `${context.label}: ${context.raw}`,
-                            },
-                          },
-                        },
-                      }}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-            </ToolCard>
-
-            <ToolCard sx={{ p: 4 }}>
-              <StatusButtonGroup
-                value={statusFilter}
-                exclusive
-                onChange={handleStatusFilter}
-                aria-label="status filter"
-                sx={{ display: "flex", justifyContent: "center", mb: 3 }}
+            {loading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: "50vh",
+                }}
               >
-                <ToggleButton value="all">All</ToggleButton>
-                <ToggleButton value="pending">Pending</ToggleButton>
-                <ToggleButton value="rejected">Rejected</ToggleButton>
-                <ToggleButton value="approved">Approved</ToggleButton>
-              </StatusButtonGroup>
+                <CircularProgress size={60} sx={{ color: "#d6393a" }} />
+              </Box>
+            ) : error ? (
+              <Typography
+                variant="h6"
+                align="center"
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  color: "#dc3545",
+                  py: 4,
+                }}
+              >
+                {error}
+              </Typography>
+            ) : (
+              <>
+                <ToolCard sx={{ mb: 6, p: 4 }}>
+                  <Grid container spacing={4} justifyContent="center">
+                    <Grid item xs={12} md={8}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif !important",
+                          fontWeight: "bold",
+                          mb: 3,
+                          textAlign: "center",
+                          color: "#333",
+                        }}
+                      >
+                        Total Quotations: {quotations.length}
+                      </Typography>
+                      <Box sx={{ maxWidth: 600, mx: "auto" }}>
+                        <Pie
+                          data={chartData}
+                          options={{
+                            responsive: true,
+                            plugins: {
+                              legend: { position: "top" },
+                              tooltip: {
+                                callbacks: {
+                                  label: (context) =>
+                                    `${context.label}: ${context.raw}`,
+                                },
+                              },
+                            },
+                          }}
+                        />
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </ToolCard>
 
-              {filteredQuotations.length === 0 ? (
-                <Typography
-                  variant="h6"
-                  sx={{
-                    textAlign: "center",
-                    fontFamily: "Helvetica, sans-serif !important",
-                    color: "#666",
-                    py: 4,
-                  }}
-                >
-                  No quotations available for this status.
-                </Typography>
-              ) : (
-                <Box sx={{ width: "100%" }}>
-                  {filteredQuotations.map((quotation, qIndex) => (
-                    <Box
-                      key={quotation.id || `quotation-${qIndex}`}
-                      sx={{ mb: 8 }}
+                <ToolCard sx={{ p: 4 }}>
+                  <StatusButtonGroup
+                    value={statusFilter}
+                    exclusive
+                    onChange={handleStatusFilter}
+                    aria-label="status filter"
+                    sx={{ display: "flex", justifyContent: "center", mb: 3 }}
+                  >
+                    <ToggleButton value="all">All</ToggleButton>
+                    <ToggleButton value="pending">Pending</ToggleButton>
+                    <ToggleButton value="rejected">Rejected</ToggleButton>
+                    <ToggleButton value="approved">Approved</ToggleButton>
+                  </StatusButtonGroup>
+
+                  {filteredQuotations.length === 0 ? (
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        textAlign: "center",
+                        fontFamily: "Helvetica, sans-serif !important",
+                        color: "#666",
+                        py: 4,
+                      }}
                     >
-                      <QuotationCard>
-                        <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              mb: 4,
-                            }}
-                          >
-                            <Typography
-                              variant="h6"
-                              fontWeight="bold"
-                              sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
-                                textTransform: "uppercase",
-                                color: "#333",
-                                fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                              }}
-                            >
-                              Quotation #{quotation.id || "Unknown"}
-                            </Typography>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
-                                  fontWeight: "bold",
-                                  color: getStatusColor(quotation.status),
-                                  textTransform: "uppercase",
-                                  bgcolor: `${getStatusColor(
-                                    quotation.status
-                                  )}22`,
-                                  px: 3,
-                                  py: 1,
-                                  borderRadius: "12px",
-                                  fontSize: { xs: "0.9rem", sm: "1rem" },
-                                }}
-                              >
-                                {formatStatusText(quotation.status)}
-                              </Typography>
-                              {quotation.status === "approved" &&
-                                userRole === "client" && (
-                                  <IconButton
-                                    onClick={() => handleDownloadPDF(quotation)}
-                                    sx={{
-                                      ml: 2,
-                                      color: "#28a745",
-                                      "&:hover": {
-                                        color: "#218838",
-                                      },
-                                    }}
-                                    aria-label="Download Quotation PDF"
-                                  >
-                                    <DownloadIcon />
-                                  </IconButton>
-                                )}
-                            </Box>
-                          </Box>
-                          <Divider sx={{ mb: 4, bgcolor: "#e0e0e0" }} />
-                          <Grid container spacing={5}>
-                            <Grid item xs={12}>
-                              <Typography
-                                variant="subtitle1"
-                                sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
-                                  fontWeight: "bold",
-                                  color: "#555",
-                                  mb: 2,
-                                  textTransform: "uppercase",
-                                  fontSize: "1rem",
-                                }}
-                              >
-                                Details
-                              </Typography>
+                      No quotations available for this status.
+                    </Typography>
+                  ) : (
+                    <Box sx={{ width: "100%" }}>
+                      {filteredQuotations.map((quotation, qIndex) => (
+                        <Box
+                          key={quotation.id || `quotation-${qIndex}`}
+                          sx={{ mb: 8 }}
+                        >
+                          <QuotationCard>
+                            <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
                               <Box
                                 sx={{
                                   display: "flex",
-                                  justifyContent: "center",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                  mb: 4,
                                 }}
                               >
-                                <Box
+                                <Typography
+                                  variant="h6"
+                                  fontWeight="bold"
                                   sx={{
-                                    width: { xs: "100%", sm: "400px" },
-                                    minWidth: { sm: "400px" },
-                                    maxWidth: { sm: "400px" },
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: 2,
-                                    bgcolor: "#fafafa",
-                                    p: 3,
-                                    borderRadius: "8px",
-                                    border: "1px solid #e0e0e0",
+                                    fontFamily:
+                                      "Helvetica, sans-serif !important",
+                                    textTransform: "uppercase",
+                                    color: "#333",
+                                    fontSize: { xs: "1.2rem", sm: "1.5rem" },
                                   }}
                                 >
+                                  Quotation #{quotation.id || "Unknown"}
+                                </Typography>
+                                <Box
+                                  sx={{ display: "flex", alignItems: "center" }}
+                                >
                                   <Typography
-                                    variant="body1"
+                                    variant="body2"
                                     sx={{
                                       fontFamily:
                                         "Helvetica, sans-serif !important",
-                                      color: "#333",
-                                      fontSize: "1rem",
+                                      fontWeight: "bold",
+                                      color: getStatusColor(quotation.status),
+                                      textTransform: "uppercase",
+                                      bgcolor: `${getStatusColor(
+                                        quotation.status
+                                      )}22`,
+                                      px: 3,
+                                      py: 1,
+                                      borderRadius: "12px",
+                                      fontSize: { xs: "0.9rem", sm: "1rem" },
                                     }}
                                   >
-                                    <strong>Submitted by:</strong>{" "}
-                                    {quotation.created_by_first_name || "N/A"}
-                                  </Typography>
-                                  <Typography
-                                    variant="body1"
-                                    sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
-                                      color: "#333",
-                                      fontSize: "1rem",
-                                    }}
-                                  >
-                                    <strong>Company:</strong>{" "}
-                                    {quotation.company || "N/A"}
-                                  </Typography>
-                                  <Typography
-                                    variant="body1"
-                                    sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
-                                      color: "#333",
-                                      fontSize: "1rem",
-                                    }}
-                                  >
-                                    <strong>Project:</strong>{" "}
-                                    {quotation.project_name || "N/A"}
-                                  </Typography>
-                                  <Typography
-                                    variant="body1"
-                                    sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
-                                      color: "#333",
-                                      fontSize: "1rem",
-                                    }}
-                                  >
-                                    <strong>Submitted at:</strong>{" "}
-                                    {quotation.submitted_at
-                                      ? (() => {
-                                          try {
-                                            return format(
-                                              parseISO(quotation.submitted_at),
-                                              "PPp"
-                                            );
-                                          } catch {
-                                            return "Unknown";
-                                          }
-                                        })()
-                                      : "Unknown"}
+                                    {formatStatusText(quotation.status)}
                                   </Typography>
                                   {quotation.status === "approved" &&
-                                    quotation.approved_at && (
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#333",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Approved at:</strong>{" "}
-                                        {(() => {
-                                          try {
-                                            return format(
-                                              parseISO(quotation.approved_at),
-                                              "PPp"
-                                            );
-                                          } catch {
-                                            return "Unknown";
-                                          }
-                                        })()}
-                                      </Typography>
-                                    )}
-                                  {quotation.status === "rejected" &&
-                                    quotation.rejected_at && (
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#333",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Rejected at:</strong>{" "}
-                                        {(() => {
-                                          try {
-                                            return format(
-                                              parseISO(quotation.rejected_at),
-                                              "PPp"
-                                            );
-                                          } catch {
-                                            return "Unknown";
-                                          }
-                                        })()}
-                                      </Typography>
-                                    )}
-                                  {quotation.status === "rejected" &&
-                                    quotation.remarks && (
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#dc3545",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Remarks:</strong>{" "}
-                                        {quotation.remarks}
-                                      </Typography>
-                                    )}
-                                  {quotation.status === "rejected" &&
                                     userRole === "client" && (
-                                      <Typography
-                                        variant="body1"
+                                      <IconButton
+                                        onClick={() =>
+                                          handleDownloadPDF(quotation)
+                                        }
                                         sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#dc3545",
-                                          fontWeight: "bold",
-                                          fontSize: "1rem",
+                                          ml: 2,
+                                          color: "#28a745",
+                                          "&:hover": {
+                                            color: "#218838",
+                                          },
                                         }}
+                                        aria-label="Download Quotation PDF"
                                       >
-                                        Please create a new quotation with
-                                        corrections.
-                                      </Typography>
+                                        <DownloadIcon />
+                                      </IconButton>
                                     )}
                                 </Box>
                               </Box>
-                            </Grid>
-                            <Grid item xs={12}>
-                              <Typography
-                                variant="subtitle1"
-                                sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
-                                  fontWeight: "bold",
-                                  color: "#555",
-                                  mb: 2,
-                                  textTransform: "uppercase",
-                                  fontSize: "1rem",
-                                }}
-                              >
-                                Instruments
-                              </Typography>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  gap: 2,
-                                }}
-                              >
-                                {quotation.items &&
-                                Array.isArray(quotation.items) &&
-                                quotation.items.length > 0 ? (
-                                  quotation.items.map((item, iIndex) => {
-                                    const imageUrl = item.instrument?.image
-                                      ? new URL(item.instrument.image, baseUrl)
-                                          .href
-                                      : null;
-                                    const imageIndex = `${qIndex}-${iIndex}`;
-                                    return (
-                                      <Box
-                                        key={imageIndex}
+                              <Divider sx={{ mb: 4, bgcolor: "#e0e0e0" }} />
+                              <Grid container spacing={5}>
+                                <Grid item xs={12}>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{
+                                      fontFamily:
+                                        "Helvetica, sans-serif !important",
+                                      fontWeight: "bold",
+                                      color: "#555",
+                                      mb: 2,
+                                      textTransform: "uppercase",
+                                      fontSize: "1rem",
+                                    }}
+                                  >
+                                    Details
+                                  </Typography>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    <Box
+                                      sx={{
+                                        width: { xs: "100%", sm: "400px" },
+                                        minWidth: { sm: "400px" },
+                                        maxWidth: { sm: "400px" },
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: 2,
+                                        bgcolor: "#fafafa",
+                                        p: 3,
+                                        borderRadius: "8px",
+                                        border: "1px solid #e0e0e0",
+                                      }}
+                                    >
+                                      <Typography
+                                        variant="body1"
                                         sx={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                          p: 2,
-                                          bgcolor: "#f9fafb",
-                                          borderRadius: "8px",
-                                          border: "1px solid #e0e0e0",
-                                          transition: "all 0.2s ease",
-                                          "&:hover": {
-                                            bgcolor: "#f1f3f5",
-                                            borderColor: "#d6393a",
-                                          },
+                                          fontFamily:
+                                            "Helvetica, sans-serif !important",
+                                          color: "#333",
+                                          fontSize: "1rem",
                                         }}
                                       >
-                                        {imageUrl ? (
-                                          <img
-                                            src={imageUrl}
-                                            alt={
-                                              item.instrument?.name ||
-                                              "Instrument"
-                                            }
-                                            style={{
-                                              width: "80px",
-                                              height: "80px",
-                                              objectFit: "cover",
-                                              borderRadius: "8px",
-                                              marginRight: "20px",
-                                              cursor: "pointer",
-                                              boxShadow:
-                                                "0 2px 4px rgba(0,0,0,0.1)",
-                                            }}
-                                            onClick={() =>
-                                              handleImageClick(imageIndex)
-                                            }
-                                            onError={(e) => {
-                                              e.target.style.display = "none";
-                                              e.target.nextSibling.style.display =
-                                                "flex";
-                                            }}
-                                          />
-                                        ) : (
-                                          <Box
-                                            sx={{
-                                              width: "80px",
-                                              height: "80px",
-                                              bgcolor: "#e0e0e0",
-                                              borderRadius: "8px",
-                                              display: "flex",
-                                              alignItems: "center",
-                                              justifyContent: "center",
-                                              mr: 2.5,
-                                            }}
-                                          >
-                                            <Typography
-                                              variant="body2"
-                                              color="text.secondary"
-                                              sx={{
-                                                fontFamily:
-                                                  "Helvetica, sans-serif !important",
-                                                fontSize: "0.9rem",
-                                              }}
-                                            >
-                                              No Image
-                                            </Typography>
-                                          </Box>
-                                        )}
-                                        <Box sx={{ flex: 1 }}>
+                                        <strong>Submitted by:</strong>{" "}
+                                        {quotation.created_by_first_name ||
+                                          "N/A"}
+                                      </Typography>
+                                      <Typography
+                                        variant="body1"
+                                        sx={{
+                                          fontFamily:
+                                            "Helvetica, sans-serif !important",
+                                          color: "#333",
+                                          fontSize: "1rem",
+                                        }}
+                                      >
+                                        <strong>Company:</strong>{" "}
+                                        {quotation.company || "N/A"}
+                                      </Typography>
+                                      <Typography
+                                        variant="body1"
+                                        sx={{
+                                          fontFamily:
+                                            "Helvetica, sans-serif !important",
+                                          color: "#333",
+                                          fontSize: "1rem",
+                                        }}
+                                      >
+                                        <strong>Project:</strong>{" "}
+                                        {quotation.project_name || "N/A"}
+                                      </Typography>
+                                      <Typography
+                                        variant="body1"
+                                        sx={{
+                                          fontFamily:
+                                            "Helvetica, sans-serif !important",
+                                          color: "#333",
+                                          fontSize: "1rem",
+                                        }}
+                                      >
+                                        <strong>Submitted at:</strong>{" "}
+                                        {quotation.submitted_at
+                                          ? (() => {
+                                              try {
+                                                return format(
+                                                  parseISO(
+                                                    quotation.submitted_at
+                                                  ),
+                                                  "PPp"
+                                                );
+                                              } catch {
+                                                return "Unknown";
+                                              }
+                                            })()
+                                          : "Unknown"}
+                                      </Typography>
+                                      {quotation.status === "approved" &&
+                                        quotation.approved_at && (
                                           <Typography
                                             variant="body1"
                                             sx={{
                                               fontFamily:
                                                 "Helvetica, sans-serif !important",
-                                              fontWeight: "600",
                                               color: "#333",
-                                              mb: 1,
                                               fontSize: "1rem",
                                             }}
                                           >
-                                            {item.instrument?.name ||
-                                              item.name ||
-                                              "N/A"}
+                                            <strong>Approved at:</strong>{" "}
+                                            {(() => {
+                                              try {
+                                                return format(
+                                                  parseISO(
+                                                    quotation.approved_at
+                                                  ),
+                                                  "PPp"
+                                                );
+                                              } catch {
+                                                return "Unknown";
+                                              }
+                                            })()}
                                           </Typography>
+                                        )}
+                                      {quotation.status === "rejected" &&
+                                        quotation.rejected_at && (
                                           <Typography
-                                            variant="body2"
+                                            variant="body1"
                                             sx={{
                                               fontFamily:
                                                 "Helvetica, sans-serif !important",
-                                              color: "#666",
-                                              fontSize: "0.95rem",
+                                              color: "#333",
+                                              fontSize: "1rem",
                                             }}
                                           >
-                                            Product Code:{" "}
-                                            {item.product_code || "N/A"}
+                                            <strong>Rejected at:</strong>{" "}
+                                            {(() => {
+                                              try {
+                                                return format(
+                                                  parseISO(
+                                                    quotation.rejected_at
+                                                  ),
+                                                  "PPp"
+                                                );
+                                              } catch {
+                                                return "Unknown";
+                                              }
+                                            })()}
                                           </Typography>
+                                        )}
+                                      {quotation.status === "rejected" &&
+                                        quotation.remarks && (
                                           <Typography
-                                            variant="body2"
+                                            variant="body1"
                                             sx={{
                                               fontFamily:
                                                 "Helvetica, sans-serif !important",
-                                              color: "#666",
-                                              fontSize: "0.95rem",
+                                              color: "#dc3545",
+                                              fontSize: "1rem",
+                                              wordBreak: "break-word",
                                             }}
                                           >
-                                            Quantity: {item.quantity || "1"}
+                                            <strong>Remarks:</strong>{" "}
+                                            <span>
+                                              {truncateRemarks(
+                                                quotation.remarks
+                                              )}
+                                              {quotation.remarks.length >
+                                                50 && (
+                                                <Link
+                                                  component="button"
+                                                  onClick={() =>
+                                                    handleOpenRemarksDialog(
+                                                      quotation.remarks
+                                                    )
+                                                  }
+                                                  sx={{
+                                                    ml: 1,
+                                                    color: "#1976d2",
+                                                    textDecoration: "underline",
+                                                    fontFamily:
+                                                      "Helvetica, sans-serif !important",
+                                                  }}
+                                                >
+                                                  View More
+                                                </Link>
+                                              )}
+                                            </span>
                                           </Typography>
-                                        </Box>
-                                      </Box>
-                                    );
-                                  })
-                                ) : (
+                                        )}
+                                      {quotation.status === "rejected" &&
+                                        userRole === "client" && (
+                                          <Typography
+                                            variant="body1"
+                                            sx={{
+                                              fontFamily:
+                                                "Helvetica, sans-serif !important",
+                                              color: "#dc3545",
+                                              fontWeight: "bold",
+                                              fontSize: "1rem",
+                                            }}
+                                          >
+                                            Please create a new quotation with
+                                            corrections.
+                                          </Typography>
+                                        )}
+                                    </Box>
+                                  </Box>
+                                </Grid>
+                                <Grid item xs={12}>
                                   <Typography
-                                    variant="body1"
+                                    variant="subtitle1"
                                     sx={{
                                       fontFamily:
                                         "Helvetica, sans-serif !important",
-                                      color: "#666",
+                                      fontWeight: "bold",
+                                      color: "#555",
+                                      mb: 2,
+                                      textTransform: "uppercase",
                                       fontSize: "1rem",
                                     }}
                                   >
-                                    No instruments found.
+                                    Instruments
                                   </Typography>
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: 2,
+                                    }}
+                                  >
+                                    {quotation.items &&
+                                    Array.isArray(quotation.items) &&
+                                    quotation.items.length > 0 ? (
+                                      quotation.items.map((item, iIndex) => {
+                                        const imageUrl = item.instrument?.image
+                                          ? new URL(
+                                              item.instrument.image,
+                                              baseUrl
+                                            ).href
+                                          : null;
+                                        const imageIndex = `${qIndex}-${iIndex}`;
+                                        return (
+                                          <Box
+                                            key={imageIndex}
+                                            sx={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                              p: 2,
+                                              bgcolor: "#f9fafb",
+                                              borderRadius: "8px",
+                                              border: "1px solid #e0e0e0",
+                                              transition: "all 0.2s ease",
+                                              "&:hover": {
+                                                bgcolor: "#f1f3f5",
+                                                borderColor: "#d6393a",
+                                              },
+                                            }}
+                                          >
+                                            {imageUrl ? (
+                                              <img
+                                                src={imageUrl}
+                                                alt={
+                                                  item.instrument?.name ||
+                                                  "Instrument"
+                                                }
+                                                style={{
+                                                  width: "80px",
+                                                  height: "80px",
+                                                  objectFit: "cover",
+                                                  borderRadius: "8px",
+                                                  marginRight: "20px",
+                                                  cursor: "pointer",
+                                                  boxShadow:
+                                                    "0 2px 4px rgba(0,0,0,0.1)",
+                                                }}
+                                                onClick={() =>
+                                                  handleImageClick(imageIndex)
+                                                }
+                                                onError={(e) => {
+                                                  e.target.style.display =
+                                                    "none";
+                                                  e.target.nextSibling.style.display =
+                                                    "flex";
+                                                }}
+                                              />
+                                            ) : (
+                                              <Box
+                                                sx={{
+                                                  width: "80px",
+                                                  height: "80px",
+                                                  bgcolor: "#e0e0e0",
+                                                  borderRadius: "8px",
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  justifyContent: "center",
+                                                  mr: 2.5,
+                                                }}
+                                              >
+                                                <Typography
+                                                  variant="body2"
+                                                  color="text.secondary"
+                                                  sx={{
+                                                    fontFamily:
+                                                      "Helvetica, sans-serif !important",
+                                                    fontSize: "0.9rem",
+                                                  }}
+                                                >
+                                                  No Image
+                                                </Typography>
+                                              </Box>
+                                            )}
+                                            <Box sx={{ flex: 1 }}>
+                                              <Typography
+                                                variant="body1"
+                                                sx={{
+                                                  fontFamily:
+                                                    "Helvetica, sans-serif !important",
+                                                  fontWeight: "600",
+                                                  color: "#333",
+                                                  mb: 1,
+                                                  fontSize: "1rem",
+                                                }}
+                                              >
+                                                {item.instrument?.name ||
+                                                  item.name ||
+                                                  "N/A"}
+                                              </Typography>
+                                              <Typography
+                                                variant="body2"
+                                                sx={{
+                                                  fontFamily:
+                                                    "Helvetica, sans-serif !important",
+                                                  color: "#666",
+                                                  fontSize: "0.95rem",
+                                                }}
+                                              >
+                                                Product Code:{" "}
+                                                {item.product_code || "N/A"}
+                                              </Typography>
+                                              <Typography
+                                                variant="body2"
+                                                sx={{
+                                                  fontFamily:
+                                                    "Helvetica, sans-serif !important",
+                                                  color: "#666",
+                                                  fontSize: "0.95rem",
+                                                }}
+                                              >
+                                                Quantity: {item.quantity || "1"}
+                                              </Typography>
+                                            </Box>
+                                          </Box>
+                                        );
+                                      })
+                                    ) : (
+                                      <Typography
+                                        variant="body1"
+                                        sx={{
+                                          fontFamily:
+                                            "Helvetica, sans-serif !important",
+                                          color: "#666",
+                                          fontSize: "1rem",
+                                        }}
+                                      >
+                                        No instruments found.
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                </Grid>
+                              </Grid>
+                              {rejectingQuotationId === quotation.id && (
+                                <Box sx={{ mt: 5 }}>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{
+                                      fontFamily:
+                                        "Helvetica, sans-serif !important",
+                                      fontWeight: "bold",
+                                      color: "#555",
+                                      mb: 2,
+                                      textTransform: "uppercase",
+                                      fontSize: "1rem",
+                                    }}
+                                  >
+                                    Rejection Remarks
+                                  </Typography>
+                                  <TextField
+                                    label="Remarks (required)"
+                                    multiline
+                                    rows={5}
+                                    value={rejectRemarks}
+                                    onChange={(e) =>
+                                      setRejectRemarks(e.target.value)
+                                    }
+                                    fullWidth
+                                    placeholder="Please provide reasons for rejection."
+                                    required
+                                    sx={{
+                                      mb: 2,
+                                      "& .MuiInputBase-root": {
+                                        fontFamily:
+                                          "Helvetica, sans-serif !important",
+                                        borderRadius: "8px",
+                                        fontSize: "1rem",
+                                      },
+                                      "& .MuiInputLabel-root": {
+                                        fontFamily:
+                                          "Helvetica, sans-serif !important",
+                                        fontSize: "1rem",
+                                      },
+                                    }}
+                                  />
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      gap: "10px",
+                                      justifyContent: "flex-end",
+                                    }}
+                                  >
+                                    <CTAButton
+                                      colorType="reject"
+                                      onClick={handleConfirmReject}
+                                      disabled={!rejectRemarks.trim()}
+                                    >
+                                      Confirm Reject
+                                    </CTAButton>
+                                    <CTAButton
+                                      colorType="cancel"
+                                      onClick={handleCancelReject}
+                                    >
+                                      Cancel
+                                    </CTAButton>
+                                  </Box>
+                                </Box>
+                              )}
+                              {["admin", "proposal_engineer"].includes(
+                                userRole
+                              ) &&
+                                quotation.status === "pending" && (
+                                  <Box
+                                    sx={{
+                                      mt: 5,
+                                      display: "flex",
+                                      gap: "10px",
+                                      justifyContent: "flex-end",
+                                    }}
+                                  >
+                                    <CTAButton
+                                      colorType="approve"
+                                      onClick={() =>
+                                        handleApproveClick(quotation.id)
+                                      }
+                                      disabled={
+                                        rejectingQuotationId === quotation.id
+                                      }
+                                    >
+                                      Approve
+                                    </CTAButton>
+                                    <CTAButton
+                                      colorType="reject"
+                                      onClick={() =>
+                                        handleRejectClick(quotation.id)
+                                      }
+                                      disabled={
+                                        rejectingQuotationId === quotation.id
+                                      }
+                                    >
+                                      Reject
+                                    </CTAButton>
+                                  </Box>
                                 )}
-                              </Box>
-                            </Grid>
-                          </Grid>
-                          {rejectingQuotationId === quotation.id && (
-                            <Box sx={{ mt: 5 }}>
-                              <Typography
-                                variant="subtitle1"
-                                sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
-                                  fontWeight: "bold",
-                                  color: "#555",
-                                  mb: 2,
-                                  textTransform: "uppercase",
-                                  fontSize: "1rem",
-                                }}
-                              >
-                                Rejection Remarks
-                              </Typography>
-                              <TextField
-                                label="Remarks (required)"
-                                multiline
-                                rows={5}
-                                value={rejectRemarks}
-                                onChange={(e) =>
-                                  setRejectRemarks(e.target.value)
-                                }
-                                fullWidth
-                                placeholder="Please provide reasons for rejection."
-                                required
-                                sx={{
-                                  mb: 2,
-                                  "& .MuiInputBase-root": {
-                                    fontFamily:
-                                      "Helvetica, sans-serif !important",
-                                    borderRadius: "8px",
-                                    fontSize: "1rem",
-                                  },
-                                  "& .MuiInputLabel-root": {
-                                    fontFamily:
-                                      "Helvetica, sans-serif !important",
-                                    fontSize: "1rem",
-                                  },
-                                }}
-                              />
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  gap: "10px",
-                                  justifyContent: "flex-end",
-                                }}
-                              >
-                                <CTAButton
-                                  colorType="reject"
-                                  onClick={handleConfirmReject}
-                                  disabled={!rejectRemarks.trim()}
-                                >
-                                  Confirm Reject
-                                </CTAButton>
-                                <CTAButton
-                                  colorType="cancel"
-                                  onClick={() => setRejectingQuotationId(null)}
-                                >
-                                  Cancel
-                                </CTAButton>
-                              </Box>
-                            </Box>
-                          )}
-                          {["admin", "proposal_engineer"].includes(userRole) &&
-                            quotation.status === "pending" && (
-                              <Box
-                                sx={{
-                                  mt: 5,
-                                  display: "flex",
-                                  gap: "10px",
-                                  justifyContent: "flex-end",
-                                }}
-                              >
-                                <CTAButton
-                                  colorType="approve"
-                                  onClick={() =>
-                                    handleApproveClick(quotation.id)
-                                  }
-                                >
-                                  Approve
-                                </CTAButton>
-                                <CTAButton
-                                  colorType="reject"
-                                  onClick={() =>
-                                    handleRejectClick(quotation.id)
-                                  }
-                                >
-                                  Reject
-                                </CTAButton>
-                              </Box>
-                            )}
-                        </CardContent>
-                      </QuotationCard>
+                            </CardContent>
+                          </QuotationCard>
+                        </Box>
+                      ))}
                     </Box>
-                  ))}
-                </Box>
-              )}
-            </ToolCard>
+                  )}
+                </ToolCard>
 
-            {isImageEnlarged && (
-              <Box
-                className="image-overlay"
-                sx={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  bgcolor: "rgba(0, 0, 0, 0.8)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 1200,
-                }}
-              >
-                {quotations.map(
-                  (quotation, qIndex) =>
-                    quotation.items &&
-                    Array.isArray(quotation.items) &&
-                    quotation.items.map((item, iIndex) => {
-                      const imageIndex = `${qIndex}-${iIndex}`;
-                      const imageUrl = item.instrument?.image
-                        ? new URL(item.instrument.image, baseUrl).href
-                        : null;
-                      if (imageIndex === isImageEnlarged && imageUrl) {
-                        return (
-                          <Box
-                            key={imageIndex}
+                <Dialog
+                  open={openRemarksDialog}
+                  onClose={handleCloseRemarksDialog}
+                  maxWidth="sm"
+                  fullWidth
+                  PaperProps={{
+                    sx: { borderRadius: 2, p: 2 },
+                  }}
+                >
+                  <DialogTitle
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif !important",
+                      fontWeight: "bold",
+                      color: "#1976d2",
+                    }}
+                  >
+                    Full Remarks
+                  </DialogTitle>
+                  <DialogContent>
+                    <Typography
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif !important",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {selectedRemarks}
+                    </Typography>
+                  </DialogContent>
+                  <DialogActions>
+                    <CTAButton
+                      colorType="cancel"
+                      onClick={handleCloseRemarksDialog}
+                    >
+                      Close
+                    </CTAButton>
+                  </DialogActions>
+                </Dialog>
+
+                {isImageEnlarged && (
+                  <Box
+                    className="image-overlay"
+                    sx={{
+                      position: "fixed",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      bgcolor: "rgba(0, 0, 0, 0.8)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 1200,
+                    }}
+                  >
+                    {quotations.map(
+                      (quotation, qIndex) =>
+                        quotation.items &&
+                        Array.isArray(quotation.items) &&
+                        quotation.items.map((item, iIndex) => {
+                          const imageIndex = `${qIndex}-${iIndex}`;
+                          const imageUrl = item.instrument?.image
+                            ? new URL(item.instrument.image, baseUrl).href
+                            : null;
+                          if (imageIndex === isImageEnlarged && imageUrl) {
+                            return (
+                              <Box
+                                key={imageIndex}
+                                sx={{
+                                  p: 3,
+                                  bgcolor: "#f9fafb",
+                                  borderRadius: "8px",
+                                  border: "1px solid #e0e0e0",
+                                  position: "relative",
+                                  maxWidth: "80vw",
+                                  maxHeight: "80vh",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <img
+                                  src={imageUrl}
+                                  alt={item.instrument?.name || "Instrument"}
+                                  style={{
+                                    maxWidth: "100%",
+                                    maxHeight: "70vh",
+                                    borderRadius: "8px",
+                                    objectFit: "contain",
+                                  }}
+                                />
+                                <Button
+                                  onClick={handleCloseOverlay}
+                                  sx={{
+                                    position: "absolute",
+                                    top: -25,
+                                    right: -25,
+                                    color: "#fff",
+                                    fontSize: "1.5rem",
+                                    fontFamily: "Helvetica, sans-serif",
+                                    "&:hover": {
+                                      color: "#d6393a",
+                                    },
+                                  }}
+                                >
+                                  ×
+                                </Button>
+                              </Box>
+                            );
+                          }
+                          return null;
+                        })
+                    )}
+                  </Box>
+                )}
+
+                {/* Success, Error, and Confirmation Snackbars */}
+                <Box
+                  sx={{
+                    position: "fixed",
+                    top: 20,
+                    left: 0,
+                    right: 0,
+                    display: "flex",
+                    justifyContent: "center",
+                    zIndex: 1400,
+                  }}
+                >
+                  <Backdrop
+                    sx={{
+                      bgcolor: "rgba(0, 0, 0, 0.8)",
+                      zIndex: (theme) => theme.zIndex.modal - 1,
+                    }}
+                    open={
+                      openConfirmApprove !== null || openConfirmReject !== null
+                    }
+                  />
+                  <Snackbar
+                    open={openConfirmApprove !== null}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  >
+                    <Alert
+                      severity="warning"
+                      variant="filled"
+                      sx={{
+                        width: "100%",
+                        color: "white",
+                        backgroundColor: "#d32f2f",
+                        "& .MuiAlert-icon": {
+                          color: "white !important",
+                          svg: { fill: "white !important" },
+                        },
+                        "& .MuiAlert-action": {
+                          color: "white !important",
+                          svg: { fill: "white !important" },
+                        },
+                      }}
+                      action={
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={handleConfirmApprove}
                             sx={{
-                              p: 3,
-                              bgcolor: "#f9fafb",
-                              borderRadius: "8px",
-                              border: "1px solid #e0e0e0",
-                              position: "relative",
-                              maxWidth: "80vw",
-                              maxHeight: "80vh",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
+                              color: "white",
+                              fontFamily: "Helvetica, sans-serif",
                             }}
                           >
-                            <img
-                              src={imageUrl}
-                              alt={item.instrument?.name || "Instrument"}
-                              style={{
-                                maxWidth: "100%",
-                                maxHeight: "70vh",
-                                borderRadius: "8px",
-                                objectFit: "contain",
-                              }}
-                            />
-                            <Button
-                              onClick={handleCloseOverlay}
-                              sx={{
-                                position: "absolute",
-                                top: -25,
-                                right: -25,
-                                color: "#fff",
-                                fontSize: "1.5rem",
-                                fontFamily: "Helvetica, sans-serif",
-                                "&:hover": {
-                                  color: "#d6393a",
-                                },
-                              }}
-                            >
-                              ×
-                            </Button>
-                          </Box>
-                        );
+                            Confirm
+                          </Button>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={handleCancelApprove}
+                            sx={{
+                              color: "white",
+                              fontFamily: "Helvetica, sans-serif",
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
                       }
-                      return null;
-                    })
-                )}
-              </Box>
+                    >
+                      Please confirm if you want to approve this quotation. Once
+                      approved, the client will be able to download the
+                      quotation sheet and proceed with submitting the Purchase
+                      Order (PO).
+                    </Alert>
+                  </Snackbar>
+                  <Snackbar
+                    open={openConfirmReject !== null}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  >
+                    <Alert
+                      severity="warning"
+                      variant="filled"
+                      sx={{
+                        width: "100%",
+                        color: "white",
+                        backgroundColor: "#d32f2f",
+                        "& .MuiAlert-icon": {
+                          color: "white !important",
+                          svg: { fill: "white !important" },
+                        },
+                        "& .MuiAlert-action": {
+                          color: "white !important",
+                          svg: { fill: "white !important" },
+                        },
+                      }}
+                      action={
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={handleConfirmRejectAction}
+                            sx={{
+                              color: "white",
+                              fontFamily: "Helvetica, sans-serif",
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={handleCancelReject}
+                            sx={{
+                              color: "white",
+                              fontFamily: "Helvetica, sans-serif",
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      }
+                    >
+                      Please confirm if you want to reject this quotation.
+                    </Alert>
+                  </Snackbar>
+                  <Snackbar
+                    open={openSuccess}
+                    autoHideDuration={6000}
+                    onClose={handleCloseSuccess}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  >
+                    <Alert
+                      onClose={handleCloseSuccess}
+                      severity="success"
+                      variant="filled"
+                      sx={{
+                        width: "100%",
+                        color: "white",
+                        backgroundColor: "#28a745",
+                        "& .MuiAlert-icon": {
+                          color: "white !important",
+                          svg: {
+                            fill: "white !important",
+                          },
+                        },
+                        "& .MuiAlert-action": {
+                          color: "white !important",
+                          svg: {
+                            fill: "white !important",
+                          },
+                        },
+                      }}
+                    >
+                      {successMessage}
+                    </Alert>
+                  </Snackbar>
+                  <Snackbar
+                    open={openError}
+                    autoHideDuration={6000}
+                    onClose={handleCloseError}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  >
+                    <Alert
+                      onClose={handleCloseError}
+                      severity="error"
+                      variant="filled"
+                      sx={{
+                        width: "100%",
+                        color: "white",
+                        backgroundColor: "#d32f2f",
+                        "& .MuiAlert-icon": {
+                          color: "white !important",
+                          svg: {
+                            fill: "white !important",
+                          },
+                        },
+                        "& .MuiAlert-action": {
+                          color: "white !important",
+                          svg: {
+                            fill: "white !important",
+                          },
+                        },
+                      }}
+                    >
+                      {errorMessage}
+                    </Alert>
+                  </Snackbar>
+                </Box>
+              </>
             )}
           </Container>
         </main>

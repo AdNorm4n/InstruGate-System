@@ -10,8 +10,9 @@ import {
   Snackbar,
   Alert,
   InputAdornment,
+  IconButton,
 } from "@mui/material";
-import { LockRounded } from "@mui/icons-material";
+import { LockRounded, Visibility, VisibilityOff } from "@mui/icons-material";
 import logo from "../assets/instrugate.png";
 import companylogo from "../assets/companylogo.png";
 import axios from "axios";
@@ -29,10 +30,19 @@ function ResetPassword() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [openError, setOpenError] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,7 +78,6 @@ function ResetPassword() {
           "Password has been reset successfully. Redirecting to login..."
         );
         setOpenSuccess(true);
-
         setTimeout(() => {
           navigate("/login");
         }, 3000);
@@ -107,7 +116,7 @@ function ResetPassword() {
             <Stack spacing={4} sx={{ mt: 5 }}>
               <TextField
                 label="New Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 variant="standard"
                 fullWidth
                 value={password}
@@ -118,15 +127,26 @@ function ResetPassword() {
                       <LockRounded sx={{ color: "#333" }} />
                     </InputAdornment>
                   ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                        edge="end"
+                      >
+                        {showPassword ? (
+                          <VisibilityOff sx={{ color: "#333" }} />
+                        ) : (
+                          <Visibility sx={{ color: "#333" }} />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
                 required
                 sx={{
-                  "& .MuiInputLabel-root": {
-                    color: "#333",
-                  },
-                  "& .MuiInputLabel-shrink": {
-                    color: "#333",
-                  },
+                  "& .MuiInputLabel-root": { color: "#333" },
+                  "& .MuiInputLabel-shrink": { color: "#333" },
                   "& .MuiInputBase-input": {
                     color: "#333",
                     fontSize: "0.875rem",
@@ -156,12 +176,8 @@ function ResetPassword() {
                 }}
                 required
                 sx={{
-                  "& .MuiInputLabel-root": {
-                    color: "#333",
-                  },
-                  "& .MuiInputLabel-shrink": {
-                    color: "#333",
-                  },
+                  "& .MuiInputLabel-root": { color: "#333" },
+                  "& .MuiInputLabel-shrink": { color: "#333" },
                   "& .MuiInputBase-input": {
                     color: "#333",
                     fontSize: "0.875rem",
@@ -197,6 +213,8 @@ function ResetPassword() {
           </Box>
         </Paper>
       </Stack>
+
+      {/* Alerts */}
       <Box
         sx={{
           position: "fixed",
@@ -222,23 +240,16 @@ function ResetPassword() {
               width: "100%",
               color: "white",
               backgroundColor: "#d32f2f",
-              "& .MuiAlert-icon": {
+              "& .MuiAlert-icon, & .MuiAlert-action, & svg": {
                 color: "white !important",
-                svg: {
-                  fill: "white !important",
-                },
-              },
-              "& .MuiAlert-action": {
-                color: "white !important",
-                svg: {
-                  fill: "white !important",
-                },
+                fill: "white !important",
               },
             }}
           >
             {errorMessage}
           </Alert>
         </Snackbar>
+
         <Snackbar
           open={openSuccess}
           autoHideDuration={6000}
@@ -252,18 +263,10 @@ function ResetPassword() {
             sx={{
               width: "100%",
               color: "white",
-              backgroundColor: "#d32f2f",
-              "& .MuiAlert-icon": {
+              backgroundColor: "#28a745",
+              "& .MuiAlert-icon, & .MuiAlert-action, & svg": {
                 color: "white !important",
-                svg: {
-                  fill: "white !important",
-                },
-              },
-              "& .MuiAlert-action": {
-                color: "white !important",
-                svg: {
-                  fill: "white !important",
-                },
+                fill: "white !important",
               },
             }}
           >
