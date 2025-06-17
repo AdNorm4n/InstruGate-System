@@ -10,11 +10,21 @@ import {
   ListItemText,
   CircularProgress,
   Fade,
+  Divider,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import "../styles/Review.css";
+
+// Utility function to format price as RM10,000.00
+const formatPrice = (price) => {
+  if (price == null || isNaN(price)) return "RM0.00";
+  return `RM${Number(price).toLocaleString("en-MY", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
@@ -30,7 +40,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -59,7 +69,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 function Review() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { instrument, selections, selectedAddOns, productCode } =
+  const { instrument, selections, selectedAddOns, productCode, totalPrice } =
     location.state || {};
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -94,6 +104,7 @@ function Review() {
     selections,
     selectedAddOns,
     productCode,
+    totalPrice,
   });
 
   const handleClick = () => {
@@ -114,6 +125,7 @@ function Review() {
           selections,
           selectedAddOns,
           productCode,
+          totalPrice,
         };
 
         const updatedCart = [...existingCart, newInstrument];
@@ -144,6 +156,37 @@ function Review() {
     console.log("Closing image overlay");
   };
 
+  // Calculate price breakdown for summary, matching Configurator.jsx
+  const priceBreakdown = [
+    { label: "Base Price", value: parseFloat(instrument?.base_price || 0) },
+    { label: "Selected Requirements:", value: null },
+    ...Object.values(selections || {}).map((opt) => ({
+      label: `${opt.label} (${opt.code})`,
+      value: parseFloat(opt?.price || 0),
+    })),
+    ...(selectedAddOns?.length > 0
+      ? [
+          { label: "Selected Add-ons:", value: null },
+          ...Object.entries(
+            selectedAddOns.reduce((acc, addon) => {
+              const typeName = addon.addon_type.name;
+              if (!acc[typeName]) acc[typeName] = [];
+              acc[typeName].push(addon);
+              return acc;
+            }, {})
+          )
+            .sort()
+            .flatMap(([typeName, addons]) => [
+              { label: `${typeName}:`, value: null },
+              ...addons.map((addon) => ({
+                label: `${addon.label} (${addon.code})`,
+                value: parseFloat(addon?.price || 0),
+              })),
+            ]),
+        ]
+      : []),
+  ];
+
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", mt: "20vh" }}>
@@ -152,7 +195,7 @@ function Review() {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif !important",
+            fontFamily: "Helvetica, sans-serif",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -170,7 +213,7 @@ function Review() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif !important",
+            fontFamily: "Helvetica, sans-serif",
             fontWeight: "bold",
           }}
         >
@@ -201,7 +244,7 @@ function Review() {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -216,7 +259,7 @@ function Review() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -264,7 +307,7 @@ function Review() {
                 align="center"
                 sx={{
                   mb: 2,
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   fontWeight: "bold",
                   color: "#000000",
                   textTransform: "uppercase",
@@ -274,18 +317,99 @@ function Review() {
               </Typography>
               <Typography
                 className="product-code"
-                variant="body1"
+                variant="subtitle1"
                 align="center"
                 sx={{
                   mb: 4,
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   textTransform: "uppercase",
                   color: "#0a5",
                 }}
               >
                 Product Code: {productCode}
               </Typography>
+              <Box sx={{ mt: 2 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#000000",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Selection Summary
+                </Typography>
+                {priceBreakdown.map((item, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif",
+                        color:
+                          item.label === "Selected Requirements:" ||
+                          item.label === "Selected Add-ons:" ||
+                          item.label.endsWith(":")
+                            ? "#000000"
+                            : "#333",
+                        fontWeight:
+                          item.label === "Selected Requirements:" ||
+                          item.label === "Selected Add-ons:" ||
+                          item.label.endsWith(":")
+                            ? "bold"
+                            : "normal",
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                    {item.value !== null && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif",
+                          fontWeight: "bold",
+                          color: "#000000",
+                        }}
+                      >
+                        {formatPrice(item.value)}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+                <Divider sx={{ my: 2 }} />
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: "bold",
+                      fontFamily: "Helvetica, sans-serif",
+                      color: "#0a5",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Total Price
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: "bold",
+                      fontFamily: "Helvetica, sans-serif",
+                      color: "#0a5",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {formatPrice(parseFloat(totalPrice || 0))}
+                  </Typography>
+                </Box>
+              </Box>
             </ToolCard>
 
             {isImageEnlarged && (
@@ -302,86 +426,6 @@ function Review() {
                 </Box>
               </Box>
             )}
-
-            <ToolCard sx={{ mb: 6 }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  mb: 3,
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  textTransform: "uppercase",
-                  color: "#00000",
-                }}
-              >
-                Requirements Selected
-              </Typography>
-              <List className="review-list">
-                {Object.values(selections).length > 0 ? (
-                  Object.values(selections).map((selection, idx) => (
-                    <ListItem key={idx} className="review-item">
-                      <ListItemText
-                        primary={`[${selection.code}] ${selection.label}`}
-                        primaryTypographyProps={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
-                        }}
-                      />
-                    </ListItem>
-                  ))
-                ) : (
-                  <ListItem className="review-item">
-                    <ListItemText
-                      primary="No requirements selected."
-                      primaryTypographyProps={{
-                        fontFamily: "Helvetica, sans-serif !important",
-                        color: "#666",
-                      }}
-                    />
-                  </ListItem>
-                )}
-              </List>
-            </ToolCard>
-
-            <ToolCard sx={{ mb: 6 }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  mb: 3,
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  textTransform: "uppercase",
-                  color: "#00000",
-                }}
-              >
-                Optional Add-Ons Selected
-              </Typography>
-              <List className="review-list">
-                {selectedAddOns.length > 0 ? (
-                  selectedAddOns.map((addon, idx) => (
-                    <ListItem key={idx} className="review-item">
-                      <ListItemText
-                        primary={`[${addon.code}] ${addon.label} (${addon.addon_type.name})`}
-                        primaryTypographyProps={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
-                        }}
-                      />
-                    </ListItem>
-                  ))
-                ) : (
-                  <ListItem className="review-item">
-                    <ListItemText
-                      primary="No add-ons selected."
-                      primaryTypographyProps={{
-                        fontFamily: "Helvetica, sans-serif !important",
-                        color: "#666",
-                      }}
-                    />
-                  </ListItem>
-                )}
-              </List>
-            </ToolCard>
 
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <CTAButton

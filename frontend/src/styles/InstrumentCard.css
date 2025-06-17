@@ -1,12 +1,16 @@
+:root {
+  --primary-color: #d6393a;
+  --secondary-color: #d4a017;
+  --text-color: #2c3e50;
+  --background-color: #f8f9fa;
+  --card-background: #ffffff;
+  --border-color: #cccccc;
+}
+
 .instrument-card {
-  display: flex;
-  align-items: center;
-  background: white;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: var(--card-background);
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease;
 }
 
 .instrument-image {
@@ -14,12 +18,27 @@
   height: 150px;
   object-fit: cover;
   border-radius: 8px;
-  display: block;
-  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.instrument-image:hover {
+  transform: scale(1.05);
+  opacity: 0.95;
 }
 
 .quantity-controls {
   display: flex;
   align-items: center;
-  gap: 0;
+}
+
+@media (max-width: 600px) {
+  .instrument-image {
+    width: 120px;
+    height: 120px;
+  }
+
+  .instrument-card {
+    padding: 12px;
+  }
 }

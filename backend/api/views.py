@@ -1,7 +1,9 @@
 from rest_framework import generics, permissions, status
 from rest_framework.permissions import IsAuthenticated
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.core.mail import EmailMessage
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from .models import (
@@ -23,6 +25,13 @@ from .serializers import (
     AdminQuotationItemSerializer, AdminQuotationItemSelectionSerializer,
     AdminQuotationItemAddOnSerializer, UserSerializer
 )
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.lib import colors
+import os
+from io import BytesIO
 
 User = get_user_model()
 
@@ -175,7 +184,6 @@ class QuotationCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated, IsClient]
 
     def perform_create(self, serializer):
-        print(self.request)
         serializer.save(created_by=self.request.user)
 
 class SubmittedQuotationView(generics.ListAPIView):
@@ -185,7 +193,7 @@ class SubmittedQuotationView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Quotation.objects.filter(created_by=self.request.user).order_by('-submitted_at')
         status_filter = self.request.query_params.get('status')
-        if status_filter in ['pending', 'approved', 'rejected']:
+        if status_filter in ['pending', 'rejected', 'approved', 'submitted']:
             queryset = queryset.filter(status=status_filter)
         return queryset
 
@@ -212,16 +220,159 @@ class QuotationReviewView(generics.GenericAPIView):
         except Quotation.DoesNotExist:
             return Response({'detail': 'Quotation not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.get_serializer(quotation, data=request.data, partial=True)
+        serializer = self.get_serializer(quotation, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             if request.data.get('status') == 'rejected':
-                serializer.validated_data['rejected_at'] = timezone.now()
+                quotation.rejected_at = timezone.now()
+                quotation.reviewed_by = request.user
             elif request.data.get('status') == 'approved':
-                serializer.validated_data['approved_at'] = timezone.now()
+                quotation.approved_at = timezone.now()
+                quotation.reviewed_by = request.user
             serializer.save()
             return Response(QuotationSerializer(quotation).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class QuotationSubmitView(APIView):
+    permission_classes = [IsAuthenticated, IsClient]
 
+    def post(self, request, pk):
+        try:
+            quotation = Quotation.objects.get(pk=pk, created_by=request.user, status='approved')
+        except Quotation.DoesNotExist:
+            return Response(
+                {'detail': 'Quotation not found or not approved'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Validate client email
+        client_email = request.user.email
+        if not client_email:
+            return Response(
+                {'detail': 'Client email is not set'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Generate PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=15*mm, leftMargin=15*mm, topMargin=40*mm, bottomMargin=15*mm)
+        elements = []
+        styles = getSampleStyleSheet()
+
+        # Custom styles
+        title_style = ParagraphStyle(name='Title', fontSize=16, leading=20, fontName='Helvetica-Bold')
+        heading_style = ParagraphStyle(name='Heading', fontSize=12, leading=16, fontName='Helvetica-Bold')
+        normal_style = ParagraphStyle(name='Normal', fontSize=10, leading=12, fontName='Helvetica')
+        bold_style = ParagraphStyle(name='Bold', fontSize=10, leading=12, fontName='Helvetica-Bold')
+
+        # Add letterhead (if exists)
+        letterhead_path = os.path.join(settings.STATIC_ROOT or settings.BASE_DIR, 'static', 'images', 'letterhead.jpg')
+        if os.path.exists(letterhead_path):
+            elements.append(Image(letterhead_path, width=A4[0], height=A4[1]))
+            elements.append(Spacer(1, -A4[1]))  # Move cursor back to top
+
+        # Title
+        elements.append(Paragraph(f"Purchase Order Quotation #{quotation.id}", title_style))
+        elements.append(Spacer(1, 8*mm))
+
+        # Status
+        elements.append(Paragraph(f"Status: Approved", normal_style))
+        elements.append(Spacer(1, 4*mm))
+
+        # Separator
+        elements.append(Paragraph("<hr>", normal_style))
+        elements.append(Spacer(1, 4*mm))
+
+        # Details Section
+        elements.append(Paragraph("Details", heading_style))
+        elements.append(Spacer(1, 8*mm))
+
+        details_data = [
+            ["Submitted by:", quotation.created_by.first_name or "N/A"],
+            ["Company:", quotation.company or "N/A"],
+            ["Project:", quotation.project_name or "N/A"],
+            ["Submitted at:", quotation.submitted_at.strftime("%b %d, %Y, %I:%M %p") if quotation.submitted_at else "N/A"],
+            ["Approved at:", quotation.approved_at.strftime("%b %d, %Y, %I:%M %p") if quotation.approved_at else "N/A"],
+            ["Reviewed by:", quotation.reviewed_by.first_name or "N/A" if quotation.reviewed_by else "N/A"],
+            ["Emailed at:", quotation.emailed_at.strftime("%b %d, %Y, %I:%M %p") if quotation.emailed_at else "N/A"],
+        ]
+        details_table = Table(details_data, colWidths=[50*mm, 120*mm])
+        details_table.setStyle(TableStyle([
+            ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 0),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+        ]))
+        elements.append(details_table)
+        elements.append(Spacer(1, 8*mm))
+
+        # Instruments Section
+        elements.append(Paragraph("Instruments", heading_style))
+        elements.append(Spacer(1, 8*mm))
+
+        items = quotation.items.all()
+        if not items:
+            elements.append(Paragraph("No instruments listed.", normal_style))
+        else:
+            for idx, item in enumerate(items, 1):
+                elements.append(Paragraph(f"Item #{idx}", bold_style))
+                elements.append(Spacer(1, 2*mm))
+                instrument_data = [
+                    ["Instrument Name:", item.instrument.name or "N/A"],
+                    ["Product Code:", item.product_code or "N/A"],
+                    ["Quantity:", str(item.quantity or 1)],
+                ]
+                # Add selections if available
+                selections = item.selections.all()
+                if selections:
+                    instrument_data.append(["Selections:", ""])
+                    for selection in selections:
+                        instrument_data.append(["", f"{selection.field_option.label} ({selection.field_option.code})"])
+                # Add addons if available
+                addons = item.addons.all()
+                if addons:
+                    instrument_data.append(["Add-Ons:", ""])
+                    for addon in addons:
+                        instrument_data.append(["", f"{addon.addon.label} ({addon.addon.code})"])
+                instrument_table = Table(instrument_data, colWidths=[50*mm, 120*mm])
+                instrument_table.setStyle(TableStyle([
+                    ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                ]))
+                elements.append(instrument_table)
+                elements.append(Spacer(1, 8*mm))
+
+        doc.build(elements)
+        pdf_data = buffer.getvalue()
+        buffer.close()
+
+        # Send Email to Sales Team with Client CC
+        try:
+            sales_email_msg = EmailMessage(
+                subject=f"Approved Purchase Order Quotation #{quotation.id} Submission",
+                body=f"Dear Sales Team,\n\nQuotation #{quotation.id} from {quotation.company or 'N/A'} has been approved and submitted by {request.user.first_name or 'Client'} ({client_email}).\nThe PDF is attached for your reference.\n\nBest regards,\nInstruGate System",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=['adriannorman@graduate.utm.my'],
+                cc=[client_email],
+            )
+            sales_email_msg.attach(f"Quotation_{quotation.id}.pdf", pdf_data, 'application/pdf')
+            sales_email_msg.send(fail_silently=False)
+        except Exception as e:
+            return Response(
+                {'detail': f'Failed to send email to sales team: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Update quotation status to 'submitted' and set emailed_at
+        quotation.status = 'submitted'
+        quotation.emailed_at = timezone.now()
+        quotation.save()
+
+        return Response(
+            {'detail': 'Quotation submitted successfully via email'},
+            status=status.HTTP_200_OK
+        )
 # QuotationItem Views
 class QuotationItemListView(generics.ListCreateAPIView):
     queryset = QuotationItem.objects.all()

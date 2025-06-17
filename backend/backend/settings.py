@@ -155,6 +155,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'backend' / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -179,6 +186,3 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'instrugate.system@gmail.com'
 EMAIL_HOST_PASSWORD = 'hfvp lsow ysrr utnx'
-
-
-

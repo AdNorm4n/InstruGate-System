@@ -7,18 +7,27 @@ import {
   CircularProgress,
   Fade,
   Container,
-  Grid,
   IconButton,
   Snackbar,
   Alert,
   Backdrop,
+  Divider,
+  TextField,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import api from "../api";
 import Navbar from "../components/Navbar";
-import InstrumentCard from "../components/InstrumentCard";
 import "../styles/SelectedInstruments.css";
+
+// Utility function to format price as RM10,000.00
+const formatPrice = (price) => {
+  if (price == null || isNaN(price)) return "RM0.00";
+  return `RM${Number(price).toLocaleString("en-MY", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
@@ -27,14 +36,19 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const ToolCard = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  borderRadius: "12px",
+  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
+  width: "100%",
+  boxSizing: "border-box",
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(2),
+  },
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -116,6 +130,7 @@ function SelectedInstruments() {
         const updatedCart = cart.map((item) => ({
           ...item,
           quantity: item.quantity || 1,
+          totalPrice: item.totalPrice || calculateInstrumentTotalPrice(item),
         }));
         setSelectedInstruments(updatedCart);
         localStorage.setItem(
@@ -134,13 +149,30 @@ function SelectedInstruments() {
     fetchData();
   }, [navigate]);
 
+  const calculateInstrumentTotalPrice = (item) => {
+    const priceBreakdown = [
+      { value: parseFloat(item.instrument?.base_price || 0) },
+      ...Object.values(item.selections || {}).map((opt) => ({
+        value: parseFloat(opt?.price || 0),
+      })),
+      ...(item.selectedAddOns || []).map((addon) => ({
+        value: parseFloat(addon?.price || 0),
+      })),
+    ];
+    return priceBreakdown.reduce((sum, item) => sum + item.value, 0);
+  };
+
   const updateInstrumentQuantity = (index, newQuantity) => {
     if (newQuantity <= 0) {
       removeInstrument(index);
       return;
     }
     const updated = [...selectedInstruments];
-    updated[index] = { ...updated[index], quantity: newQuantity };
+    updated[index] = {
+      ...updated[index],
+      quantity: newQuantity,
+      totalPrice: calculateInstrumentTotalPrice(updated[index]) * newQuantity,
+    };
     setSelectedInstruments(updated);
     localStorage.setItem("selectedInstruments", JSON.stringify(updated));
     console.log("Updated selectedInstruments:", updated);
@@ -203,6 +235,54 @@ function SelectedInstruments() {
     console.log("Closing image overlay");
   };
 
+  // Calculate price breakdown for each instrument
+  const getPriceBreakdown = (item) => {
+    return [
+      {
+        label: "Base Price",
+        value: parseFloat(item.instrument?.base_price || 0),
+      },
+      ...(Object.values(item.selections || {}).length > 0
+        ? [
+            { label: "Selected Requirements:", value: null },
+            ...Object.values(item.selections || {}).map((opt) => ({
+              label: `${opt.label || "N/A"} (${opt.code || "N/A"})`,
+              value: parseFloat(opt?.price || 0),
+            })),
+          ]
+        : []),
+      ...(item.selectedAddOns?.length > 0
+        ? [
+            { label: "Selected Add-ons:", value: null },
+            ...Object.entries(
+              (item.selectedAddOns || []).reduce((acc, addon) => {
+                const typeName = addon.addon_type?.name || "Other";
+                if (!acc[typeName]) acc[typeName] = [];
+                acc[typeName].push(addon);
+                return acc;
+              }, {})
+            )
+              .sort()
+              .flatMap(([typeName, addons]) => [
+                { label: `${typeName}:`, value: null },
+                ...addons.map((addon) => ({
+                  label: `${addon.label || "N/A"} (${addon.code || "N/A"})`,
+                  value: parseFloat(addon?.price || 0),
+                })),
+              ]),
+          ]
+        : []),
+    ];
+  };
+
+  // Calculate overall total price
+  const overallTotalPrice = selectedInstruments.reduce((sum, item) => {
+    const totalPrice = getPriceBreakdown(item)
+      .filter((pb) => pb.value !== null)
+      .reduce((pbSum, pb) => pbSum + pb.value, 0);
+    return sum + totalPrice * (item.quantity || 1);
+  }, 0);
+
   if (loading) {
     return (
       <Box sx={{ textAlign: "center", mt: "20vh" }}>
@@ -211,7 +291,7 @@ function SelectedInstruments() {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif !important",
+            fontFamily: "Helvetica, sans-serif",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -229,7 +309,7 @@ function SelectedInstruments() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif !important",
+            fontFamily: "Helvetica, sans-serif",
             fontWeight: "bold",
           }}
         >
@@ -254,13 +334,26 @@ function SelectedInstruments() {
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>
-          <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              py: 6,
+              mt: 8,
+              px: { xs: 2, sm: 3, md: 4 },
+              mx: "auto",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
             <Typography
               variant="h6"
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -275,7 +368,7 @@ function SelectedInstruments() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -285,12 +378,14 @@ function SelectedInstruments() {
             </Typography>
 
             {selectedInstruments.length === 0 ? (
-              <ToolCard sx={{ textAlign: "center", mt: 8, mb: 6 }}>
+              <ToolCard
+                sx={{ textAlign: "center", mt: 8, mb: 6, maxWidth: "100%" }}
+              >
                 <Typography
                   variant="h6"
                   color="error"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "Helvetica, sans-serif",
                     fontWeight: "bold",
                     mb: 4,
                   }}
@@ -311,7 +406,7 @@ function SelectedInstruments() {
               </ToolCard>
             ) : (
               <>
-                <ToolCard sx={{ mb: 6 }}>
+                <ToolCard sx={{ mb: 6, maxWidth: "100%" }}>
                   <Box
                     sx={{
                       display: "flex",
@@ -363,75 +458,468 @@ function SelectedInstruments() {
                       )}
                     </DangerButton>
                   </Box>
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif",
+                        color: "#0a5",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Quotation Summary
+                    </Typography>
+                    {selectedInstruments.map((item, index) => {
+                      const priceBreakdown = getPriceBreakdown(item);
+                      const totalPrice = priceBreakdown
+                        .filter((pb) => pb.value !== null)
+                        .reduce((sum, pb) => sum + pb.value, 0);
+                      const totalWithQuantity =
+                        totalPrice * (item.quantity || 1);
+
+                      return (
+                        <Box
+                          key={index}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mt: 1,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#333",
+                            }}
+                          >
+                            {item.instrument?.name || "Unnamed Instrument"}:{" "}
+                            {item.productCode || "N/A"} x {item.quantity || 1}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              fontWeight: "bold",
+                              color: "#000000",
+                            }}
+                          >
+                            {formatPrice(totalWithQuantity)}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                    <Divider sx={{ my: 2 }} />
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#0a5",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Grand Total
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#0a5",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {formatPrice(overallTotalPrice)}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </ToolCard>
 
-                <Grid container spacing={4}>
-                  {selectedInstruments.map((item, index) => {
-                    const imageUrl = item.instrument?.image
-                      ? new URL(item.instrument.image, baseUrl).href
-                      : null;
-                    return (
-                      <Grid item xs={12} sm={6} md={4} key={index}>
-                        <Box sx={{ position: "relative" }}>
-                          <InstrumentCard
-                            instrument={item.instrument}
-                            userRole={userRole}
-                            configData={null}
-                            productCode={item.productCode}
-                            requirements={Object.values(item.selections)}
-                            addOns={item.selectedAddOns}
-                            quantity={item.quantity}
-                            onQuantityChange={(newQuantity) =>
-                              updateInstrumentQuantity(index, newQuantity)
-                            }
-                            onRemove={() => removeInstrument(index)}
-                            onImageClick={() => handleImageClick(index)}
-                            isSelectedInstrument
-                          />
-                          <IconButton
-                            onClick={() => removeInstrument(index)}
-                            sx={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              color: "#d6393a",
-                              bgcolor: "#ffffff",
-                              borderRadius: "50%",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                              "&:hover": {
-                                bgcolor: "#f5f5f5",
-                                color: "#b32d2e",
-                              },
+                {selectedInstruments.map((item, index) => {
+                  const imageUrl = item.instrument?.image
+                    ? new URL(item.instrument.image, baseUrl).href
+                    : null;
+                  const priceBreakdown = getPriceBreakdown(item);
+                  const totalPrice = priceBreakdown
+                    .filter((pb) => pb.value !== null)
+                    .reduce((sum, pb) => sum + pb.value, 0);
+                  const totalWithQuantity = totalPrice * (item.quantity || 1);
+
+                  return (
+                    <ToolCard
+                      key={index}
+                      sx={{ mb: 4, maxWidth: "100%", position: "relative" }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={item.instrument?.name || "Instrument"}
+                            style={{
+                              width: "150px",
+                              height: "150px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                              cursor: "pointer",
                             }}
-                            aria-label="Remove instrument"
-                          >
-                            <RemoveCircleOutline sx={{ color: "#d32f2f" }} />
-                          </IconButton>
-                        </Box>
-                        {isImageEnlarged === index && (
+                            onClick={() => handleImageClick(index)}
+                            onError={(e) => {
+                              console.log("Image load error:", imageUrl);
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "flex";
+                            }}
+                          />
+                        ) : (
                           <Box
-                            className="image-overlay"
-                            onClick={handleCloseOverlay}
+                            sx={{
+                              width: "150px",
+                              height: "150px",
+                              bgcolor: "#e0e0e0",
+                              borderRadius: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
-                            <Box className="enlarged-image-container">
-                              <img
-                                src={imageUrl}
-                                alt={item.instrument.name}
-                                className="enlarged-image"
-                              />
-                              <button
-                                className="close-button"
-                                onClick={handleCloseOverlay}
-                              >
-                                ×
-                              </button>
-                            </Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "#666",
+                                fontFamily: "Helvetica, sans-serif",
+                              }}
+                            >
+                              No Image
+                            </Typography>
                           </Box>
                         )}
-                      </Grid>
-                    );
-                  })}
-                </Grid>
+                        <Box sx={{ flex: 1, minWidth: 0, width: "100%" }}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: "bold",
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#000000",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {item.instrument?.name || "Unnamed Instrument"}
+                          </Typography>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: "bold",
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#0a5",
+                              textTransform: "uppercase",
+                              mt: 1,
+                            }}
+                          >
+                            Product Code: {item.productCode || "N/A"}
+                          </Typography>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              mt: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: "bold",
+                                fontFamily: "Helvetica, sans-serif",
+                                color: "#0a5",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Quantity: {item.quantity || 1}
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <TextField
+                                type="number"
+                                value={item.quantity || 1}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value, 10);
+                                  if (!isNaN(value) && value >= 1) {
+                                    updateInstrumentQuantity(index, value);
+                                  }
+                                }}
+                                variant="outlined"
+                                size="medium"
+                                sx={{
+                                  width: "100px",
+                                  "& .MuiInputBase-root": {
+                                    fontFamily: "Helvetica, sans-serif",
+                                    fontSize: "1rem",
+                                    borderRadius: "12px",
+                                  },
+                                  "& .MuiInputBase-input": {
+                                    padding: "8px 12px",
+                                    textAlign: "center",
+                                  },
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#0a5",
+                                    borderRadius: "12px",
+                                  },
+                                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#087",
+                                  },
+                                  "&.Mui-focused .MuiOutlinedInput-notchedOutline":
+                                    {
+                                      borderColor: "#087",
+                                      borderWidth: "2px",
+                                    },
+                                }}
+                                inputProps={{ min: 1 }}
+                              />
+                            </Box>
+                          </Box>
+                          <Divider sx={{ my: 2 }} />
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: "bold",
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#000000",
+                              textTransform: "uppercase",
+                              mb: 1,
+                            }}
+                          >
+                            Selection Summary
+                          </Typography>
+                          {priceBreakdown.map((pb, idx) => (
+                            <Box
+                              key={idx}
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                gap: 2,
+                                mt: 1,
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontFamily: "Helvetica, sans-serif",
+                                  color:
+                                    pb.label === "Selected Requirements:" ||
+                                    pb.label === "Selected Add-ons:" ||
+                                    pb.label.endsWith(":")
+                                      ? "#000000"
+                                      : "#333",
+                                  fontWeight:
+                                    pb.label === "Selected Requirements:" ||
+                                    pb.label === "Selected Add-ons:" ||
+                                    pb.label.endsWith(":")
+                                      ? "bold"
+                                      : "normal",
+                                  flex: 1,
+                                }}
+                              >
+                                {pb.label}
+                              </Typography>
+                              {pb.value !== null && (
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontFamily: "Helvetica, sans-serif",
+                                    fontWeight: "bold",
+                                    color: "#000000",
+                                    textAlign: "right",
+                                    minWidth: "80px",
+                                  }}
+                                >
+                                  {formatPrice(pb.value)}
+                                </Typography>
+                              )}
+                            </Box>
+                          ))}
+                          <Divider sx={{ my: 2 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              mt: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: "bold",
+                                fontFamily: "Helvetica, sans-serif",
+                                color: "#0a5",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              Total Price
+                            </Typography>
+                            <Typography
+                              variant="subtitle1"
+                              sx={{
+                                fontWeight: "bold",
+                                fontFamily: "Helvetica, sans-serif",
+                                color: "#0a5",
+                                textTransform: "uppercase",
+                                textAlign: "right",
+                                minWidth: "80px",
+                              }}
+                            >
+                              {formatPrice(totalWithQuantity)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <IconButton
+                        onClick={() => removeInstrument(index)}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          color: "#d6393a",
+                          bgcolor: "#ffffff",
+                          borderRadius: "50%",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                          "&:hover": {
+                            bgcolor: "#f5f5f5",
+                            color: "#b32d2e",
+                          },
+                        }}
+                        aria-label="Remove instrument"
+                      >
+                        <RemoveCircleOutline sx={{ color: "#d32f2f" }} />
+                      </IconButton>
+                    </ToolCard>
+                  );
+                })}
+                {isImageEnlarged !== null && (
+                  <Box className="image-overlay" onClick={handleCloseOverlay}>
+                    <Box className="enlarged-image-container">
+                      <img
+                        src={
+                          new URL(
+                            selectedInstruments[
+                              isImageEnlarged
+                            ]?.instrument?.image,
+                            baseUrl
+                          ).href
+                        }
+                        alt={
+                          selectedInstruments[isImageEnlarged]?.instrument
+                            ?.name || "Instrument"
+                        }
+                        className="enlarged-image"
+                      />
+                      <button
+                        className="close-button"
+                        onClick={handleCloseOverlay}
+                      >
+                        ×
+                      </button>
+                    </Box>
+                  </Box>
+                )}
+                <ToolCard sx={{ mb: 4, maxWidth: "100%" }}>
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: "bold",
+                        fontFamily: "Helvetica, sans-serif",
+                        color: "#0a5",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Quotation Summary
+                    </Typography>
+                    {selectedInstruments.map((item, index) => {
+                      const priceBreakdown = getPriceBreakdown(item);
+                      const totalPrice = priceBreakdown
+                        .filter((pb) => pb.value !== null)
+                        .reduce((sum, pb) => sum + pb.value, 0);
+                      const totalWithQuantity =
+                        totalPrice * (item.quantity || 1);
+
+                      return (
+                        <Box
+                          key={index}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mt: 1,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#333",
+                            }}
+                          >
+                            {item.instrument?.name || "Unnamed Instrument"}:{" "}
+                            {item.productCode || "N/A"} x {item.quantity || 1}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              fontWeight: "bold",
+                              color: "#000000",
+                            }}
+                          >
+                            {formatPrice(totalWithQuantity)}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                    <Divider sx={{ my: 2 }} />
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
+                    >
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#0a5",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Grand Total
+                      </Typography>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: "bold",
+                          fontFamily: "Helvetica, sans-serif",
+                          color: "#0a5",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {formatPrice(overallTotalPrice)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </ToolCard>
               </>
             )}
           </Container>
@@ -468,15 +956,15 @@ function SelectedInstruments() {
                 color: "white",
                 backgroundColor: "#d32f2f",
                 "& .MuiAlert-icon": {
-                  color: "white !important",
+                  color: "white",
                   svg: {
-                    fill: "white !important",
+                    fill: "white",
                   },
                 },
                 "& .MuiAlert-action": {
-                  color: "white !important",
+                  color: "white",
                   svg: {
-                    fill: "white !important",
+                    fill: "white",
                   },
                 },
               }}

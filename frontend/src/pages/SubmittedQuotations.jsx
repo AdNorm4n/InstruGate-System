@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { format, parseISO } from "date-fns";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +30,7 @@ import { styled } from "@mui/material/styles";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import DownloadIcon from "@mui/icons-material/Download";
+import SendIcon from "@mui/icons-material/Send";
 import jsPDF from "jspdf";
 import api from "../api";
 import Navbar from "../components/Navbar";
@@ -38,6 +39,15 @@ import "../styles/SubmittedQuotations.css";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+// Utility function to format price as RM10,000.00
+const formatPrice = (price) => {
+  if (price == null || isNaN(price)) return "RM0.00";
+  return `RM${Number(price).toLocaleString("en-MY", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
@@ -52,9 +62,8 @@ const QuotationCard = styled(Card)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
   width: "100%",
-  margin: 0,
 }));
 
 const ToolCard = styled(Box)(({ theme }) => ({
@@ -67,9 +76,8 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
   width: "100%",
-  margin: 0,
 }));
 
 const StatusButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -136,13 +144,15 @@ function SubmittedQuotations() {
   const [rejectRemarks, setRejectRemarks] = useState("");
   const [isImageEnlarged, setIsImageEnlarged] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedInstrument, setSelectedInstrument] = useState(null);
+  const [openInstrumentDialog, setOpenInstrumentDialog] = useState(false);
   const [chartData, setChartData] = useState({
-    labels: ["Pending", "Approved", "Rejected"],
+    labels: ["Pending", "Approved", "Rejected", "Submitted"],
     datasets: [
       {
-        data: [0, 0, 0],
-        backgroundColor: ["#fbc02d", "#388e3c", "#d32f2f"],
-        hoverBackgroundColor: ["#fbc02d", "#388e3c", "#d32f2f"],
+        data: [0, 0, 0, 0],
+        backgroundColor: ["#ffc107", "#28a745", "#dc3545", "#1976d2"],
+        hoverBackgroundColor: ["#ffc107", "#28a745", "#dc3545", "#1565c0"],
       },
     ],
   });
@@ -154,7 +164,157 @@ function SubmittedQuotations() {
   const [errorMessage, setErrorMessage] = useState("");
   const [openConfirmApprove, setOpenConfirmApprove] = useState(null);
   const [openConfirmReject, setOpenConfirmReject] = useState(null);
+  const [submittingQuotationId, setSubmittingQuotationId] = useState(null);
+  const [openConfirmSubmit, setOpenConfirmSubmit] = useState(null);
   const navigate = useNavigate();
+
+  // Memoize Requirements content
+  const requirementsContent = useMemo(() => {
+    const selections = selectedInstrument?.selections;
+    if (!selections || !Array.isArray(selections) || selections.length === 0) {
+      return (
+        <Typography
+          component="span"
+          sx={{
+            fontFamily: "Helvetica, sans-serif",
+            color: "#666",
+            fontSize: "0.95rem",
+          }}
+        >
+          -
+        </Typography>
+      );
+    }
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {selections
+          .filter((sel) => sel?.field_option?.label)
+          .map((sel, idx) => {
+            const option = sel.field_option;
+            const type = option?.type || "";
+            const code = option?.code || "";
+            const label = option?.label || "Unknown";
+            const price = parseFloat(option?.price || 0).toFixed(2);
+            const displayText =
+              type || code
+                ? `${type}${type && code ? ": " : ""}${
+                    code ? `[${code}] ` : ""
+                  }${label}`
+                : label;
+            return (
+              <Box
+                key={`selection-${idx}`}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 0.5,
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    fontSize: "0.95rem",
+                    flex: 1,
+                    pr: 2,
+                  }}
+                >
+                  {displayText}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    fontSize: "0.95rem",
+                    minWidth: "100px",
+                    textAlign: "right",
+                  }}
+                >
+                  RM {price}
+                </Typography>
+              </Box>
+            );
+          })}
+      </Box>
+    );
+  }, [selectedInstrument?.selections]);
+
+  // Memoize Addons content
+  const addonsContent = useMemo(() => {
+    const addons = selectedInstrument?.addons;
+    if (!addons || !Array.isArray(addons) || addons.length === 0) {
+      return (
+        <Typography
+          component="span"
+          sx={{
+            fontFamily: "Helvetica, sans-serif",
+            color: "#666",
+            fontSize: "0.95rem",
+          }}
+        >
+          -
+        </Typography>
+      );
+    }
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        {addons
+          .filter((addon) => addon?.addon?.label)
+          .map((addon, idx) => {
+            const option = addon.addon || {};
+            const type = option.type || "";
+            const code = option.code || "";
+            const label = option.label || "Unknown";
+            const price = parseFloat(option.price || 0).toFixed(2);
+            const displayText =
+              type || code
+                ? `${type}${type && code ? ": " : ""}${
+                    code ? `[${code}] ` : ""
+                  }${label}`
+                : label;
+            return (
+              <Box
+                key={`addon-${idx}`}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 0.5,
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    fontSize: "0.95rem",
+                    flex: 1,
+                    pr: 2,
+                  }}
+                >
+                  {displayText}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#333",
+                    fontSize: "0.95rem",
+                    minWidth: "100px",
+                    textAlign: "right",
+                  }}
+                >
+                  RM {price}
+                </Typography>
+              </Box>
+            );
+          })}
+      </Box>
+    );
+  }, [selectedInstrument?.addons]);
 
   const baseUrl = "http://127.0.0.1:8000";
 
@@ -187,16 +347,49 @@ function SubmittedQuotations() {
     setErrorMessage("");
   };
 
+  const handleSubmitQuotation = useCallback(async (quotationId) => {
+    if (!quotationId) {
+      setErrorMessage("Invalid quotation ID.");
+      setOpenError(true);
+      return;
+    }
+    setOpenConfirmSubmit(null);
+    setSubmittingQuotationId(quotationId);
+    try {
+      const access = getToken();
+      if (!access) {
+        throw new Error("No access token found.");
+      }
+      await api.post(
+        `/api/quotations/${quotationId}/submit/`,
+        {},
+        { headers: { Authorization: `Bearer ${access}` } }
+      );
+      setSuccessMessage("Quotation submitted successfully via email!");
+      setOpenSuccess(true);
+      await fetchData();
+    } catch (err) {
+      console.error("Error submitting quotation:", err);
+      setErrorMessage(
+        `Failed to submit quotation: ${
+          err.response?.data?.detail || err.message || "Unknown error"
+        }`
+      );
+      setOpenError(true);
+    } finally {
+      setSubmittingQuotationId(null);
+    }
+  }, []);
+
   const handleDownloadPDF = (quotation) => {
     try {
       console.log("Generating PDF for quotation:", quotation.id);
-      console.log("Quotation items:", JSON.stringify(quotation.items, null, 2));
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 15;
       const lineHeight = 5;
-      let y = 40; // Top padding for title
+      let y = 40;
 
       // Add Letterhead
       try {
@@ -213,28 +406,24 @@ function SubmittedQuotations() {
         margin,
         y
       );
-      console.log("Added title at y:", y);
       y += lineHeight + 2;
 
       // Status
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(`Status: Approved`, margin, y);
-      console.log("Added status at y:", y);
+      doc.text(`Status: ${formatStatusText(quotation.status)}`, margin, y);
       y += lineHeight + 4;
 
       // Separator Line
       doc.setDrawColor(100, 100, 100);
       doc.setLineWidth(0.3);
       doc.line(margin, y, pageWidth - margin, y);
-      console.log("Added separator at y:", y);
       y += lineHeight + 2;
 
       // Details Section
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
       doc.text("Details", margin, y);
-      console.log("Added Details header at y:", y);
       y += lineHeight + 8;
 
       doc.setFont("helvetica", "normal");
@@ -247,23 +436,46 @@ function SubmittedQuotations() {
         { label: "Company:", value: quotation.company || "N/A" },
         { label: "Project:", value: quotation.project_name || "N/A" },
         {
+          label: "Total Quotation Price:",
+          value: formatPrice(quotation.total_price),
+        },
+        {
           label: "Submitted at:",
           value: quotation.submitted_at
             ? format(parseISO(quotation.submitted_at), "MMM dd, yyyy, h:mm a")
             : "Unknown",
         },
         {
+          label: "Reviewed by:",
+          value: quotation.reviewed_by_name || "N/A",
+          show: quotation.status !== "pending",
+        },
+        {
           label: "Approved at:",
           value: quotation.approved_at
             ? format(parseISO(quotation.approved_at), "MMM dd, yyyy, h:mm a")
             : "N/A",
+          show: quotation.status === "approved",
         },
-      ];
+        {
+          label: "Rejected at:",
+          value: quotation.rejected_at
+            ? format(parseISO(quotation.rejected_at), "MMM dd, yyyy, h:mm a")
+            : "N/A",
+          show: quotation.status === "rejected",
+        },
+        {
+          label: "Emailed at:",
+          value: quotation.emailed_at
+            ? format(parseISO(quotation.emailed_at), "MMM dd, yyyy, h:mm a")
+            : "N/A",
+          show: !!quotation.emailed_at,
+        },
+      ].filter((item) => item.show !== false);
 
       // Two-column layout for Details
       const colWidth = 90;
       const indent = 5;
-      console.log("Adding Details content at y:", y);
       const midPoint = Math.ceil(details.length / 2);
       details.slice(0, midPoint).forEach((item, index) => {
         doc.text(
@@ -285,7 +497,6 @@ function SubmittedQuotations() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
       doc.text("Instruments", margin, y);
-      console.log("Added Instruments header at y:", y);
       y += lineHeight + 8;
 
       // Instruments List
@@ -293,7 +504,6 @@ function SubmittedQuotations() {
       doc.setFontSize(10);
       const items = Array.isArray(quotation.items) ? quotation.items : [];
       if (items.length === 0) {
-        console.warn("No instruments found for quotation:", quotation.id);
         doc.text("No instruments listed.", margin + indent, y);
         y += lineHeight + 8;
       } else {
@@ -316,13 +526,12 @@ function SubmittedQuotations() {
             y += lineHeight + 8;
             doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
-            console.log("Added new page for Instruments at y:", y);
           }
           const instrumentName =
             item.instrument?.name || item.name || "Unknown";
           const productCode = item.product_code || "N/A";
           const quantity = item.quantity || "1";
-          console.log(`Adding instrument ${index + 1}:`, instrumentName);
+          const totalPrice = formatPrice(item.total_price);
           doc.setFont("helvetica", "bold");
           doc.text(`Item #${index + 1}`, margin + indent, y);
           y += lineHeight + 1;
@@ -332,11 +541,13 @@ function SubmittedQuotations() {
           doc.text(`Product Code: ${productCode}`, margin + indent, y);
           y += lineHeight + 1;
           doc.text(`Qty: ${quantity}`, margin + indent, y);
+          y += lineHeight + 1;
+          doc.text(`Total Price: ${totalPrice}`, margin + indent, y);
           y += lineHeight + 8;
         });
       }
+
       // Save PDF
-      console.log("Saving PDF");
       const safeCompany = (quotation.company || "Unknown").replace(
         /[^a-zA-Z0-9]/g,
         "_"
@@ -363,23 +574,30 @@ function SubmittedQuotations() {
       if (!access) {
         setError("No access token found. Please log in again.");
         setLoading(false);
+        navigate("/login");
         return;
       }
 
       const decoded = jwtDecode(access);
       const now = Date.now() / 1000;
       if (decoded.exp < now) {
-        const res = await api.post("/api/token/refresh/", { refresh });
-        access = res.data.access;
-        localStorage.setItem(ACCESS_TOKEN, access);
-        console.log("Token refreshed:", res.data.access);
+        try {
+          const res = await api.post("/api/token/refresh/", { refresh });
+          access = res.data.access;
+          localStorage.setItem(ACCESS_TOKEN, access);
+        } catch (refreshErr) {
+          console.error("Token refresh failed:", refreshErr);
+          setError("Session expired. Please log in again.");
+          setLoading(false);
+          navigate("/login");
+          return;
+        }
       }
 
       const userRes = await api.get("/api/users/me/", {
         headers: { Authorization: `Bearer ${access}` },
       });
       setUserRole(userRes.data.role);
-      console.log("User role:", userRes.data.role);
 
       const endpoint =
         userRes.data.role === "client"
@@ -388,18 +606,6 @@ function SubmittedQuotations() {
       const quotationsRes = await api.get(endpoint, {
         headers: { Authorization: `Bearer ${access}` },
       });
-
-      console.log(
-        "Quotations data:",
-        JSON.stringify(quotationsRes.data, null, 2)
-      );
-      quotationsRes.data.forEach((item, index) =>
-        console.log(
-          `Quotation ${item.id} created_by_first_name:`,
-          item.created_by_first_name || "N/A",
-          index
-        )
-      );
 
       setQuotations(quotationsRes.data);
 
@@ -412,13 +618,16 @@ function SubmittedQuotations() {
       const rejected = quotationsRes.data.filter(
         (q) => q.status === "rejected"
       ).length;
+      const submitted = quotationsRes.data.filter(
+        (q) => q.status === "submitted"
+      ).length;
       setChartData({
-        labels: ["Pending", "Approved", "Rejected"],
+        labels: ["Pending", "Approved", "Rejected", "Submitted"],
         datasets: [
           {
-            data: [pending, approved, rejected],
-            backgroundColor: ["#ffc107", "#28a745", "#dc3545"],
-            hoverBackgroundColor: ["#ffc107", "#28a745", "#dc3545"],
+            data: [pending, approved, rejected, submitted],
+            backgroundColor: ["#ffc107", "#28a745", "#dc3545", "#1976d2"],
+            hoverBackgroundColor: ["#ffc107", "#28a745", "#dc3545", "#1565c0"],
           },
         ],
       });
@@ -427,8 +636,8 @@ function SubmittedQuotations() {
     } catch (err) {
       console.error("Error fetching data:", err);
       setError(
-        `Failed to fetch quotations. Error: ${
-          err?.response?.data?.detail || err.message
+        `Failed to fetch quotations: ${
+          err.response?.data?.detail || err.message || "Unknown error"
         }`
       );
       setLoading(false);
@@ -439,7 +648,7 @@ function SubmittedQuotations() {
     fetchData();
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [navigate]);
 
   const handleRejectClick = (quotationId) => {
     setRejectingQuotationId(quotationId);
@@ -457,10 +666,9 @@ function SubmittedQuotations() {
 
   const handleConfirmRejectAction = async () => {
     setOpenConfirmReject(null);
-    const payload = { status: "rejected", remarks: rejectRemarks };
-    console.log("Sending PATCH payload:", JSON.stringify(payload, null, 2));
     try {
       const access = getToken();
+      const payload = { status: "rejected", remarks: rejectRemarks };
       const response = await api.patch(
         `/api/quotations/review/${rejectingQuotationId}/`,
         payload,
@@ -475,18 +683,16 @@ function SubmittedQuotations() {
       setRejectRemarks("");
       setSuccessMessage("Quotation rejected successfully.");
       setOpenSuccess(true);
-      fetchData();
+      await fetchData();
     } catch (err) {
-      console.error("Error rejecting quotation:", err.response?.data || err);
+      console.error("Error rejecting quotation:", err);
       setErrorMessage(
-        `Failed to reject quotation. Error: ${
-          err.response?.data?.detail ||
-          err.response?.data?.status?.[0] ||
-          err.message
+        `Failed to reject quotation: ${
+          err.response?.data?.detail || err.message || "Unknown error"
         }`
       );
       setOpenError(true);
-      setRejectingQuotationId(null); // Reset to re-enable buttons on error
+      setRejectingQuotationId(null);
     }
   };
 
@@ -496,17 +702,16 @@ function SubmittedQuotations() {
     setRejectRemarks("");
   };
 
-  const handleApproveClick = async (quotationId) => {
+  const handleApproveClick = (quotationId) => {
     setOpenConfirmApprove(quotationId);
   };
 
   const handleConfirmApprove = async () => {
     const quotationId = openConfirmApprove;
     setOpenConfirmApprove(null);
-    const payload = { status: "approved", remarks: "" };
-    console.log("Sending PATCH payload:", JSON.stringify(payload, null, 2));
     try {
       const access = getToken();
+      const payload = { status: "approved", remarks: "" };
       const response = await api.patch(
         `/api/quotations/review/${quotationId}/`,
         payload,
@@ -515,16 +720,14 @@ function SubmittedQuotations() {
       setQuotations((prev) =>
         prev.map((q) => (q.id === quotationId ? { ...q, ...response.data } : q))
       );
-      setSuccessMessage("Quotation has been approved.");
+      setSuccessMessage("Quotation approved successfully!");
       setOpenSuccess(true);
-      fetchData();
+      await fetchData();
     } catch (err) {
-      console.error("Error approving quotation:", err.response?.data || err);
+      console.error("Error approving quotation:", err);
       setErrorMessage(
-        `Failed to approve quotation. Error: ${
-          err.response?.data?.detail ||
-          err.response?.data?.status?.[0] ||
-          err.message
+        `Failed to approve quotation: ${
+          err.response?.data?.detail || err.message || "Unknown error"
         }`
       );
       setOpenError(true);
@@ -537,15 +740,23 @@ function SubmittedQuotations() {
 
   const handleImageClick = (index) => {
     setIsImageEnlarged(index);
-    console.log("Image clicked, opening overlay for index:", index);
   };
 
   const handleCloseOverlay = () => {
     setIsImageEnlarged(null);
-    console.log("Closing image overlay");
   };
 
-  const handleStatusFilter = (event, newStatus) => {
+  const handleInstrumentClick = (item) => {
+    setSelectedInstrument(item);
+    setOpenInstrumentDialog(true);
+  };
+
+  const handleCloseInstrumentDialog = () => {
+    setOpenInstrumentDialog(false);
+    setSelectedInstrument(null);
+  };
+
+  const handleStatusFilterChange = (event, newStatus) => {
     if (newStatus !== null) {
       setStatusFilter(newStatus);
     }
@@ -557,6 +768,8 @@ function SubmittedQuotations() {
         return "#28a745";
       case "rejected":
         return "#dc3545";
+      case "submitted":
+        return "#1976d2";
       default:
         return "#ffc107";
     }
@@ -572,8 +785,63 @@ function SubmittedQuotations() {
       ? quotations
       : quotations.filter((q) => q.status === statusFilter);
 
+  const getDetailsFields = (quotation) => {
+    const fields = [
+      {
+        label: "Submitted by:",
+        value: quotation.created_by_first_name || "N/A",
+      },
+      { label: "Company:", value: quotation.company || "N/A" },
+      { label: "Project:", value: quotation.project_name || "N/A" },
+      {
+        label: "Total Quotation Price:",
+        value: formatPrice(quotation.total_price),
+      },
+      {
+        label: "Submitted at:",
+        value: quotation.submitted_at
+          ? format(parseISO(quotation.submitted_at), "PPp")
+          : "Unknown",
+      },
+      {
+        label: "Reviewed by:",
+        value: quotation.reviewed_by_name || "N/A",
+        show: quotation.status !== "pending",
+      },
+      {
+        label: "Approved at:",
+        value: quotation.approved_at
+          ? format(parseISO(quotation.approved_at), "PPp")
+          : "N/A",
+        show:
+          quotation.status === "approved" || quotation.status === "submitted",
+      },
+      {
+        label: "Rejected at:",
+        value: quotation.rejected_at
+          ? (() => {
+              try {
+                return format(parseISO(quotation.rejected_at), "PPp");
+              } catch {
+                return "N/A";
+              }
+            })()
+          : "N/A",
+        show: quotation.status === "rejected",
+      },
+      {
+        label: "Emailed at:",
+        value: quotation.emailed_at
+          ? format(parseISO(quotation.emailed_at), "PPp")
+          : "N/A",
+        show: !!quotation.emailed_at,
+      },
+    ];
+    return fields.filter((item) => item.show !== false);
+  };
+
   return (
-    <Fade in timeout={800}>
+    <Fade in timeout={600}>
       <Box
         className="submitted-quotations-page"
         sx={{
@@ -586,13 +854,26 @@ function SubmittedQuotations() {
         <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              py: 6,
+              mt: 8,
+              px: { xs: 2, sm: 3, md: 4 },
+              mx: "auto",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+          >
             <Typography
               variant="h6"
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -607,7 +888,7 @@ function SubmittedQuotations() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -623,7 +904,7 @@ function SubmittedQuotations() {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  minHeight: "50vh",
+                  minHeight: "400px",
                 }}
               >
                 <CircularProgress size={60} sx={{ color: "#d6393a" }} />
@@ -633,9 +914,10 @@ function SubmittedQuotations() {
                 variant="h6"
                 align="center"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   color: "#dc3545",
                   py: 4,
+                  fontSize: "1.2rem",
                 }}
               >
                 {error}
@@ -648,7 +930,7 @@ function SubmittedQuotations() {
                       <Typography
                         variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Helvetica, sans-serif",
                           fontWeight: "bold",
                           mb: 3,
                           textAlign: "center",
@@ -682,7 +964,7 @@ function SubmittedQuotations() {
                   <StatusButtonGroup
                     value={statusFilter}
                     exclusive
-                    onChange={handleStatusFilter}
+                    onChange={handleStatusFilterChange}
                     aria-label="status filter"
                     sx={{ display: "flex", justifyContent: "center", mb: 3 }}
                   >
@@ -690,6 +972,7 @@ function SubmittedQuotations() {
                     <ToggleButton value="pending">Pending</ToggleButton>
                     <ToggleButton value="rejected">Rejected</ToggleButton>
                     <ToggleButton value="approved">Approved</ToggleButton>
+                    <ToggleButton value="submitted">Submitted</ToggleButton>
                   </StatusButtonGroup>
 
                   {filteredQuotations.length === 0 ? (
@@ -697,7 +980,7 @@ function SubmittedQuotations() {
                       variant="h6"
                       sx={{
                         textAlign: "center",
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "Helvetica, sans-serif",
                         color: "#666",
                         py: 4,
                       }}
@@ -725,8 +1008,7 @@ function SubmittedQuotations() {
                                   variant="h6"
                                   fontWeight="bold"
                                   sx={{
-                                    fontFamily:
-                                      "Helvetica, sans-serif !important",
+                                    fontFamily: "Helvetica, sans-serif",
                                     textTransform: "uppercase",
                                     color: "#333",
                                     fontSize: { xs: "1.2rem", sm: "1.5rem" },
@@ -740,8 +1022,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="body2"
                                     sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                      fontFamily: "Helvetica, sans-serif",
                                       fontWeight: "bold",
                                       color: getStatusColor(quotation.status),
                                       textTransform: "uppercase",
@@ -756,24 +1037,52 @@ function SubmittedQuotations() {
                                   >
                                     {formatStatusText(quotation.status)}
                                   </Typography>
-                                  {quotation.status === "approved" &&
-                                    userRole === "client" && (
-                                      <IconButton
-                                        onClick={() =>
-                                          handleDownloadPDF(quotation)
-                                        }
-                                        sx={{
-                                          ml: 2,
-                                          color: "#28a745",
-                                          "&:hover": {
-                                            color: "#218838",
-                                          },
-                                        }}
-                                        aria-label="Download Quotation PDF"
-                                      >
-                                        <DownloadIcon />
-                                      </IconButton>
-                                    )}
+                                  {userRole === "client" && (
+                                    <>
+                                      {quotation.status === "approved" && (
+                                        <>
+                                          <IconButton
+                                            onClick={() =>
+                                              handleDownloadPDF(quotation)
+                                            }
+                                            sx={{
+                                              ml: 2,
+                                              color: "#28a745",
+                                              "&:hover": { color: "#218838" },
+                                            }}
+                                            aria-label="Download Quotation PDF"
+                                          >
+                                            <DownloadIcon />
+                                          </IconButton>
+                                          <IconButton
+                                            onClick={() =>
+                                              setOpenConfirmSubmit(quotation.id)
+                                            }
+                                            disabled={
+                                              submittingQuotationId ===
+                                              quotation.id
+                                            }
+                                            sx={{
+                                              ml: 2,
+                                              color: "#1976d2",
+                                              "&:hover": { color: "#1565c0" },
+                                            }}
+                                            aria-label="Submit Quotation via Email"
+                                          >
+                                            {submittingQuotationId ===
+                                            quotation.id ? (
+                                              <CircularProgress
+                                                size={24}
+                                                sx={{ color: "#1976d2" }}
+                                              />
+                                            ) : (
+                                              <SendIcon />
+                                            )}
+                                          </IconButton>
+                                        </>
+                                      )}
+                                    </>
+                                  )}
                                 </Box>
                               </Box>
                               <Divider sx={{ mb: 4, bgcolor: "#e0e0e0" }} />
@@ -782,8 +1091,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="subtitle1"
                                     sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                      fontFamily: "Helvetica, sans-serif",
                                       fontWeight: "bold",
                                       color: "#555",
                                       mb: 2,
@@ -801,9 +1109,9 @@ function SubmittedQuotations() {
                                   >
                                     <Box
                                       sx={{
-                                        width: { xs: "100%", sm: "400px" },
-                                        minWidth: { sm: "400px" },
-                                        maxWidth: { sm: "400px" },
+                                        width: { xs: "100%", sm: "350px" },
+                                        minWidth: { sm: "350px" },
+                                        maxWidth: { sm: "350px" },
                                         display: "flex",
                                         flexDirection: "column",
                                         gap: 2,
@@ -813,127 +1121,30 @@ function SubmittedQuotations() {
                                         border: "1px solid #e0e0e0",
                                       }}
                                     >
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#333",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Submitted by:</strong>{" "}
-                                        {quotation.created_by_first_name ||
-                                          "N/A"}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#333",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Company:</strong>{" "}
-                                        {quotation.company || "N/A"}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#333",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Project:</strong>{" "}
-                                        {quotation.project_name || "N/A"}
-                                      </Typography>
-                                      <Typography
-                                        variant="body1"
-                                        sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
-                                          color: "#333",
-                                          fontSize: "1rem",
-                                        }}
-                                      >
-                                        <strong>Submitted at:</strong>{" "}
-                                        {quotation.submitted_at
-                                          ? (() => {
-                                              try {
-                                                return format(
-                                                  parseISO(
-                                                    quotation.submitted_at
-                                                  ),
-                                                  "PPp"
-                                                );
-                                              } catch {
-                                                return "Unknown";
-                                              }
-                                            })()
-                                          : "Unknown"}
-                                      </Typography>
-                                      {quotation.status === "approved" &&
-                                        quotation.approved_at && (
+                                      {getDetailsFields(quotation).map(
+                                        (item, index) => (
                                           <Typography
+                                            key={`detail-${index}`}
                                             variant="body1"
                                             sx={{
                                               fontFamily:
-                                                "Helvetica, sans-serif !important",
+                                                "Helvetica, sans-serif",
                                               color: "#333",
                                               fontSize: "1rem",
                                             }}
                                           >
-                                            <strong>Approved at:</strong>{" "}
-                                            {(() => {
-                                              try {
-                                                return format(
-                                                  parseISO(
-                                                    quotation.approved_at
-                                                  ),
-                                                  "PPp"
-                                                );
-                                              } catch {
-                                                return "Unknown";
-                                              }
-                                            })()}
+                                            <strong>{item.label}</strong>{" "}
+                                            {item.value}
                                           </Typography>
-                                        )}
-                                      {quotation.status === "rejected" &&
-                                        quotation.rejected_at && (
-                                          <Typography
-                                            variant="body1"
-                                            sx={{
-                                              fontFamily:
-                                                "Helvetica, sans-serif !important",
-                                              color: "#333",
-                                              fontSize: "1rem",
-                                            }}
-                                          >
-                                            <strong>Rejected at:</strong>{" "}
-                                            {(() => {
-                                              try {
-                                                return format(
-                                                  parseISO(
-                                                    quotation.rejected_at
-                                                  ),
-                                                  "PPp"
-                                                );
-                                              } catch {
-                                                return "Unknown";
-                                              }
-                                            })()}
-                                          </Typography>
-                                        )}
+                                        )
+                                      )}
                                       {quotation.status === "rejected" &&
                                         quotation.remarks && (
                                           <Typography
                                             variant="body1"
                                             sx={{
                                               fontFamily:
-                                                "Helvetica, sans-serif !important",
+                                                "Helvetica, sans-serif",
                                               color: "#dc3545",
                                               fontSize: "1rem",
                                               wordBreak: "break-word",
@@ -958,7 +1169,7 @@ function SubmittedQuotations() {
                                                     color: "#1976d2",
                                                     textDecoration: "underline",
                                                     fontFamily:
-                                                      "Helvetica, sans-serif !important",
+                                                      "Helvetica, sans-serif",
                                                   }}
                                                 >
                                                   View More
@@ -973,7 +1184,7 @@ function SubmittedQuotations() {
                                             variant="body1"
                                             sx={{
                                               fontFamily:
-                                                "Helvetica, sans-serif !important",
+                                                "Helvetica, sans-serif",
                                               color: "#dc3545",
                                               fontWeight: "bold",
                                               fontSize: "1rem",
@@ -990,8 +1201,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="subtitle1"
                                     sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                      fontFamily: "Helvetica, sans-serif",
                                       fontWeight: "bold",
                                       color: "#555",
                                       mb: 2,
@@ -1022,6 +1232,9 @@ function SubmittedQuotations() {
                                         return (
                                           <Box
                                             key={imageIndex}
+                                            onClick={() =>
+                                              handleInstrumentClick(item)
+                                            }
                                             sx={{
                                               display: "flex",
                                               alignItems: "center",
@@ -1030,39 +1243,47 @@ function SubmittedQuotations() {
                                               borderRadius: "8px",
                                               border: "1px solid #e0e0e0",
                                               transition: "all 0.2s ease",
+                                              cursor: "pointer",
                                               "&:hover": {
                                                 bgcolor: "#f1f3f5",
                                                 borderColor: "#d6393a",
+                                                transform: "scale(1.02)",
                                               },
                                             }}
                                           >
                                             {imageUrl ? (
-                                              <img
-                                                src={imageUrl}
-                                                alt={
-                                                  item.instrument?.name ||
-                                                  "Instrument"
+                                              <Box
+                                                onClick={(e) =>
+                                                  e.stopPropagation()
                                                 }
-                                                style={{
-                                                  width: "80px",
-                                                  height: "80px",
-                                                  objectFit: "cover",
-                                                  borderRadius: "8px",
-                                                  marginRight: "20px",
-                                                  cursor: "pointer",
-                                                  boxShadow:
-                                                    "0 2px 4px rgba(0,0,0,0.1)",
-                                                }}
-                                                onClick={() =>
-                                                  handleImageClick(imageIndex)
-                                                }
-                                                onError={(e) => {
-                                                  e.target.style.display =
-                                                    "none";
-                                                  e.target.nextSibling.style.display =
-                                                    "flex";
-                                                }}
-                                              />
+                                                sx={{ mr: 2.5 }}
+                                              >
+                                                <img
+                                                  src={imageUrl}
+                                                  alt={
+                                                    item.instrument?.name ||
+                                                    "Instrument"
+                                                  }
+                                                  style={{
+                                                    width: "80px",
+                                                    height: "80px",
+                                                    objectFit: "cover",
+                                                    borderRadius: "8px",
+                                                    cursor: "pointer",
+                                                    boxShadow:
+                                                      "0 2px 4px rgba(0,0,0,0.1)",
+                                                  }}
+                                                  onClick={() =>
+                                                    handleImageClick(imageIndex)
+                                                  }
+                                                  onError={(e) => {
+                                                    e.target.style.display =
+                                                      "none";
+                                                    e.target.nextSibling.style.display =
+                                                      "flex";
+                                                  }}
+                                                />
+                                              </Box>
                                             ) : (
                                               <Box
                                                 sx={{
@@ -1081,7 +1302,7 @@ function SubmittedQuotations() {
                                                   color="text.secondary"
                                                   sx={{
                                                     fontFamily:
-                                                      "Helvetica, sans-serif !important",
+                                                      "Helvetica, sans-serif",
                                                     fontSize: "0.9rem",
                                                   }}
                                                 >
@@ -1094,7 +1315,7 @@ function SubmittedQuotations() {
                                                 variant="body1"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif !important",
+                                                    "Helvetica, sans-serif",
                                                   fontWeight: "600",
                                                   color: "#333",
                                                   mb: 1,
@@ -1109,7 +1330,7 @@ function SubmittedQuotations() {
                                                 variant="body2"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif !important",
+                                                    "Helvetica, sans-serif",
                                                   color: "#666",
                                                   fontSize: "0.95rem",
                                                 }}
@@ -1121,12 +1342,24 @@ function SubmittedQuotations() {
                                                 variant="body2"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif !important",
+                                                    "Helvetica, sans-serif",
                                                   color: "#666",
                                                   fontSize: "0.95rem",
                                                 }}
                                               >
                                                 Quantity: {item.quantity || "1"}
+                                              </Typography>
+                                              <Typography
+                                                variant="body2"
+                                                sx={{
+                                                  fontFamily:
+                                                    "Helvetica, sans-serif",
+                                                  color: "#666",
+                                                  fontSize: "0.95rem",
+                                                }}
+                                              >
+                                                Total Price:{" "}
+                                                {formatPrice(item.total_price)}
                                               </Typography>
                                             </Box>
                                           </Box>
@@ -1136,8 +1369,7 @@ function SubmittedQuotations() {
                                       <Typography
                                         variant="body1"
                                         sx={{
-                                          fontFamily:
-                                            "Helvetica, sans-serif !important",
+                                          fontFamily: "Helvetica, sans-serif",
                                           color: "#666",
                                           fontSize: "1rem",
                                         }}
@@ -1153,8 +1385,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="subtitle1"
                                     sx={{
-                                      fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                      fontFamily: "Helvetica, sans-serif",
                                       fontWeight: "bold",
                                       color: "#555",
                                       mb: 2,
@@ -1178,14 +1409,12 @@ function SubmittedQuotations() {
                                     sx={{
                                       mb: 2,
                                       "& .MuiInputBase-root": {
-                                        fontFamily:
-                                          "Helvetica, sans-serif !important",
+                                        fontFamily: "Helvetica, sans-serif",
                                         borderRadius: "8px",
                                         fontSize: "1rem",
                                       },
                                       "& .MuiInputLabel-root": {
-                                        fontFamily:
-                                          "Helvetica, sans-serif !important",
+                                        fontFamily: "Helvetica, sans-serif",
                                         fontSize: "1rem",
                                       },
                                     }}
@@ -1262,13 +1491,11 @@ function SubmittedQuotations() {
                   onClose={handleCloseRemarksDialog}
                   maxWidth="sm"
                   fullWidth
-                  PaperProps={{
-                    sx: { borderRadius: 2, p: 2 },
-                  }}
+                  PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
                 >
                   <DialogTitle
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Helvetica, sans-serif",
                       fontWeight: "bold",
                       color: "#1976d2",
                     }}
@@ -1278,7 +1505,7 @@ function SubmittedQuotations() {
                   <DialogContent>
                     <Typography
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "Helvetica, sans-serif",
                         whiteSpace: "pre-wrap",
                         wordBreak: "break-word",
                       }}
@@ -1290,6 +1517,126 @@ function SubmittedQuotations() {
                     <CTAButton
                       colorType="cancel"
                       onClick={handleCloseRemarksDialog}
+                    >
+                      Close
+                    </CTAButton>
+                  </DialogActions>
+                </Dialog>
+
+                <Dialog
+                  open={openInstrumentDialog}
+                  onClose={handleCloseInstrumentDialog}
+                  maxWidth={false}
+                  fullWidth
+                  PaperProps={{
+                    sx: {
+                      borderRadius: 2,
+                      p: 2,
+                      maxWidth: "1000px",
+                      width: "100%",
+                      overflowX: "auto",
+                    },
+                  }}
+                >
+                  <DialogTitle
+                    sx={{
+                      fontFamily: "Helvetica, sans-serif",
+                      fontWeight: "bold",
+                      color: "#1976d2",
+                    }}
+                  >
+                    Instrument Details
+                  </DialogTitle>
+                  <DialogContent>
+                    {selectedInstrument && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 2,
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "#333",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          <strong>Name:</strong>{" "}
+                          {selectedInstrument.instrument?.name ||
+                            selectedInstrument.name ||
+                            "N/A"}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "#333",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          <strong>Product Code:</strong>{" "}
+                          {selectedInstrument.product_code || "N/A"}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "#333",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          <strong>Quantity:</strong>{" "}
+                          {selectedInstrument.quantity || "1"}
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "#333",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          <strong>Total Price:</strong>{" "}
+                          {formatPrice(selectedInstrument.total_price)}
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography
+                            component="div"
+                            variant="subtitle1"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#333",
+                              fontSize: "1rem",
+                              fontWeight: "bold",
+                              mb: 1,
+                            }}
+                          >
+                            Requirements
+                          </Typography>
+                          {requirementsContent}
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                          <Typography
+                            component="div"
+                            variant="subtitle1"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "#333",
+                              fontSize: "1rem",
+                              fontWeight: "bold",
+                              mb: 1,
+                            }}
+                          >
+                            Addons
+                          </Typography>
+                          {addonsContent}
+                        </Box>
+                      </Box>
+                    )}
+                  </DialogContent>
+                  <DialogActions>
+                    <CTAButton
+                      colorType="cancel"
+                      onClick={handleCloseInstrumentDialog}
                     >
                       Close
                     </CTAButton>
@@ -1326,10 +1673,9 @@ function SubmittedQuotations() {
                               <Box
                                 key={imageIndex}
                                 sx={{
-                                  p: 3,
-                                  bgcolor: "#f9fafb",
+                                  p: 1,
+                                  bgcolor: "#444",
                                   borderRadius: "8px",
-                                  border: "1px solid #e0e0e0",
                                   position: "relative",
                                   maxWidth: "80vw",
                                   maxHeight: "80vh",
@@ -1373,7 +1719,6 @@ function SubmittedQuotations() {
                   </Box>
                 )}
 
-                {/* Success, Error, and Confirmation Snackbars */}
                 <Box
                   sx={{
                     position: "fixed",
@@ -1391,7 +1736,9 @@ function SubmittedQuotations() {
                       zIndex: (theme) => theme.zIndex.modal - 1,
                     }}
                     open={
-                      openConfirmApprove !== null || openConfirmReject !== null
+                      openConfirmApprove !== null ||
+                      openConfirmReject !== null ||
+                      openConfirmSubmit !== null
                     }
                   />
                   <Snackbar
@@ -1405,14 +1752,8 @@ function SubmittedQuotations() {
                         width: "100%",
                         color: "white",
                         backgroundColor: "#d32f2f",
-                        "& .MuiAlert-icon": {
-                          color: "white !important",
-                          svg: { fill: "white !important" },
-                        },
-                        "& .MuiAlert-action": {
-                          color: "white !important",
-                          svg: { fill: "white !important" },
-                        },
+                        "& .MuiAlert-icon": { color: "white" },
+                        "& .MuiAlert-action": { color: "white" },
                       }}
                       action={
                         <Box sx={{ display: "flex", gap: 1 }}>
@@ -1442,9 +1783,8 @@ function SubmittedQuotations() {
                       }
                     >
                       Please confirm if you want to approve this quotation. Once
-                      approved, the client will be able to download the
-                      quotation sheet and proceed with submitting the Purchase
-                      Order (PO).
+                      approved, the client will be able to submit the Purchase
+                      (PO) via email.
                     </Alert>
                   </Snackbar>
                   <Snackbar
@@ -1458,14 +1798,8 @@ function SubmittedQuotations() {
                         width: "100%",
                         color: "white",
                         backgroundColor: "#d32f2f",
-                        "& .MuiAlert-icon": {
-                          color: "white !important",
-                          svg: { fill: "white !important" },
-                        },
-                        "& .MuiAlert-action": {
-                          color: "white !important",
-                          svg: { fill: "white !important" },
-                        },
+                        "& .MuiAlert-icon": { color: "white" },
+                        "& .MuiAlert-action": { color: "white" },
                       }}
                       action={
                         <Box sx={{ display: "flex", gap: 1 }}>
@@ -1498,6 +1832,53 @@ function SubmittedQuotations() {
                     </Alert>
                   </Snackbar>
                   <Snackbar
+                    open={openConfirmSubmit !== null}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                  >
+                    <Alert
+                      severity="info"
+                      variant="filled"
+                      sx={{
+                        width: "100%",
+                        color: "white",
+                        backgroundColor: "#1976d2",
+                        "& .MuiAlert-icon": { color: "white" },
+                        "& .MuiAlert-action": { color: "white" },
+                      }}
+                      action={
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() =>
+                              handleSubmitQuotation(openConfirmSubmit)
+                            }
+                            sx={{
+                              color: "white",
+                              fontFamily: "Helvetica, sans-serif",
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() => setOpenConfirmSubmit(null)}
+                            sx={{
+                              color: "white",
+                              fontFamily: "Helvetica, sans-serif",
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      }
+                    >
+                      Confirm to submit this quotation to the sales team via
+                      email.
+                    </Alert>
+                  </Snackbar>
+                  <Snackbar
                     open={openSuccess}
                     autoHideDuration={6000}
                     onClose={handleCloseSuccess}
@@ -1511,18 +1892,8 @@ function SubmittedQuotations() {
                         width: "100%",
                         color: "white",
                         backgroundColor: "#28a745",
-                        "& .MuiAlert-icon": {
-                          color: "white !important",
-                          svg: {
-                            fill: "white !important",
-                          },
-                        },
-                        "& .MuiAlert-action": {
-                          color: "white !important",
-                          svg: {
-                            fill: "white !important",
-                          },
-                        },
+                        "& .MuiAlert-icon": { color: "white" },
+                        "& .MuiAlert-action": { color: "white" },
                       }}
                     >
                       {successMessage}
@@ -1542,18 +1913,8 @@ function SubmittedQuotations() {
                         width: "100%",
                         color: "white",
                         backgroundColor: "#d32f2f",
-                        "& .MuiAlert-icon": {
-                          color: "white !important",
-                          svg: {
-                            fill: "white !important",
-                          },
-                        },
-                        "& .MuiAlert-action": {
-                          color: "white !important",
-                          svg: {
-                            fill: "white !important",
-                          },
-                        },
+                        "& .MuiAlert-icon": { color: "white" },
+                        "& .MuiAlert-action": { color: "white" },
                       }}
                     >
                       {errorMessage}

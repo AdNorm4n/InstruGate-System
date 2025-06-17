@@ -19,6 +19,15 @@ import api from "../api";
 import "../styles/Configurator.css";
 import Navbar from "../components/Navbar";
 
+// Utility function to format price as RM10,000.00
+const formatPrice = (price) => {
+  if (price == null || isNaN(price)) return "RM0.00";
+  return `RM${Number(price).toLocaleString("en-MY", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
@@ -87,6 +96,7 @@ function Configurator({ navigateWithLoading }) {
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [isClicked, setIsClicked] = useState(null);
   const [showError, setShowError] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const wrappedNavigate = navigateWithLoading
     ? navigateWithLoading(navigate)
@@ -165,6 +175,18 @@ function Configurator({ navigateWithLoading }) {
       setAddons(state?.configData?.addons || []);
     }
   }, [showAddOns, state?.configData]);
+
+  useEffect(() => {
+    // Calculate total price whenever selections or add-ons change
+    let price = parseFloat(instrument?.base_price || 0);
+    Object.values(selections).forEach((opt) => {
+      price += parseFloat(opt?.price || 0);
+    });
+    selectedAddOns.forEach((addon) => {
+      price += parseFloat(addon?.price || 0);
+    });
+    setTotalPrice(price);
+  }, [selections, selectedAddOns, instrument]);
 
   const handleSelect = (fieldId, option) => {
     if (option) {
@@ -258,6 +280,42 @@ function Configurator({ navigateWithLoading }) {
     acc[typeName].push(addon);
     return acc;
   }, {});
+
+  // Calculate price breakdown
+  const priceBreakdown = [
+    { label: "Base Price", value: parseFloat(instrument?.base_price || 0) },
+    { label: "Selected Requirements:", value: null },
+    ...fields
+      .filter((field) => selections[field.id])
+      .map((field) => {
+        const opt = selections[field.id];
+        return {
+          label: `${field.name}: ${opt.label} (${opt.code})`,
+          value: parseFloat(opt?.price || 0),
+        };
+      }),
+    ...(selectedAddOns.length > 0
+      ? [
+          { label: "Selected Add-ons:", value: null },
+          ...Object.entries(
+            selectedAddOns.reduce((acc, addon) => {
+              const typeName = addon.addon_type.name;
+              if (!acc[typeName]) acc[typeName] = [];
+              acc[typeName].push(addon);
+              return acc;
+            }, {})
+          )
+            .sort()
+            .flatMap(([typeName, addons]) => [
+              { label: `${typeName}:`, value: null },
+              ...addons.map((addon) => ({
+                label: `${addon.label} (${addon.code})`,
+                value: parseFloat(addon?.price || 0),
+              })),
+            ]),
+        ]
+      : []),
+  ];
 
   if (loading) {
     return (
@@ -397,6 +455,88 @@ function Configurator({ navigateWithLoading }) {
               >
                 Product Code: {codeSegments.join("")}
               </Typography>
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ mt: 2 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "#000000",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Selection Summary
+                </Typography>
+                {priceBreakdown.map((item, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      mt: 1,
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif",
+                        color:
+                          item.label === "Selected Requirements:" ||
+                          item.label === "Selected Add-ons:" ||
+                          item.label.endsWith(":")
+                            ? "#000000"
+                            : "#333",
+                        fontWeight:
+                          item.label === "Selected Requirements:" ||
+                          item.label === "Selected Add-ons:" ||
+                          item.label.endsWith(":")
+                            ? "bold"
+                            : "normal",
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                    {item.value !== null && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif",
+                          fontWeight: "bold",
+                          color: "#000000",
+                        }}
+                      >
+                        {formatPrice(item.value)}
+                      </Typography>
+                    )}
+                  </Box>
+                ))}
+                <Divider sx={{ my: 2 }} />
+                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: "bold",
+                      fontFamily: "Helvetica, sans-serif",
+                      color: "#0a5",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Total Price
+                  </Typography>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: "bold",
+                      fontFamily: "Helvetica, sans-serif",
+                      color: "#0a5",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {formatPrice(totalPrice)}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
 
             {isImageEnlarged && (
@@ -561,7 +701,8 @@ function Configurator({ navigateWithLoading }) {
                                         >
                                           {opt.code}
                                         </Box>
-                                        {opt.label}
+                                        {opt.label} (
+                                        {formatPrice(opt.price || 0)})
                                       </Box>
                                     </MenuItem>
                                   ))}
@@ -705,7 +846,8 @@ function Configurator({ navigateWithLoading }) {
                                       >
                                         {addon.code}
                                       </Box>
-                                      {addon.label}
+                                      {addon.label} (
+                                      {formatPrice(addon.price || 0)})
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -739,6 +881,7 @@ function Configurator({ navigateWithLoading }) {
                             selections,
                             selectedAddOns,
                             productCode: codeSegments.join(""),
+                            totalPrice: totalPrice.toFixed(2),
                           }
                         )
                       }

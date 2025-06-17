@@ -7,19 +7,17 @@
   --border-color: #cccccc;
 }
 
-.configurator-page {
+.quotation-form-page {
   background-color: var(--background-color);
   min-height: 100vh;
   padding-bottom: 48px;
 }
 
 .instrument-image {
-  width: 400px;
-  height: 400px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
-  border-radius: 12px;
-  display: block;
-  flex-shrink: 0;
+  border-radius: 8px;
   cursor: pointer;
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
@@ -27,99 +25,4 @@
 .instrument-image:hover {
   transform: scale(1.05);
   opacity: 0.95;
-}
-
-.image-fallback {
-  width: 250px;
-  height: 250px;
-  border-radius: 12px;
-}
-
-.image-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  transition: opacity 0.3s ease;
-}
-
-.enlarged-image-container {
-  position: relative;
-  max-width: 90%;
-  max-height: 90%;
-}
-
-.enlarged-image {
-  width: 600px;
-  height: 600px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease;
-}
-
-.enlarged-image:hover {
-  transform: scale(1.02);
-}
-
-.close-button {
-  position: absolute;
-  top: -16px;
-  right: -16px;
-  background-color: var(--primary-color);
-  color: #ffffff;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  transition: background-color 0.3s ease;
-}
-
-.close-button:hover {
-  background-color: var(--secondary-color);
-}
-
-.field-item {
-  padding: 16px;
-  background-color: var(--card-background);
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  transition: box-shadow 0.3s ease;
-}
-
-.field-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.addon-item {
-  transition: background-color 0.3s ease;
-}
-
-@media (max-width: 600px) {
-  .instrument-image,
-  .image-fallback {
-    width: 200px;
-    height: 400px;
-  }
-
-  .enlarged-image {
-    width: 400px;
-    height: 400px;
-  }
-
-  .field-item,
-  .addon-item {
-    padding: 12px;
-  }
 }

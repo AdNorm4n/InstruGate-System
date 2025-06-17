@@ -53,11 +53,12 @@ class InstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ['id', 'name', 'type', 'type_id', 'category', 'category_id', 'description', 'specifications', 'image', 'is_available', 'created_at']
+        fields = ['id', 'name', 'type', 'type_id', 'category', 'category_id', 'base_price', 'description', 'specifications', 'image', 'is_available', 'created_at']
         read_only_fields = ['created_at']
         extra_kwargs = {
             'name': {'required': True, 'allow_blank': False},
             'type_id': {'required': True},
+            'base_price': {'required': True, 'allow_null': False},
             'image': {'required': False, 'allow_null': True},
             'description': {'required': False, 'allow_blank': True},
             'specifications': {'required': False, 'allow_blank': True},
@@ -70,11 +71,12 @@ class FieldOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FieldOption
-        fields = ['id', 'field', 'label', 'code']
+        fields = ['id', 'field', 'label', 'code', 'price']
         extra_kwargs = {
             'field': {'required': True},
             'label': {'required': True, 'allow_blank': False},
-            'code': {'required': True, 'allow_blank': False}
+            'code': {'required': True, 'allow_blank': False},
+            'price': {'required': True, 'allow_null': False}
         }
 
 # Configurable Field Serializer
@@ -113,13 +115,15 @@ class AddOnSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AddOn
-        fields = ['id', 'addon_type', 'addon_type_id', 'label', 'code']
+        fields = ['id', 'addon_type', 'addon_type_id', 'label', 'code', 'price']
         extra_kwargs = {
             'addon_type_id': {'required': True},
             'label': {'required': True, 'allow_blank': False},
-            'code': {'required': True, 'allow_blank': False}
+            'code': {'required': True, 'allow_blank': False},
+            'price': {'required': False, 'allow_null': True}
         }
 
+# Quotation Item Selection Serializer
 class QuotationItemSelectionSerializer(serializers.ModelSerializer):
     field_option = FieldOptionSerializer(read_only=True)
     field_option_id = serializers.PrimaryKeyRelatedField(
@@ -137,6 +141,7 @@ class QuotationItemSelectionSerializer(serializers.ModelSerializer):
         print("QuotationItemSelectionSerializer validate:", data)
         return data
 
+# Quotation Item AddOn Serializer
 class QuotationItemAddOnSerializer(serializers.ModelSerializer):
     addon = AddOnSerializer(read_only=True)
     addon_id = serializers.PrimaryKeyRelatedField(
@@ -154,6 +159,7 @@ class QuotationItemAddOnSerializer(serializers.ModelSerializer):
         print("QuotationItemAddOnSerializer validate:", data)
         return data
 
+# Quotation Item Serializer
 class QuotationItemSerializer(serializers.ModelSerializer):
     instrument = InstrumentSerializer(read_only=True)
     instrument_id = serializers.PrimaryKeyRelatedField(
@@ -161,10 +167,14 @@ class QuotationItemSerializer(serializers.ModelSerializer):
     )
     selections = QuotationItemSelectionSerializer(many=True, required=False)
     addons = QuotationItemAddOnSerializer(many=True, required=False)
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, obj):
+        return obj.calculate_total_price()
 
     class Meta:
         model = QuotationItem
-        fields = ['id', 'product_code', 'quantity', 'instrument', 'instrument_id', 'selections', 'addons']
+        fields = ['id', 'product_code', 'quantity', 'instrument', 'instrument_id', 'selections', 'addons', 'total_price']
         extra_kwargs = {
             'product_code': {'required': True, 'allow_blank': False},
             'quantity': {'required': True},
@@ -201,21 +211,40 @@ class QuotationSerializer(serializers.ModelSerializer):
         queryset=User.objects.all(), source='created_by', write_only=True
     )
     created_by_first_name = serializers.SerializerMethodField()
+    reviewed_by = UserSerializer(read_only=True)
+    reviewed_by_name = serializers.SerializerMethodField()
+    total_price = serializers.SerializerMethodField()
+
+    def get_created_by_first_name(self, obj):
+        if not obj.created_by:
+            return "N/A"
+        first_name = obj.created_by.first_name or obj.created_by.username
+        username = obj.created_by.username
+        return f"{first_name} ({username})"
+
+    def get_reviewed_by_name(self, obj):
+        if not obj.reviewed_by:
+            return "N/A"
+        first_name = obj.reviewed_by.first_name or obj.reviewed_by.username
+        username = obj.reviewed_by.username
+        return f"{first_name} ({username})"
+
+    def get_total_price(self, obj):
+        return obj.calculate_total_price()
 
     class Meta:
         model = Quotation
         fields = [
             'id', 'created_by', 'created_by_id', 'created_by_first_name', 'company', 'project_name', 'status',
-            'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at', 'items'
+            'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'reviewed_by', 'reviewed_by_name', 
+            'emailed_at', 'updated_at', 'items', 'total_price'
         ]
-        read_only_fields = ['id', 'created_at', 'created_by_id', 'created_by_first_name', 'submitted_at', 'updated_at']
+        read_only_fields = ['id', 'submitted_at', 'approved_at', 'rejected_at', 'reviewed_by', 'emailed_at', 'updated_at']
         extra_kwargs = {
+            'created_by_id': {'required': True},
             'company': {'required': True, 'allow_blank': False},
             'project_name': {'required': True, 'allow_blank': False}
         }
-
-    def get_created_by_first_name(self, obj):
-        return obj.created_by.first_name if obj.created_by.first_name else "N/A"
 
     def validate(self, data):
         print("QuotationSerializer validate:", data)
@@ -239,16 +268,33 @@ class QuotationSerializer(serializers.ModelSerializer):
         if status == 'approved' and instance.status != 'approved':
             instance.approved_at = timezone.now()
             instance.rejected_at = None
+            instance.reviewed_by = self.context['request'].user
         elif status == 'rejected' and instance.status != 'rejected':
             instance.rejected_at = timezone.now()
             instance.approved_at = None
+            instance.reviewed_by = self.context['request'].user
+        elif status == 'submitted' and instance.status != 'submitted':
+            instance.emailed_at = timezone.now()
+            instance.approved_at = instance.approved_at  # Preserve approved_at
         instance.status = status
         instance.remarks = remarks
         instance.save()
         print("Updated quotation:", instance.id, "Status:", instance.status, 
-              "Approved at:", instance.approved_at, "Rejected at:", instance.rejected_at)
+              "Approved at:", instance.approved_at, "Rejected at:", instance.rejected_at,
+              "Reviewed by:", instance.reviewed_by, "Emailed at:", instance.emailed_at)
         return instance
+class QuotationReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quotation
+        fields = ['id', 'status', 'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'reviewed_by', 'emailed_at']
+        read_only_fields = ['id', 'submitted_at', 'reviewed_by', 'emailed_at']
 
+    def validate(self, data):
+        if data.get('status') == 'rejected' and not data.get('remarks'):
+            raise serializers.ValidationError({"remarks": "Remarks are required when rejecting a quotation."})
+        return data
+
+# Quotation Review Serializer
 class QuotationReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quotation
@@ -260,6 +306,7 @@ class QuotationReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"remarks": "Remarks are required when rejecting a quotation."})
         return data
 
+# Instrument Config Serializer
 class InstrumentConfigSerializer(serializers.ModelSerializer):
     fields = ConfigurableFieldSerializer(many=True, read_only=True)
     addons = serializers.SerializerMethodField()
@@ -272,6 +319,7 @@ class InstrumentConfigSerializer(serializers.ModelSerializer):
         addons = AddOn.objects.filter(addon_type__in=obj.addon_types.all())
         return AddOnSerializer(addons, many=True).data
 
+# Admin Category Serializer
 class AdminCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -280,6 +328,7 @@ class AdminCategorySerializer(serializers.ModelSerializer):
             'name': {'required': True, 'allow_blank': False}
         }
 
+# Admin Instrument Type Serializer
 class AdminInstrumentTypeSerializer(serializers.ModelSerializer):
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), source='category'
@@ -293,6 +342,7 @@ class AdminInstrumentTypeSerializer(serializers.ModelSerializer):
             'category_id': {'required': True}
         }
 
+# Admin Instrument Serializer
 class AdminInstrumentSerializer(serializers.ModelSerializer):
     type_id = serializers.PrimaryKeyRelatedField(
         queryset=InstrumentType.objects.all(), source='type'
@@ -302,16 +352,18 @@ class AdminInstrumentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Instrument
-        fields = ['id', 'name', 'type_id', 'type', 'category', 'description', 'specifications', 'image', 'is_available']
+        fields = ['id', 'name', 'type_id', 'type', 'category', 'base_price', 'description', 'specifications', 'image', 'is_available']
         extra_kwargs = {
             'name': {'required': True, 'allow_blank': False},
             'type_id': {'required': True},
+            'base_price': {'required': True, 'allow_null': False},
             'description': {'required': False, 'allow_blank': True},
             'specifications': {'required': False, 'allow_blank': True},
             'image': {'required': False, 'allow_null': True},
             'is_available': {'required': False}
         }
 
+# Admin Configurable Field Serializer
 class AdminConfigurableFieldSerializer(serializers.ModelSerializer):
     instrument_id = serializers.PrimaryKeyRelatedField(
         queryset=Instrument.objects.all(), source='instrument'
@@ -330,6 +382,7 @@ class AdminConfigurableFieldSerializer(serializers.ModelSerializer):
             'trigger_value': {'required': False, 'allow_blank': True, 'allow_null': True}
         }
 
+# Admin Field Option Serializer
 class AdminFieldOptionSerializer(serializers.ModelSerializer):
     field_id = serializers.PrimaryKeyRelatedField(
         queryset=ConfigurableField.objects.all(), source='field'
@@ -337,13 +390,15 @@ class AdminFieldOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FieldOption
-        fields = ['id', 'field_id', 'label', 'code']
+        fields = ['id', 'field_id', 'label', 'code', 'price']
         extra_kwargs = {
             'field_id': {'required': True},
             'label': {'required': True, 'allow_blank': False},
-            'code': {'required': True, 'allow_blank': False}
+            'code': {'required': True, 'allow_blank': False},
+            'price': {'required': True, 'allow_null': False}
         }
 
+# Admin AddOn Type Serializer
 class AdminAddOnTypeSerializer(serializers.ModelSerializer):
     instrument_ids = serializers.PrimaryKeyRelatedField(
         queryset=Instrument.objects.all(), source='instruments', many=True, required=False
@@ -356,6 +411,7 @@ class AdminAddOnTypeSerializer(serializers.ModelSerializer):
             'name': {'required': True, 'allow_blank': False}
         }
 
+# Admin AddOn Serializer
 class AdminAddOnSerializer(serializers.ModelSerializer):
     addon_type_id = serializers.PrimaryKeyRelatedField(
         queryset=AddOnType.objects.all(), source='addon_type'
@@ -363,13 +419,15 @@ class AdminAddOnSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AddOn
-        fields = ['id', 'addon_type_id', 'label', 'code']
+        fields = ['id', 'addon_type_id', 'label', 'code', 'price']
         extra_kwargs = {
             'addon_type_id': {'required': True},
             'label': {'required': True, 'allow_blank': False},
-            'code': {'required': True, 'allow_blank': False}
+            'code': {'required': True, 'allow_blank': False},
+            'price': {'required': False, 'allow_null': True}
         }
 
+# Admin Quotation Serializer
 class AdminQuotationSerializer(serializers.ModelSerializer):
     created_by_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source='created_by'
@@ -392,25 +450,21 @@ class AdminQuotationSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         print("AdminQuotationSerializer.update validated_data:", validated_data)
-        # Update status and remarks
         status = validated_data.get('status', instance.status)
         remarks = validated_data.get('remarks', instance.remarks)
-
-        # Set approved_at or rejected_at based on status
         if status == 'approved' and instance.status != 'approved':
             instance.approved_at = timezone.now()
-            instance.rejected_at = None  # Clear rejected_at
+            instance.rejected_at = None
         elif status == 'rejected' and instance.status != 'rejected':
             instance.rejected_at = timezone.now()
-            instance.approved_at = None  # Clear approved_at
-
-        # Update fields
+            instance.approved_at = None
         instance.status = status
         instance.remarks = remarks
         instance.save()
         print(f"Updated Quotation {instance.id}: Status: {instance.status}, Approved at: {instance.approved_at}, Rejected at: {instance.rejected_at}")
         return instance
 
+# Admin Quotation Item Serializer
 class AdminQuotationItemSerializer(serializers.ModelSerializer):
     quotation_id = serializers.PrimaryKeyRelatedField(
         queryset=Quotation.objects.all(), source='quotation'
@@ -429,6 +483,7 @@ class AdminQuotationItemSerializer(serializers.ModelSerializer):
             'instrument_id': {'required': True}
         }
 
+# Admin Quotation Item Selection Serializer
 class AdminQuotationItemSelectionSerializer(serializers.ModelSerializer):
     quotation_item_id = serializers.PrimaryKeyRelatedField(
         queryset=QuotationItem.objects.all(), source='quotation_item'
@@ -445,6 +500,7 @@ class AdminQuotationItemSelectionSerializer(serializers.ModelSerializer):
             'field_option_id': {'required': True}
         }
 
+# Admin Quotation Item AddOn Serializer
 class AdminQuotationItemAddOnSerializer(serializers.ModelSerializer):
     quotation_item_id = serializers.PrimaryKeyRelatedField(
         queryset=QuotationItem.objects.all(), source='quotation_item'

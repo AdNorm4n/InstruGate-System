@@ -19,6 +19,7 @@ class InstrumentTypeAdmin(admin.ModelAdmin):
 class FieldOptionInline(admin.TabularInline):
     model = FieldOption
     extra = 1
+    fields = ["label", "code", "price"]
 
 class ConfigurableFieldInline(admin.StackedInline):
     model = ConfigurableField
@@ -35,7 +36,7 @@ class ConfigurableFieldAdmin(admin.ModelAdmin):
 
 @admin.register(Instrument)
 class InstrumentAdmin(admin.ModelAdmin):
-    list_display = ["name", "type", "is_available", "created_at"]
+    list_display = ["name", "type", "is_available", "base_price", "created_at"]
     list_filter = ["type", "type__category", "is_available"]
     search_fields = ["name", "type__name", "specifications"]
     readonly_fields = ["created_at"]
@@ -43,7 +44,7 @@ class InstrumentAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ("Basic Info", {
-            "fields": ("name", "type", "is_available")
+            "fields": ("name", "type", "base_price", "is_available")
         }),
         ("Instrument Description", {
             "fields": ("description", "specifications")
@@ -68,7 +69,7 @@ class AddOnTypeAdmin(admin.ModelAdmin):
 
 @admin.register(AddOn)
 class AddOnAdmin(admin.ModelAdmin):
-    list_display = ["label", "code", "addon_type"]
+    list_display = ["label", "code", "addon_type" , "price"]
     list_filter = ["addon_type"]
     search_fields = ["label", "code"]
 
@@ -87,28 +88,49 @@ class QuotationItemAddOnInline(admin.TabularInline):
 class QuotationItemInline(admin.TabularInline):
     model = QuotationItem
     extra = 0
-    fields = ['product_code', 'quantity', 'instrument']
-    readonly_fields = ['product_code', 'quantity', 'instrument']
+    fields = ['product_code', 'quantity', 'instrument', 'total_price_display']
+    readonly_fields = ['product_code', 'quantity', 'instrument', 'total_price_display']
     inlines = [QuotationItemSelectionInline, QuotationItemAddOnInline]
+
+    def total_price_display(self, obj):
+        return f"RM {obj.calculate_total_price():,.2f}"
+    total_price_display.short_description = "Total Price (RM)"
 
 @admin.register(Quotation)
 class QuotationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_by', 'company', 'project_name', 'status', 'submitted_at', 'rejected_at', 'approved_at', 'updated_at']
-    list_filter = ['status', 'created_by__role']
-    search_fields = ['id', 'company', 'created_by__username']
+    list_display = [
+        'id', 'created_by', 'company', 'project_name', 'status',
+        'submitted_at', 'rejected_at', 'approved_at', 'reviewed_by', 'emailed_at', 'updated_at',
+        'total_quotation_price'
+    ]
+    list_filter = ['status', 'created_by__role', 'reviewed_by']
+    search_fields = ['id', 'company', 'created_by__username', 'reviewed_by__username']
     inlines = [QuotationItemInline]
+
     fieldsets = (
         (None, {'fields': ('created_by', 'company', 'project_name')}),
-        (_('Review'), {'fields': ('status', 'remarks')}),
+        (_('Review'), {'fields': ('status', 'remarks', 'reviewed_by')}),
+        (_('Timestamps'), {'fields': ('submitted_at', 'approved_at', 'rejected_at', 'emailed_at')}),
+        (_('Summary'), {'fields': ('total_quotation_price',)}), 
     )
-    readonly_fields = ['submitted_at', 'rejected_at', 'approved_at', 'updated_at']
-    actions = ['approve_quotation', 'reject_quotation']
+
+    readonly_fields = [
+        'submitted_at', 'rejected_at', 'approved_at', 'reviewed_by', 'emailed_at', 'updated_at',
+        'total_quotation_price'  
+    ]
+    
+    actions = ['submit_quotation', 'approve_quotation', 'reject_quotation']
 
     def has_view_or_change_permission(self, request, obj=None):
         return request.user.is_authenticated and request.user.role in ['proposal_engineer', 'admin']
 
+    def submit_quotation(self, request, queryset):
+        queryset.update(status='submitted', emailed_at=timezone.now())
+        self.message_user(request, "Quotations have been marked as submitted.")
+    submit_quotation.short_description = "Mark quotations as submitted"
+
     def approve_quotation(self, request, queryset):
-        queryset.update(status='approved', remarks='', approved_at=timezone.now())
+        queryset.update(status='approved', remarks='', approved_at=timezone.now(), reviewed_by=request.user)
         self.message_user(request, "Quotations have been approved.")
     approve_quotation.short_description = "Approve quotations"
 
@@ -117,6 +139,42 @@ class QuotationAdmin(admin.ModelAdmin):
         if not remarks:
             self.message_user(request, "Please provide remarks for rejection.", level='error')
             return
-        queryset.update(status='rejected', remarks=remarks, rejected_at=timezone.now())
+        queryset.update(status='rejected', remarks=remarks, rejected_at=timezone.now(), reviewed_by=request.user)
         self.message_user(request, "Quotations have been rejected with remarks.")
     reject_quotation.short_description = "Reject quotations with remarks"
+
+    def total_quotation_price(self, obj):
+        return f"RM {obj.calculate_total_price():,.2f}"
+    total_quotation_price.short_description = "Total Quotation Price (RM)"
+
+@admin.register(QuotationItem)
+class QuotationItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'quotation', 'product_code', 'instrument', 'quantity', 'total_price_display']
+    readonly_fields = ['quotation', 'product_code', 'instrument', 'quantity', 'total_price_display', 'field_options_list', 'addons_list']
+    fieldsets = (
+        (None, {
+            'fields': ('quotation', 'product_code', 'instrument', 'quantity', 'total_price_display')
+        }),
+        ('Selected Field Options', {
+            'fields': ('field_options_list',),
+        }),
+        ('Selected Add-Ons', {
+            'fields': ('addons_list',),
+        }),
+    )
+
+    def total_price_display(self, obj):
+        return f"RM {obj.calculate_total_price():,.2f}"
+    total_price_display.short_description = "Total Price (RM)"
+
+    def field_options_list(self, obj):
+        if not obj.selections.exists():
+            return "-"
+        return "\n".join([f"{sel.field_option.label} (RM {sel.field_option.price})" for sel in obj.selections.all()])
+    field_options_list.short_description = "Field Options"
+
+    def addons_list(self, obj):
+        if not obj.addons.exists():
+            return "-"
+        return "\n".join([f"{addon.addon.label} (RM {addon.addon.price})" for addon in obj.addons.all()])
+    addons_list.short_description = "Add-Ons"
