@@ -216,7 +216,7 @@ const AdminPanel = () => {
     totalProjects: 0,
     totalQuotations: 0,
     totalInstrumentsAvailable: 0,
-    quotationStatuses: { pending: 0, approved: 0, rejected: 0 },
+    quotationStatuses: { pending: 0, approved: 0, rejected: 0, submitted: 0 },
   });
 
   useEffect(() => {
@@ -264,7 +264,12 @@ const AdminPanel = () => {
           totalProjects: 0,
           totalQuotations: 0,
           totalInstrumentsAvailable: 0,
-          quotationStatuses: { pending: 0, approved: 0, rejected: 0 },
+          quotationStatuses: {
+            pending: 0,
+            approved: 0,
+            rejected: 0,
+            submitted: 0,
+          },
         };
         const errors = [];
 
@@ -280,16 +285,23 @@ const AdminPanel = () => {
             newMetrics.totalUsers = data.length;
           } else if (index === 1) {
             newMetrics.totalQuotations = data.length;
-            const companies = new Set(data.map((q) => q.company));
-            const projects = new Set(data.map((q) => q.project_name));
+            const companies = new Set(data.map((q) => q?.company || ""));
+            const projects = new Set(data.map((q) => q?.project_name || ""));
             newMetrics.totalCompanies = companies.size;
             newMetrics.totalProjects = projects.size;
             newMetrics.quotationStatuses = data.reduce(
               (acc, q) => {
-                acc[q.status] = (acc[q.status] || 0) + 1;
+                const status = q?.status || "unknown";
+                if (
+                  ["pending", "approved", "rejected", "submitted"].includes(
+                    status
+                  )
+                ) {
+                  acc[status] = (acc[status] || 0) + 1;
+                }
                 return acc;
               },
-              { pending: 0, approved: 0, rejected: 0 }
+              { pending: 0, approved: 0, rejected: 0, submitted: 0 }
             );
           } else if (index === 2) {
             newMetrics.totalInstrumentsAvailable = data.length;
@@ -350,30 +362,20 @@ const AdminPanel = () => {
   ];
 
   const chartData = {
-    labels: ["Pending", "Approved", "Rejected"],
+    labels: ["Pending", "Approved", "Rejected", "Submitted"],
     datasets: [
       {
         label: "Quotation Statuses",
         data: [
-          metrics.quotationStatuses.pending,
-          metrics.quotationStatuses.approved,
-          metrics.quotationStatuses.rejected,
+          metrics.quotationStatuses.pending || 0,
+          metrics.quotationStatuses.approved || 0,
+          metrics.quotationStatuses.rejected || 0,
+          metrics.quotationStatuses.submitted || 0,
         ],
-        backgroundColor: [
-          "linear-gradient(180deg, #FFE082 0%, #FFCE56 100%)",
-          "linear-gradient(180deg, #66BB6A 0%, #388E3C 100%)",
-          "linear-gradient(180deg, #F06292 0%, #d6393a 100%)",
-        ].map((gradient) => {
-          const ctx = document.createElement("canvas").getContext("2d");
-          const grad = ctx.createLinearGradient(0, 0, 0, 400);
-          const [start, end] = gradient.match(/#[0-9A-Fa-f]{6}/g);
-          grad.addColorStop(0, start);
-          grad.addColorStop(1, end);
-          return grad;
-        }),
-        borderColor: ["#B8860B", "#2E7D32", "#AD1457"],
+        backgroundColor: ["#FFE082", "#66BB6A", "#F06292", "#64B5F6"],
+        borderColor: ["#B8860B", "#2E7D32", "#AD1457", "#1565C0"],
         borderWidth: 1,
-        borderRadius: 6,
+        borderRadius: 4,
       },
     ],
   };
@@ -381,13 +383,10 @@ const AdminPanel = () => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    barPercentage: 0.4,
-    categoryPercentage: 0.7,
+    barPercentage: 0.3,
+    categoryPercentage: 0.6,
     layout: {
-      padding: {
-        left: 30,
-        right: 30,
-      },
+      padding: { left: 30, right: 30 },
     },
     plugins: {
       legend: {
@@ -401,11 +400,7 @@ const AdminPanel = () => {
       title: {
         display: true,
         text: "Quotation Status Distribution",
-        font: {
-          family: "Helvetica, sans-serif",
-          size: 22,
-          weight: "bold",
-        },
+        font: { family: "Helvetica, sans-serif", size: 22, weight: "bold" },
         color: "#000000",
         padding: { top: 15, bottom: 35 },
       },
@@ -476,8 +471,10 @@ const AdminPanel = () => {
               <Alert severity="error" sx={{ borderRadius: 2 }}>
                 <Typography
                   variant="body1"
-                  fontFamily="Helvetica, sans-serif"
-                  fontSize="0.9rem"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    fontSize: "0.9rem",
+                  }}
                 >
                   {error}
                 </Typography>
@@ -510,7 +507,7 @@ const AdminPanel = () => {
                 align="center"
                 gutterBottom
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   fontWeight: "bold",
                   color: "#000000",
                   textTransform: "uppercase",
@@ -525,7 +522,7 @@ const AdminPanel = () => {
                 variant="body1"
                 align="center"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   color: "#333",
                   mb: 6,
                   fontSize: "0.9rem",
@@ -538,9 +535,11 @@ const AdminPanel = () => {
                   <Alert severity="warning" sx={{ borderRadius: 2 }}>
                     <Typography
                       variant="body1"
-                      fontFamily="Helvetica, sans-serif"
-                      fontSize="0.9rem"
-                      lineHeight={1.6}
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif",
+                        fontSize: "0.9rem",
+                        lineHeight: 1.6,
+                      }}
                     >
                       Some metrics could not be loaded:
                     </Typography>
@@ -549,9 +548,11 @@ const AdminPanel = () => {
                         <li key={index}>
                           <Typography
                             variant="body2"
-                            fontFamily="Helvetica, sans-serif"
-                            fontSize="0.9rem"
-                            lineHeight={1.6}
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              fontSize: "0.9rem",
+                              lineHeight: 1.6,
+                            }}
                           >
                             {err}
                           </Typography>

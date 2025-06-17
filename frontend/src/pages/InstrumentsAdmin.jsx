@@ -123,11 +123,18 @@ const InstrumentsAdmin = () => {
   });
   const [activeTab, setActiveTab] = useState(0);
   const [fieldOptions, setFieldOptions] = useState([]);
-  const [newOption, setNewOption] = useState({ label: "", code: "" });
+  const [newOption, setNewOption] = useState({
+    label: "",
+    code: "",
+    price: "",
+  });
   const [filterInstrumentId, setFilterInstrumentId] = useState("");
   const [filterCategoryId, setFilterCategoryId] = useState("");
   const [addonOptions, setAddonOptions] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const tabs = [
     {
@@ -138,12 +145,14 @@ const InstrumentsAdmin = () => {
         "name",
         "type.name",
         "category.name",
+        "base_price",
         "image",
         "is_available",
       ],
       writableFields: [
         "name",
         "type_id",
+        "base_price",
         "description",
         "specifications",
         "image",
@@ -156,6 +165,7 @@ const InstrumentsAdmin = () => {
         name: "Name",
         "type.name": "Type",
         "category.name": "Category",
+        base_price: "Base Price (RM)",
         image: "Image",
         is_available: "Available",
       },
@@ -219,12 +229,13 @@ const InstrumentsAdmin = () => {
       const responses = await Promise.all(
         endpoints.map((endpoint) =>
           api.get(endpoint, { headers }).catch((err) => {
-            console.error(
-              `Error fetching ${endpoint}:`,
-              err.response?.data || err.message
+            setError(
+              `Error fetching ${endpoint}: ${
+                err.response?.data?.detail || "Network error"
+              }`
             );
             return {
-              error: err.response?.data?.detail || err.message,
+              error: err.response?.data?.detail || "Network error",
               data: [],
             };
           })
@@ -240,7 +251,6 @@ const InstrumentsAdmin = () => {
         types: Array.isArray(responses[3].data) ? responses[3].data : [],
         categories: Array.isArray(responses[4].data) ? responses[4].data : [],
       };
-      console.log("Fetched Data:", newData);
       setData(newData);
       setFilteredData({
         instruments: newData.instruments,
@@ -253,7 +263,6 @@ const InstrumentsAdmin = () => {
         setError("Some data could not be loaded. Please try again.");
       }
     } catch (err) {
-      console.error("fetchData Error:", err, err.response?.data);
       setError(
         `Error loading data: ${err.response?.data?.detail || err.message}`
       );
@@ -308,8 +317,11 @@ const InstrumentsAdmin = () => {
       const fieldA = getField(a, sortConfig.field) || "";
       const fieldB = getField(b, sortConfig.field) || "";
       const multiplier = sortConfig.direction === "asc" ? 1 : -1;
-      if (sortConfig.field === "id") {
-        return multiplier * ((a?.id || 0) - (b?.id || 0));
+      if (sortConfig.field === "id" || sortConfig.field === "base_price") {
+        return (
+          multiplier *
+          ((a?.[sortConfig.field] || 0) - (b?.[sortConfig.field] || 0))
+        );
       }
       return multiplier * fieldA.toString().localeCompare(fieldB.toString());
     });
@@ -317,8 +329,6 @@ const InstrumentsAdmin = () => {
     filtered = Array.from(
       new Map(filtered.map((item) => [item.id, item])).values()
     );
-
-    console.log(`Filtered ${tab.name}:`, filtered);
 
     setFilteredData((prev) => ({
       ...prev,
@@ -342,6 +352,9 @@ const InstrumentsAdmin = () => {
         .filter(Boolean)
         .join(", ");
       return instrumentNames || "N/A";
+    }
+    if (field === "base_price") {
+      return obj[field] ? `RM ${parseFloat(obj[field]).toFixed(2)}` : "N/A";
     }
     if (field.includes(".")) {
       const [key, subKey] = field.split(".");
@@ -387,7 +400,7 @@ const InstrumentsAdmin = () => {
     setModalType(tabs[activeTab].name);
     setFieldOptions([]);
     setAddonOptions([]);
-    setNewOption({ label: "", code: "" });
+    setNewOption({ label: "", code: "", price: "" });
     setImagePreview(null);
     setOpenModal(true);
   };
@@ -425,17 +438,15 @@ const InstrumentsAdmin = () => {
         setAddonOptions(addons);
       }
     } catch (err) {
-      console.error(
-        "Error fetching options:",
-        err.response?.data || err.message
-      );
       setError(
-        `Failed to load options: ${err.response?.data?.detail || err.message}`
+        `Failed to load options: ${
+          err.response?.data?.detail || "Network error"
+        }`
       );
       setFieldOptions([]);
       setAddonOptions([]);
     }
-    setNewOption({ label: "", code: "" });
+    setNewOption({ label: "", code: "", price: "" });
     setOpenModal(true);
   };
 
@@ -445,7 +456,7 @@ const InstrumentsAdmin = () => {
     setModalType("");
     setFieldOptions([]);
     setAddonOptions([]);
-    setNewOption({ label: "", code: "" });
+    setNewOption({ label: "", code: "", price: "" });
     setImagePreview(null);
     setError("");
   };
@@ -512,6 +523,7 @@ const InstrumentsAdmin = () => {
         const formData = new FormData();
         formData.append("name", modalData.name || "");
         if (modalData.type_id) formData.append("type_id", modalData.type_id);
+        formData.append("base_price", modalData.base_price || 0);
         formData.append("description", modalData.description || "");
         formData.append("specifications", modalData.specifications || "");
         formData.append(
@@ -526,17 +538,12 @@ const InstrumentsAdmin = () => {
           formData.append("image", "");
         }
 
-        for (let [key, value] of formData.entries()) {
-          console.log(`FormData Entry: ${key}=${value}`);
-        }
-
         const response = await api({
           method,
           url: endpoint,
           data: formData,
           headers,
         });
-        console.log("Save Response:", response.data);
         setSuccess(
           `${modalType} ${
             modalAction === "add" ? "added" : "updated"
@@ -566,7 +573,6 @@ const InstrumentsAdmin = () => {
               : [],
           };
         }
-        console.log(`${modalType} Payload:`, payload);
         headers["Content-Type"] = "application/json";
         const response = await api({
           method,
@@ -574,7 +580,6 @@ const InstrumentsAdmin = () => {
           data: payload,
           headers,
         });
-        console.log("Save Response:", response.data);
         setSuccess(
           `${modalType} ${
             modalAction === "add" ? "added" : "updated"
@@ -584,22 +589,22 @@ const InstrumentsAdmin = () => {
       fetchData();
       handleModalClose();
     } catch (err) {
-      console.error("Error Response:", err.response?.data || err);
       const errorMessage =
         err.response?.data?.name?.[0] ||
         err.response?.data?.type_id?.[0] ||
+        err.response?.data?.base_price?.[0] ||
         err.response?.data?.instrument_id?.[0] ||
         err.response?.data?.image?.[0] ||
         err.response?.data?.detail ||
         Object.values(err.response?.data || {})[0]?.[0] ||
-        err.message;
+        "Network error";
       setError(`Failed to save ${modalType}: ${errorMessage}`);
     }
   };
 
   const handleAddFieldOption = async () => {
-    if (!newOption.label || !newOption.code) {
-      setError("Label and code are required for field options.");
+    if (!newOption.label || !newOption.code || !newOption.price) {
+      setError("Label, code, and price are required for field options.");
       return;
     }
     try {
@@ -609,28 +614,28 @@ const InstrumentsAdmin = () => {
         field_id: modalData.id,
         label: newOption.label,
         code: newOption.code,
+        price: parseFloat(newOption.price) || 0,
       };
       const response = await api.post("/api/admin/field-options/", payload, {
         headers,
       });
       setFieldOptions([...fieldOptions, response.data]);
-      setNewOption({ label: "", code: "" });
+      setNewOption({ label: "", code: "", price: "" });
       setSuccess("Field option added successfully!");
     } catch (err) {
-      console.error("Error Adding FieldOption:", err.response?.data);
       setError(
         `Failed to add field option: ${
           err.response?.data?.detail ||
           Object.values(err.response?.data || {})[0]?.[0] ||
-          err.message
+          "Network error"
         }`
       );
     }
   };
 
   const handleAddAddon = async () => {
-    if (!newOption.label || !newOption.code) {
-      setError("Label and code are required for addons.");
+    if (!newOption.label || !newOption.code || !newOption.price) {
+      setError("Label, code, and price are required for addons.");
       return;
     }
     try {
@@ -640,58 +645,80 @@ const InstrumentsAdmin = () => {
         addon_type_id: modalData.id,
         label: newOption.label,
         code: newOption.code,
+        price: parseFloat(newOption.price) || 0,
       };
       const response = await api.post("/api/admin/addons/", payload, {
         headers,
       });
       setAddonOptions([...addonOptions, response.data]);
-      setNewOption({ label: "", code: "" });
+      setNewOption({ label: "", code: "", price: "" });
       setSuccess("AddOn added successfully!");
     } catch (err) {
-      console.error("Error Adding Addon:", err.response?.data);
       setError(
         `Failed to add addon: ${
           err.response?.data?.detail ||
           Object.values(err.response?.data || {})[0]?.[0] ||
-          err.message
+          "Network error"
         }`
       );
     }
+  };
+
+  const handleOpenConfirmDialog = (action, message) => {
+    setConfirmAction(() => action);
+    setConfirmMessage(message);
+    setOpenConfirmDialog(true);
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+    setConfirmAction(null);
+    setConfirmMessage("");
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmAction) {
+      await confirmAction();
+    }
+    handleCloseConfirmDialog();
   };
 
   const handleDeleteFieldOption = async (optionId) => {
-    if (!window.confirm("Are you sure you want to delete this field option?"))
-      return;
-    try {
-      const access = localStorage.getItem("access");
-      await api.delete(`/api/admin/field-options/${optionId}/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      setFieldOptions(fieldOptions.filter((opt) => opt.id !== optionId));
-      setSuccess("Field option deleted successfully!");
-    } catch (err) {
-      setError(
-        `Failed to delete field option: ${
-          err.response?.data?.detail || err.message
-        }`
-      );
-    }
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+        await api.delete(`/api/admin/field-options/${optionId}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        setFieldOptions(fieldOptions.filter((opt) => opt.id !== optionId));
+        setSuccess("Field option deleted successfully!");
+      } catch (err) {
+        setError(
+          `Failed to delete field option: ${
+            err.response?.data?.detail || "Network error"
+          }`
+        );
+      }
+    }, "Are you sure you want to delete this field option?");
   };
 
   const handleDeleteAddon = async (addonId) => {
-    if (!window.confirm("Are you sure you want to delete this addon?")) return;
-    try {
-      const access = localStorage.getItem("access");
-      await api.delete(`/api/admin/addons/${addonId}/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      setAddonOptions(addonOptions.filter((opt) => opt.id !== addonId));
-      setSuccess("Addon deleted successfully!");
-    } catch (err) {
-      setError(
-        `Failed to delete addon: ${err.response?.data?.detail || err.message}`
-      );
-    }
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+        await api.delete(`/api/admin/addons/${addonId}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        setAddonOptions(addonOptions.filter((opt) => opt.id !== addonId));
+        setSuccess("Addon deleted successfully!");
+      } catch (err) {
+        setError(
+          `Failed to delete addon: ${
+            err.response?.data?.detail || "Network error"
+          }`
+        );
+      }
+    }, "Are you sure you want to delete this addon?");
   };
 
   const handleDelete = async (id) => {
@@ -699,29 +726,23 @@ const InstrumentsAdmin = () => {
       setError("You do not have permission to delete items.");
       return;
     }
-    if (
-      !window.confirm(
-        `Are you sure you want to delete this ${tabs[activeTab].name
-          .toLowerCase()
-          .replace("s", "")}?`
-      )
-    )
-      return;
-    try {
-      const access = localStorage.getItem("access");
-      const tab = tabs[activeTab];
-      await api.delete(`${tab.endpoint}${id}/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      setSuccess(`${tab.name} deleted successfully!`);
-      fetchData();
-    } catch (err) {
-      setError(
-        `Failed to delete ${tab.name}: ${
-          err.response?.data?.detail || err.message
-        }`
-      );
-    }
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+        const tab = tabs[activeTab];
+        await api.delete(`${tab.endpoint}${id}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        setSuccess(`${tab.name} deleted successfully!`);
+        fetchData();
+      } catch (err) {
+        setError(
+          `Failed to delete ${tab.name}: ${
+            err.response?.data?.detail || "Network error"
+          }`
+        );
+      }
+    }, `Are you sure you want to delete this ${tabs[activeTab].name.toLowerCase().replace("s", "")}?`);
   };
 
   const renderModalContent = () => {
@@ -754,6 +775,26 @@ const InstrumentsAdmin = () => {
             variant="outlined"
             size="small"
             required
+            InputLabelProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+            InputProps={{
+              sx: { fontFamily: "Helvetica, sans-serif !important" },
+            }}
+          />
+          <TextField
+            label="BASE PRICE (RM)"
+            value={modalData.base_price || ""}
+            onChange={(e) =>
+              setModalData({ ...modalData, base_price: e.target.value })
+            }
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            size="small"
+            type="number"
+            required
+            inputProps={{ min: 0, step: "0.01" }}
             InputLabelProps={{
               sx: { fontFamily: "Helvetica, sans-serif !important" },
             }}
@@ -1043,6 +1084,11 @@ const InstrumentsAdmin = () => {
                       <TableCell
                         sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                       >
+                        Price (RM)
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
                         Actions
                       </TableCell>
                     </TableRow>
@@ -1070,6 +1116,15 @@ const InstrumentsAdmin = () => {
                           }}
                         >
                           {option.code}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {option.price
+                            ? `RM ${parseFloat(option.price).toFixed(2)}`
+                            : "N/A"}
                         </TableCell>
                         <TableCell>
                           <IconButton
@@ -1116,6 +1171,25 @@ const InstrumentsAdmin = () => {
                   size="small"
                   variant="outlined"
                   sx={{ flex: 1 }}
+                  InputLabelProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                  InputProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                />
+                <TextField
+                  label="Price (RM)"
+                  value={newOption.price}
+                  onChange={(e) =>
+                    setNewOption({ ...newOption, price: e.target.value })
+                  }
+                  size="small"
+                  variant="outlined"
+                  sx={{ flex: 1 }}
+                  type="number"
+                  required
+                  inputProps={{ min: 0, step: "0.01" }}
                   InputLabelProps={{
                     sx: { fontFamily: "Helvetica, sans-serif !important" },
                   }}
@@ -1240,6 +1314,11 @@ const InstrumentsAdmin = () => {
                       <TableCell
                         sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                       >
+                        Price (RM)
+                      </TableCell>
+                      <TableCell
+                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      >
                         Actions
                       </TableCell>
                     </TableRow>
@@ -1267,6 +1346,15 @@ const InstrumentsAdmin = () => {
                           }}
                         >
                           {addon.code}
+                        </TableCell>
+                        <TableCell
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          {addon.price
+                            ? `RM ${parseFloat(addon.price).toFixed(2)}`
+                            : "N/A"}
                         </TableCell>
                         <TableCell>
                           <IconButton
@@ -1313,6 +1401,25 @@ const InstrumentsAdmin = () => {
                   size="small"
                   variant="outlined"
                   sx={{ flex: 1 }}
+                  InputLabelProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                  InputProps={{
+                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  }}
+                />
+                <TextField
+                  label="Price (RM)"
+                  value={newOption.price}
+                  onChange={(e) =>
+                    setNewOption({ ...newOption, price: e.target.value })
+                  }
+                  size="small"
+                  variant="outlined"
+                  sx={{ flex: 1 }}
+                  type="number"
+                  required
+                  inputProps={{ min: 0, step: "0.01" }}
                   InputLabelProps={{
                     sx: { fontFamily: "Helvetica, sans-serif !important" },
                   }}
@@ -1419,7 +1526,9 @@ const InstrumentsAdmin = () => {
                         }}
                         onError={(e) => (e.target.src = placeholderImage)}
                       />
-                    ) : field.includes(".") || field === "instruments" ? (
+                    ) : field.includes(".") ||
+                      field === "instruments" ||
+                      field === "base_price" ? (
                       getField(item, field) || "N/A"
                     ) : field === "is_available" ? (
                       item[field] ? (
@@ -1738,6 +1847,45 @@ const InstrumentsAdmin = () => {
                 <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
                 <CTAButton type="submit" variant="contained">
                   {modalAction === "add" ? "Create" : "Save"}
+                </CTAButton>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              open={openConfirmDialog}
+              onClose={handleCloseConfirmDialog}
+              maxWidth="xs"
+              fullWidth
+              PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+            >
+              <DialogTitle
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  color: "#d6393a",
+                }}
+              >
+                Confirm Deletion
+              </DialogTitle>
+              <DialogContent>
+                <Typography
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  {confirmMessage}
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <CancelButton onClick={handleCloseConfirmDialog}>
+                  Cancel
+                </CancelButton>
+                <CTAButton
+                  variant="contained"
+                  onClick={handleConfirmAction}
+                  sx={{
+                    bgcolor: "#d6393a",
+                    "&:hover": { bgcolor: "#b71c1c" },
+                  }}
+                >
+                  Delete
                 </CTAButton>
               </DialogActions>
             </Dialog>
