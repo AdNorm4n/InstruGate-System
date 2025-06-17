@@ -27,8 +27,6 @@ import {
   Snackbar,
   Divider,
   Fade,
-  Tabs,
-  Tab,
   Link,
 } from "@mui/material";
 import { Visibility, Delete, Check, Close } from "@mui/icons-material";
@@ -92,6 +90,9 @@ const QuotationsAdmin = () => {
   const [quotationItems, setQuotationItems] = useState([]);
   const [openRemarksDialog, setOpenRemarksDialog] = useState(false);
   const [selectedRemarks, setSelectedRemarks] = useState("");
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const tabs = [
     {
@@ -146,9 +147,10 @@ const QuotationsAdmin = () => {
       const responses = await Promise.all(
         endpoints.map((endpoint) =>
           api.get(endpoint, { headers }).catch((err) => {
-            console.error(
-              `Error fetching ${endpoint}:`,
-              err.response?.data || err.message
+            setError(
+              `Error fetching ${endpoint}: ${
+                err.response?.data?.detail || err.message
+              }`
             );
             return {
               error: err.response?.data?.detail || err.message,
@@ -170,7 +172,6 @@ const QuotationsAdmin = () => {
           : [],
       };
 
-      console.log("Fetched Data:", newData);
       setData(newData);
       setFilteredData({
         quotations: newData.quotations,
@@ -181,7 +182,6 @@ const QuotationsAdmin = () => {
         setError("Some data could not be loaded. Please try again.");
       }
     } catch (err) {
-      console.error("fetchData Error:", err, err.response?.data);
       setError(
         `Error loading data: ${err.response?.data?.detail || err.message}`
       );
@@ -223,8 +223,6 @@ const QuotationsAdmin = () => {
       return multiplier * fieldA.toString().localeCompare(fieldB.toString());
     });
 
-    console.log("Filtered Quotations:", filtered);
-
     setFilteredData((prev) => ({
       ...prev,
       quotations: filtered,
@@ -232,7 +230,7 @@ const QuotationsAdmin = () => {
   }, [searchTerm, statusFilter, data, sortConfig]);
 
   const getField = (obj, field) => {
-    if (!obj) return "";
+    if (!obj) return "N/A";
     if (field.includes(".")) {
       const [key, subKey] = field.split(".");
       if (key === "created_by" && subKey === "first_name") {
@@ -249,13 +247,23 @@ const QuotationsAdmin = () => {
     if (
       field === "submitted_at" ||
       field === "approved_at" ||
-      field === "rejected_at"
+      field === "rejected_at" ||
+      field === "updated_at" ||
+      field === "emailed_at"
     ) {
       return obj[field] ? new Date(obj[field]).toLocaleString() : "N/A";
     }
     if (field === "status") {
       const status = obj[field] || "N/A";
       return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+    if (field === "total_price") {
+      return typeof obj[field] === "number"
+        ? `RM${obj[field].toLocaleString("en-MY", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}`
+        : "N/A";
     }
     return obj[field] || "N/A";
   };
@@ -293,10 +301,6 @@ const QuotationsAdmin = () => {
         : [];
       setQuotationItems(items);
     } catch (err) {
-      console.error(
-        "Error fetching quotation items:",
-        err.response?.data || err.message
-      );
       setError(
         `Failed to load quotation items: ${
           err.response?.data?.detail || err.message
@@ -313,28 +317,46 @@ const QuotationsAdmin = () => {
     setError("");
   };
 
+  const handleOpenConfirmDialog = (action, message) => {
+    setConfirmAction(() => action);
+    setConfirmMessage(message);
+    setOpenConfirmDialog(true);
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+    setConfirmAction(null);
+    setConfirmMessage("");
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmAction) {
+      await confirmAction();
+    }
+    handleCloseConfirmDialog();
+  };
+
   const handleDelete = async (id) => {
     if (!tabs[0].permissions.includes(userRole)) {
       setError("You do not have permission to delete quotations.");
       return;
     }
-    if (!window.confirm("Are you sure you want to delete this quotation?")) {
-      return;
-    }
-    try {
-      const access = localStorage.getItem("access");
-      await api.delete(`${tabs[0].endpoint}${id}/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      setSuccess("Quotation deleted successfully!");
-      fetchData();
-    } catch (err) {
-      setError(
-        `Failed to delete quotation: ${
-          err.response?.data?.detail || err.message
-        }`
-      );
-    }
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+        await api.delete(`${tabs[0].endpoint}${id}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        setSuccess("Quotation deleted successfully!");
+        fetchData();
+      } catch (err) {
+        setError(
+          `Failed to delete quotation: ${
+            err.response?.data?.detail || err.message
+          }`
+        );
+      }
+    }, "Are you sure you want to delete this quotation?");
   };
 
   const handleQuotationAction = async (id, action, remarks = "") => {
@@ -357,7 +379,11 @@ const QuotationsAdmin = () => {
       await api.patch(`/api/admin/quotations/${id}/`, payload, {
         headers: { Authorization: `Bearer ${access}` },
       });
-      setSuccess(`Quotation ${action}d successfully!`);
+      setSuccess(
+        `Quotation ${
+          action === "approve" ? "approved" : "rejected"
+        } successfully!`
+      );
       fetchData();
     } catch (err) {
       setError(
@@ -457,6 +483,8 @@ const QuotationsAdmin = () => {
                             ? "#d32f2f"
                             : getField(item, field) === "Pending"
                             ? "#fbc02d"
+                            : getField(item, field) === "Submitted"
+                            ? "#1976d2"
                             : "inherit",
                         fontWeight: field === "status" ? "bold" : "normal",
                       }),
@@ -532,11 +560,9 @@ const QuotationsAdmin = () => {
                       {tab.actions.includes("reject") && (
                         <IconButton
                           onClick={() => {
-                            const remarks = prompt(
-                              "Enter remarks for rejection:"
-                            );
-                            if (remarks)
-                              handleQuotationAction(item.id, "reject", remarks);
+                            setModalData({ id: item.id });
+                            setModalAction("reject");
+                            setOpenModal(true);
                           }}
                           disabled={item.status === "rejected"}
                           sx={{ color: "#d32f2f" }}
@@ -559,179 +585,346 @@ const QuotationsAdmin = () => {
   const renderModalContent = () => {
     const tab = tabs[0];
 
-    return (
-      <>
-        {tab.writableFields.map((field) => {
-          if (tab.lookups && tab.lookups[field]) {
-            const lookupKey = tab.lookups[field];
-            const lookupItems = data[lookupKey] || [];
-            return (
-              <FormControl fullWidth key={field} margin="normal" size="small">
-                <InputLabel
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                >
-                  {tab.displayFields[field.replace("_id", "")] ||
-                    field.replace("_id", "").toUpperCase()}
-                </InputLabel>
-                <Select
-                  value={modalData[field] || ""}
-                  onChange={(e) =>
-                    setModalData({
-                      ...modalData,
-                      [field]: parseInt(e.target.value, 10) || null,
-                    })
-                  }
-                  required
-                  disabled={modalAction === "view"}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                >
-                  <MenuItem
-                    value=""
-                    disabled
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                  >
-                    Select a user
-                  </MenuItem>
-                  {lookupItems.map((item) => (
-                    <MenuItem
-                      key={item.id}
-                      value={item.id}
-                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                    >
-                      {item.first_name || item.username || item.id}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            );
-          }
-          return (
-            <TextField
-              key={field}
-              label={
-                tab.displayFields[field] ||
-                field.replace("_", " ").toUpperCase()
-              }
-              value={modalData[field] || ""}
-              onChange={(e) =>
-                setModalData({ ...modalData, [field]: e.target.value })
-              }
-              fullWidth
-              margin="normal"
-              variant="outlined"
-              size="small"
-              required
-              disabled={modalAction === "view"}
-              InputLabelProps={{
-                sx: { fontFamily: "Helvetica, sans-serif !important" },
-              }}
-              InputProps={{
-                sx: { fontFamily: "Helvetica, sans-serif !important" },
-              }}
-            />
-          );
-        })}
-        {modalAction === "view" && (
-          <>
-            <Divider sx={{ my: 2 }} />
-            <Typography
-              variant="h6"
-              sx={{
-                mb: 2,
+    if (modalAction === "reject") {
+      return (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontFamily: "Helvetica, sans-serif !important",
+              fontWeight: "bold",
+              color: "#000000",
+            }}
+          >
+            Reject Quotation
+          </Typography>
+          <TextField
+            label="Remarks"
+            value={modalData.remarks || ""}
+            onChange={(e) =>
+              setModalData({ ...modalData, remarks: e.target.value })
+            }
+            fullWidth
+            variant="outlined"
+            size="small"
+            multiline
+            rows={4}
+            required
+            InputLabelProps={{
+              sx: {
                 fontFamily: "Helvetica, sans-serif !important",
-                fontWeight: "bold",
-              }}
-            >
-              Submitted Instruments
-            </Typography>
-            {quotationItems.length > 0 ? (
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+        </Box>
+      );
+    }
+
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontFamily: "Helvetica, sans-serif !important",
+            fontWeight: "bold",
+            color: "#000000",
+          }}
+        >
+          Quotation Details
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 2,
+          }}
+        >
+          {/* Created By */}
+          <TextField
+            label="Created By"
+            value={getField(modalData, "created_by.first_name")}
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            InputLabelProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+          {/* Company */}
+          <TextField
+            label="Company"
+            value={modalData.company || ""}
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            InputLabelProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+          {/* Project Name */}
+          <TextField
+            label="Project Name"
+            value={modalData.project_name || ""}
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            InputLabelProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+          {/* Updated At */}
+          <TextField
+            label="Updated At"
+            value={
+              modalData.updated_at
+                ? new Date(modalData.updated_at).toLocaleString()
+                : "N/A"
+            }
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            InputLabelProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+          {/* Emailed At */}
+          <TextField
+            label="Emailed At"
+            value={
+              modalData.emailed_at
+                ? new Date(modalData.emailed_at).toLocaleString()
+                : "N/A"
+            }
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            InputLabelProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+          {/* Total Quotation Price */}
+          <TextField
+            label="Total Quotation Price (RM)"
+            value={
+              typeof modalData.total_price === "number"
+                ? `RM${modalData.total_price.toLocaleString("en-MY", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : "N/A"
+            }
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled
+            InputLabelProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                fontWeight: 500,
+              },
+            }}
+            InputProps={{
+              sx: {
+                fontFamily: "Helvetica, sans-serif !important",
+                color: "#000000",
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+              },
+            }}
+          />
+        </Box>
+        <Divider sx={{ my: 2 }} />
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            fontFamily: "Helvetica, sans-serif !important",
+            fontWeight: "bold",
+            color: "#000000",
+          }}
+        >
+          Submitted Instruments
+        </Typography>
+        {quotationItems.length > 0 ? (
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  ID
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  Product Code
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  Instrument
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  Quantity
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  Price (RM)
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {quotationItems.map((item) => {
+                const instrument = data.instruments.find(
+                  (inst) => inst.id === item.instrument_id
+                );
+                return (
+                  <TableRow key={item.id}>
                     <TableCell
                       sx={{
-                        fontWeight: "bold",
                         fontFamily: "Helvetica, sans-serif !important",
                       }}
                     >
-                      ID
+                      {item.id}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontWeight: "bold",
                         fontFamily: "Helvetica, sans-serif !important",
                       }}
                     >
-                      Product Code
+                      {item.product_code || "N/A"}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontWeight: "bold",
                         fontFamily: "Helvetica, sans-serif !important",
                       }}
                     >
-                      Instrument
+                      {instrument?.name || "Unknown Instrument"}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontWeight: "bold",
                         fontFamily: "Helvetica, sans-serif !important",
                       }}
                     >
-                      Quantity
+                      {item.quantity || "N/A"}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontFamily: "Helvetica, sans-serif !important",
+                      }}
+                    >
+                      {typeof item.total_price === "number"
+                        ? `RM${item.total_price.toLocaleString("en-MY", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}`
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {quotationItems.map((item) => {
-                    const instrument = data.instruments.find(
-                      (inst) => inst.id === item.instrument_id
-                    );
-                    return (
-                      <TableRow key={item.id}>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          {item.id}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          {item.product_code || "N/A"}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          {instrument?.name || "Unknown Instrument"}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          {item.quantity || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-              >
-                No instruments submitted for this quotation.
-              </Typography>
-            )}
-          </>
+                );
+              })}
+            </TableBody>
+          </Table>
+        ) : (
+          <Typography sx={{ fontFamily: "Helvetica, sans-serif !important" }}>
+            No instruments submitted for this quotation.
+          </Typography>
         )}
-      </>
+      </Box>
     );
   };
 
@@ -776,7 +969,20 @@ const QuotationsAdmin = () => {
                 <Alert
                   severity="success"
                   onClose={() => setSuccess("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    width: "100%",
+                    color: "white",
+                    backgroundColor: "#28a745",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                  }}
                 >
                   {success}
                 </Alert>
@@ -905,6 +1111,14 @@ const QuotationsAdmin = () => {
                           >
                             Rejected
                           </MenuItem>
+                          <MenuItem
+                            value="submitted"
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif !important",
+                            }}
+                          >
+                            Submitted
+                          </MenuItem>
                         </Select>
                       </FormControl>
                     </Box>
@@ -915,10 +1129,21 @@ const QuotationsAdmin = () => {
               <Dialog
                 open={openModal}
                 onClose={handleModalClose}
-                maxWidth="lg"
+                maxWidth={modalAction === "reject" ? "sm" : "lg"}
                 fullWidth
                 PaperProps={{
                   component: "form",
+                  onSubmit: (e) => {
+                    e.preventDefault();
+                    if (modalAction === "reject") {
+                      handleQuotationAction(
+                        modalData.id,
+                        "reject",
+                        modalData.remarks
+                      );
+                      handleModalClose();
+                    }
+                  },
                   sx: { borderRadius: 2, p: 2 },
                 }}
               >
@@ -929,11 +1154,26 @@ const QuotationsAdmin = () => {
                     color: "#1976d2",
                   }}
                 >
-                  View Quotation
+                  {modalAction === "reject"
+                    ? "Reject Quotation"
+                    : "View Quotation"}
                 </DialogTitle>
                 <DialogContent>{renderModalContent()}</DialogContent>
                 <DialogActions>
                   <CancelButton onClick={handleModalClose}>Close</CancelButton>
+                  {modalAction === "reject" && (
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{
+                        bgcolor: "#d6393a",
+                        "&:hover": { bgcolor: "#b71c1c" },
+                        fontFamily: "Helvetica, sans-serif !important",
+                      }}
+                    >
+                      Submit
+                    </Button>
+                  )}
                 </DialogActions>
               </Dialog>
               <Dialog
@@ -969,6 +1209,46 @@ const QuotationsAdmin = () => {
                   <CancelButton onClick={handleCloseRemarksDialog}>
                     Close
                   </CancelButton>
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openConfirmDialog}
+                onClose={handleCloseConfirmDialog}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+              >
+                <DialogTitle
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    fontWeight: "bold",
+                    color: "#d6393a",
+                  }}
+                >
+                  Confirm Deletion
+                </DialogTitle>
+                <DialogContent>
+                  <Typography
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  >
+                    {confirmMessage}
+                  </Typography>
+                </DialogContent>
+                <DialogActions>
+                  <CancelButton onClick={handleCloseConfirmDialog}>
+                    Cancel
+                  </CancelButton>
+                  <Button
+                    variant="contained"
+                    onClick={handleConfirmAction}
+                    sx={{
+                      bgcolor: "#d6393a",
+                      "&:hover": { bgcolor: "#b71c1c" },
+                      fontFamily: "Helvetica, sans-serif !important",
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </DialogActions>
               </Dialog>
             </Container>

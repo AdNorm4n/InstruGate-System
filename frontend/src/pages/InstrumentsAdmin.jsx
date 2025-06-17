@@ -1606,7 +1606,20 @@ const InstrumentsAdmin = () => {
                 <Alert
                   severity="success"
                   onClose={() => setSuccess("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    width: "100%",
+                    color: "white",
+                    backgroundColor: "#28a745",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                  }}
                 >
                   {success}
                 </Alert>

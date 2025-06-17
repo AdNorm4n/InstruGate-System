@@ -283,16 +283,6 @@ class QuotationSerializer(serializers.ModelSerializer):
               "Approved at:", instance.approved_at, "Rejected at:", instance.rejected_at,
               "Reviewed by:", instance.reviewed_by, "Emailed at:", instance.emailed_at)
         return instance
-class QuotationReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Quotation
-        fields = ['id', 'status', 'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'reviewed_by', 'emailed_at']
-        read_only_fields = ['id', 'submitted_at', 'reviewed_by', 'emailed_at']
-
-    def validate(self, data):
-        if data.get('status') == 'rejected' and not data.get('remarks'):
-            raise serializers.ValidationError({"remarks": "Remarks are required when rejecting a quotation."})
-        return data
 
 # Quotation Review Serializer
 class QuotationReviewSerializer(serializers.ModelSerializer):
@@ -432,14 +422,18 @@ class AdminQuotationSerializer(serializers.ModelSerializer):
     created_by_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), source='created_by'
     )
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, obj):
+        return obj.calculate_total_price()
 
     class Meta:
         model = Quotation
         fields = [
             'id', 'created_by_id', 'company', 'project_name', 'status',
-            'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at'
+            'remarks', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at', 'emailed_at', 'total_price'
         ]
-        read_only_fields = ['id', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at']
+        read_only_fields = ['id', 'submitted_at', 'approved_at', 'rejected_at', 'updated_at', 'emailed_at', 'total_price']
         extra_kwargs = {
             'created_by_id': {'required': True},
             'company': {'required': True, 'allow_blank': False},
@@ -472,10 +466,14 @@ class AdminQuotationItemSerializer(serializers.ModelSerializer):
     instrument_id = serializers.PrimaryKeyRelatedField(
         queryset=Instrument.objects.all(), source='instrument'
     )
+    total_price = serializers.SerializerMethodField()
+
+    def get_total_price(self, obj):
+        return obj.calculate_total_price()
 
     class Meta:
         model = QuotationItem
-        fields = ['id', 'quotation_id', 'product_code', 'quantity', 'instrument_id']
+        fields = ['id', 'quotation_id', 'product_code', 'quantity', 'instrument_id', 'total_price']
         extra_kwargs = {
             'quotation_id': {'required': True},
             'product_code': {'required': True, 'allow_blank': False},

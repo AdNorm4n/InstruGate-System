@@ -111,6 +111,9 @@ const UsersAdmin = () => {
     field: "id",
     direction: "asc",
   });
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
@@ -333,27 +336,45 @@ const UsersAdmin = () => {
     }
   };
 
+  const handleOpenConfirmDialog = (action, message) => {
+    setConfirmAction(() => action);
+    setConfirmMessage(message);
+    setOpenConfirmDialog(true);
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+    setConfirmAction(null);
+    setConfirmMessage("");
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmAction) {
+      await confirmAction();
+    }
+    handleCloseConfirmDialog();
+  };
+
   const handleDelete = async (id) => {
     if (userRole !== "admin") {
       setError("You do not have permission to delete users.");
       return;
     }
-    if (!window.confirm("Are you sure you want to delete this user?")) {
-      return;
-    }
-    try {
-      const access = localStorage.getItem("access");
-      await api.delete(`/api/users/${id}/`, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      setSuccess("User deleted successfully!");
-      fetchData();
-    } catch (err) {
-      console.error("Delete Error:", err.response?.data || err);
-      setError(
-        `Failed to delete user: ${err.response?.data?.detail || err.message}`
-      );
-    }
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+        await api.delete(`/api/users/${id}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        setSuccess("User deleted successfully!");
+        fetchData();
+      } catch (err) {
+        console.error("Delete Error:", err.response?.data || err);
+        setError(
+          `Failed to delete user: ${err.response?.data?.detail || err.message}`
+        );
+      }
+    }, "Are you sure you want to delete this user?");
   };
 
   const toTitleCase = (str) => {
@@ -404,7 +425,20 @@ const UsersAdmin = () => {
                 <Alert
                   severity="success"
                   onClose={() => setSuccess("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    width: "100%",
+                    color: "white",
+                    backgroundColor: "#28a745",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                  }}
                 >
                   {success}
                 </Alert>
@@ -861,6 +895,46 @@ const UsersAdmin = () => {
                   <CTAButton type="submit" variant="contained">
                     {modalAction === "add" ? "Create" : "Save"}
                   </CTAButton>
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openConfirmDialog}
+                onClose={handleCloseConfirmDialog}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+              >
+                <DialogTitle
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    fontWeight: "bold",
+                    color: "#d6393a",
+                  }}
+                >
+                  Confirm Deletion
+                </DialogTitle>
+                <DialogContent>
+                  <Typography
+                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  >
+                    {confirmMessage}
+                  </Typography>
+                </DialogContent>
+                <DialogActions>
+                  <CancelButton onClick={handleCloseConfirmDialog}>
+                    Cancel
+                  </CancelButton>
+                  <Button
+                    variant="contained"
+                    onClick={handleConfirmAction}
+                    sx={{
+                      bgcolor: "#d6393a",
+                      "&:hover": { bgcolor: "#b71c1c" },
+                      fontFamily: "Helvetica, sans-serif !important",
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </DialogActions>
               </Dialog>
             </Container>
