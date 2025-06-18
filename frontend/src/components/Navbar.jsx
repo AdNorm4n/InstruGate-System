@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
-import { Box, AppBar, Toolbar, Button } from "@mui/material";
+import { useState, useEffect, useContext } from "react";
+import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -14,8 +14,11 @@ import api from "../api";
 import headerBanner from "../assets/menu.png";
 import logo from "../assets/ashcroft.png";
 import centerLogo from "../assets/instrugate.png";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import { UserContext } from "../contexts/UserContext";
 
-export default function Navbar({ userRole }) {
+export default function Navbar() {
+  const { userRole, loading } = useContext(UserContext);
   const [instruments, setInstruments] = useState([]);
   const [hideTopToolbar, setHideTopToolbar] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -55,7 +58,9 @@ export default function Navbar({ userRole }) {
     } catch (error) {
       console.error("Logout failed:", error);
     }
-    localStorage.clear();
+    localStorage.removeItem(ACCESS_TOKEN);
+    localStorage.removeItem(REFRESH_TOKEN);
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -100,6 +105,63 @@ export default function Navbar({ userRole }) {
         ]
       : []),
   ];
+
+  if (loading) {
+    return (
+      <AppBar
+        position="fixed"
+        sx={{
+          boxShadow: 0,
+          transition: "all 0.3s ease",
+          backgroundColor: "transparent",
+        }}
+      >
+        <Toolbar
+          sx={{
+            minHeight: 100,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            position: "relative",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{}}>
+              <img
+                src={logo}
+                alt="New Logo"
+                style={{ height: "30px", paddingBottom: "7px" }}
+              />
+              <img
+                src={headerBanner}
+                alt="Header Banner"
+                style={{ height: "50px" }}
+              />
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={centerLogo}
+              alt="Center Logo"
+              style={{ height: "40px" }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <CircularProgress size={20} sx={{ color: "#d6393a" }} />
+          </Box>
+        </Toolbar>
+      </AppBar>
+    );
+  }
 
   return (
     <AppBar

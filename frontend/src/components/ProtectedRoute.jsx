@@ -1,14 +1,16 @@
-import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../api";
 import { REFRESH_TOKEN, ACCESS_TOKEN } from "../constants";
-import { useState, useEffect } from "react";
 
 function ProtectedRoute({ children }) {
   const [isAuthorized, setIsAuthorized] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log("ProtectedRoute: Starting authentication check...");
       const token = localStorage.getItem(ACCESS_TOKEN);
       const refresh = localStorage.getItem(REFRESH_TOKEN);
 
@@ -22,7 +24,7 @@ function ProtectedRoute({ children }) {
       );
 
       if (!token || !refresh) {
-        console.error("ProtectedRoute: No tokens found in localStorage");
+        console.log("ProtectedRoute: No tokens found, unauthorized");
         setIsAuthorized(false);
         return;
       }
@@ -39,21 +41,35 @@ function ProtectedRoute({ children }) {
 
         if (decoded.exp < now) {
           console.log("ProtectedRoute: Token expired, attempting refresh...");
-          const res = await api.post("/api/token/refresh/", { refresh });
-          if (!res.data.access) {
-            throw new Error("No access token in refresh response");
+          try {
+            const res = await api.post("/api/token/refresh/", { refresh });
+            if (!res.data.access) {
+              throw new Error("No access token in refresh response");
+            }
+            localStorage.setItem(ACCESS_TOKEN, res.data.access);
+            console.log("ProtectedRoute: Token refreshed successfully");
+            setIsAuthorized(true);
+          } catch (refreshError) {
+            console.error("ProtectedRoute: Token refresh failed:", {
+              message: refreshError.message,
+              response: refreshError.response?.data,
+              status: refreshError.response?.status,
+            });
+            localStorage.removeItem(ACCESS_TOKEN);
+            localStorage.removeItem(REFRESH_TOKEN);
+            setIsAuthorized(false);
+            return;
           }
-          localStorage.setItem(ACCESS_TOKEN, res.data.access);
-          console.log("ProtectedRoute: Token refreshed successfully");
+        } else {
+          console.log("ProtectedRoute: Token valid, authorized");
+          setIsAuthorized(true);
         }
-
-        setIsAuthorized(true);
       } catch (err) {
-        console.error("ProtectedRoute: Auth error:", {
+        console.error("ProtectedRoute: Token decode error:", {
           message: err.message,
-          response: err.response?.data,
-          status: err.response?.status,
         });
+        localStorage.removeItem(ACCESS_TOKEN);
+        localStorage.removeItem(REFRESH_TOKEN);
         setIsAuthorized(false);
       }
     };
@@ -62,10 +78,16 @@ function ProtectedRoute({ children }) {
   }, []);
 
   if (isAuthorized === null) {
+    console.log("ProtectedRoute: Authentication check pending");
     return <div>Loading...</div>;
   }
 
-  return isAuthorized ? children : <Navigate to="/login" />;
+  if (!isAuthorized) {
+    console.log("ProtectedRoute: Unauthorized, redirecting to /login");
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }
 
 export default ProtectedRoute;

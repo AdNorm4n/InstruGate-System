@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import api from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
@@ -24,6 +24,7 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
+import { UserContext } from "../contexts/UserContext";
 
 function Form({ route, method }) {
   const [username, setUsername] = useState("");
@@ -40,9 +41,9 @@ function Form({ route, method }) {
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openConfirmRegister, setOpenConfirmRegister] = useState(false);
   const navigate = useNavigate();
+  const { setUserRole } = useContext(UserContext);
 
   const name = method === "login" ? "Login" : "Register";
-
   const description =
     method === "login"
       ? "Enter your credentials to access your account."
@@ -57,6 +58,7 @@ function Form({ route, method }) {
     setLoading(true);
 
     try {
+      console.log("Form: Submitting login with username:", username);
       let payload;
       if (method === "login") {
         payload = { username, password };
@@ -72,6 +74,7 @@ function Form({ route, method }) {
       }
 
       const res = await api.post(route, payload);
+      console.log("Form: Login API response:", res.data);
 
       if (method === "login") {
         const access = res.data.access;
@@ -79,30 +82,45 @@ function Form({ route, method }) {
 
         localStorage.setItem(ACCESS_TOKEN, access);
         localStorage.setItem(REFRESH_TOKEN, refresh);
-
-        const decoded = jwtDecode(access);
-        const role = decoded?.role;
+        console.log("Form: Stored tokens in localStorage");
 
         const userProfileRes = await api.get("/api/users/me/");
         const userProfile = userProfileRes.data;
-        localStorage.setItem("user", JSON.stringify(userProfile));
+        console.log("Form: User profile fetched:", userProfile);
+
+        const role = userProfile.role;
+        if (!role) {
+          throw new Error("No role found in user profile");
+        }
+
+        localStorage.setItem("user", JSON.stringify({ ...userProfile, role }));
+        console.log("Form: Stored user profile with role:", role);
+
+        setUserRole(role);
+        console.log("Form: Set UserContext userRole:", role);
 
         setSuccessMessage("Login successful!");
         setOpenSuccess(true);
 
         setTimeout(() => {
+          console.log("Form: Navigating based on role:", role);
           if (role === "admin") {
-            window.location.href = "/admin";
+            navigate("/admin-panel");
           } else {
             navigate("/");
           }
-        }, 1500);
+        }, 500);
       } else {
         setSuccessMessage("Registration successful! Please log in.");
         setOpenSuccess(true);
-        setTimeout(() => navigate("/login"), 1500);
+        setTimeout(() => navigate("/login"), 500);
       }
     } catch (error) {
+      console.error("Form: Login error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
       let message = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         const data = error.response.data;
@@ -126,6 +144,7 @@ function Form({ route, method }) {
     setLoading(true);
 
     try {
+      console.log("Form: Confirming registration for:", username);
       const payload = {
         username,
         password,
@@ -136,11 +155,17 @@ function Form({ route, method }) {
       };
 
       const res = await api.post(route, payload);
+      console.log("Form: Registration API response:", res.data);
 
       setSuccessMessage("Registration successful! Please log in.");
       setOpenSuccess(true);
-      setTimeout(() => navigate("/login"), 1500);
+      setTimeout(() => navigate("/login"), 500);
     } catch (error) {
+      console.error("Form: Registration error:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
       let message = "An error occurred. Please try again.";
       if (error.response && error.response.data) {
         const data = error.response.data;
@@ -333,7 +358,6 @@ function Form({ route, method }) {
         </Stack>
       </Box>
 
-      {/* Snackbar Messages */}
       <Box
         sx={{
           position: "fixed",

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useContext } from "react";
 import axios from "axios";
 import {
   Container,
@@ -31,8 +31,8 @@ import {
   Fade,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
-import { styled } from "@mui/material/styles";
-import Navbar from "../components/Navbar";
+import { styled } from "@mui/material/styles"; // Added import for styled
+import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
 import "../styles/InstrumentsAdmin.css";
 
@@ -82,7 +82,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 
 const CancelButton = styled(Button)(({ theme }) => ({
   color: "#d6393a",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Helvetica, sans-serif",
   textTransform: "none",
   "&:hover": {
     color: "#b71c1c",
@@ -90,12 +90,45 @@ const CancelButton = styled(Button)(({ theme }) => ({
 }));
 
 const ENTITY_TYPES = {
+  CATEGORIES: "Categories",
+  INSTRUMENT_TYPES: "Instrument Types",
   INSTRUMENTS: "Instruments",
   CONFIGURABLE_FIELDS: "Configurable Fields",
   ADDON_TYPES: "AddOn Types",
 };
 
+// Define choices mirroring Django model
+const CATEGORY_CHOICES = [
+  { value: "Pressure Instruments", label: "Pressure Instruments" },
+  { value: "Temperature Instruments", label: "Temperature Instruments" },
+  { value: "Test Instruments", label: "Test Instruments" },
+];
+
+const TYPE_CHOICES = [
+  { value: "Pressure Gauges", label: "Pressure Gauges" },
+  { value: "Digital Gauges", label: "Digital Gauges" },
+  { value: "High-Purity", label: "High-Purity" },
+  { value: "Test Gauges", label: "Test Gauges" },
+  { value: "Differential Gauges", label: "Differential Gauges" },
+  { value: "Pressure Switches", label: "Pressure Switches" },
+  { value: "Pressure Sensors", label: "Pressure Sensors" },
+  {
+    value: "Diaphragm Seals - Isolators",
+    label: "Diaphragm Seals - Isolators",
+  },
+  { value: "Threaded Seals", label: "Threaded Seals" },
+  { value: "Isolation Rings", label: "Isolation Rings" },
+  { value: "Flanged Seals", label: "Flanged Seals" },
+  { value: "In-Line", label: "In-Line" },
+  { value: "Accessories", label: "Accessories" },
+  { value: "Thermometers", label: "Thermometers" },
+  { value: "Bimetals Thermometers", label: "Bimetals Thermometers" },
+  { value: "Gas Actuated Thermometers", label: "Gas Actuated Thermometers" },
+  { value: "Thermowells", label: "Thermowells" },
+];
+
 const InstrumentsAdmin = () => {
+  const { userRole } = useContext(UserContext);
   const [data, setData] = useState({
     instruments: [],
     configurablefields: [],
@@ -107,6 +140,8 @@ const InstrumentsAdmin = () => {
     instruments: [],
     configurablefields: [],
     addontypes: [],
+    types: [],
+    categories: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -115,7 +150,7 @@ const InstrumentsAdmin = () => {
   const [modalData, setModalData] = useState({});
   const [modalType, setModalType] = useState("");
   const [modalAction, setModalAction] = useState("add");
-  const [userRole, setUserRole] = useState("");
+  const [modalError, setModalError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({
     field: "id",
@@ -130,6 +165,7 @@ const InstrumentsAdmin = () => {
   });
   const [filterInstrumentId, setFilterInstrumentId] = useState("");
   const [filterCategoryId, setFilterCategoryId] = useState("");
+  const [filterTypeCategoryId, setFilterTypeCategoryId] = useState("");
   const [addonOptions, setAddonOptions] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
@@ -137,6 +173,26 @@ const InstrumentsAdmin = () => {
   const [confirmMessage, setConfirmMessage] = useState("");
 
   const tabs = [
+    {
+      name: ENTITY_TYPES.CATEGORIES,
+      endpoint: "/api/admin/categories/",
+      fields: ["id", "name"],
+      writableFields: ["name"],
+      searchFields: ["name"],
+      lookups: {},
+      displayFields: { id: "ID", name: "Name" },
+      dataKey: "categories",
+    },
+    {
+      name: ENTITY_TYPES.INSTRUMENT_TYPES,
+      endpoint: "/api/admin/instrument-types/",
+      fields: ["id", "name", "category.name"],
+      writableFields: ["name", "category_id"],
+      searchFields: ["name"],
+      lookups: { category_id: "categories" },
+      displayFields: { id: "ID", name: "Name", "category.name": "Category" },
+      dataKey: "types",
+    },
     {
       name: ENTITY_TYPES.INSTRUMENTS,
       endpoint: "/api/admin/instruments/",
@@ -169,6 +225,7 @@ const InstrumentsAdmin = () => {
         image: "Image",
         is_available: "Available",
       },
+      dataKey: "instruments",
     },
     {
       name: ENTITY_TYPES.CONFIGURABLE_FIELDS,
@@ -192,6 +249,7 @@ const InstrumentsAdmin = () => {
         name: "Field Name",
         order: "Order",
       },
+      dataKey: "configurablefields",
     },
     {
       name: ENTITY_TYPES.ADDON_TYPES,
@@ -205,6 +263,7 @@ const InstrumentsAdmin = () => {
         instruments: "Instruments",
         name: "Name",
       },
+      dataKey: "addontypes",
     },
   ];
 
@@ -222,23 +281,15 @@ const InstrumentsAdmin = () => {
         "/api/admin/instruments/",
         "/api/admin/configurable-fields/",
         "/api/admin/addon-types/",
-        "/api/instrument-types/",
-        "/api/categories/",
-        "/api/users/me/",
+        "/api/admin/instrument-types/",
+        "/api/admin/categories/",
       ];
       const responses = await Promise.all(
         endpoints.map((endpoint) =>
-          api.get(endpoint, { headers }).catch((err) => {
-            setError(
-              `Error fetching ${endpoint}: ${
-                err.response?.data?.detail || "Network error"
-              }`
-            );
-            return {
-              error: err.response?.data?.detail || "Network error",
-              data: [],
-            };
-          })
+          api.get(endpoint, { headers }).catch((err) => ({
+            error: err.response?.data?.detail || "Network error",
+            data: [],
+          }))
         )
       );
 
@@ -256,16 +307,15 @@ const InstrumentsAdmin = () => {
         instruments: newData.instruments,
         configurablefields: newData.configurablefields,
         addontypes: newData.addontypes,
+        types: newData.types,
+        categories: newData.categories,
       });
-      setUserRole(responses[5].data?.role || "client");
 
       if (responses.some((res) => res.error)) {
         setError("Some data could not be loaded. Please try again.");
       }
     } catch (err) {
-      setError(
-        `Error loading data: ${err.response?.data?.detail || err.message}`
-      );
+      setError(`Error loading data: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -273,75 +323,12 @@ const InstrumentsAdmin = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
-
-  useEffect(() => {
-    const tab = tabs[activeTab];
-    const key = tab.name.toLowerCase().replace(" ", "");
-    let filtered = [...(data[key] || [])];
-
-    if (tab.name === ENTITY_TYPES.INSTRUMENTS && filterCategoryId) {
-      filtered = filtered.filter(
-        (item) =>
-          item.category_id === parseInt(filterCategoryId) ||
-          (item.category && item.category.id === parseInt(filterCategoryId))
-      );
-    } else if (
-      tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS &&
-      filterInstrumentId
-    ) {
-      filtered = filtered.filter(
-        (item) =>
-          item.instrument_id === parseInt(filterInstrumentId) ||
-          (item.instrument &&
-            item.instrument.id === parseInt(filterInstrumentId))
-      );
-    } else if (tab.name === ENTITY_TYPES.ADDON_TYPES && filterInstrumentId) {
-      filtered = filtered.filter((item) =>
-        item.instrument_ids.includes(parseInt(filterInstrumentId))
-      );
-    }
-
-    if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        tab.searchFields.some((field) =>
-          getField(item, field)
-            ?.toString()
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        )
-      );
-    }
-
-    filtered.sort((a, b) => {
-      const fieldA = getField(a, sortConfig.field) || "";
-      const fieldB = getField(b, sortConfig.field) || "";
-      const multiplier = sortConfig.direction === "asc" ? 1 : -1;
-      if (sortConfig.field === "id" || sortConfig.field === "base_price") {
-        return (
-          multiplier *
-          ((a?.[sortConfig.field] || 0) - (b?.[sortConfig.field] || 0))
-        );
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
       }
-      return multiplier * fieldA.toString().localeCompare(fieldB.toString());
-    });
-
-    filtered = Array.from(
-      new Map(filtered.map((item) => [item.id, item])).values()
-    );
-
-    setFilteredData((prev) => ({
-      ...prev,
-      [key]: filtered,
-    }));
-  }, [
-    searchTerm,
-    data,
-    sortConfig,
-    activeTab,
-    filterInstrumentId,
-    filterCategoryId,
-  ]);
+    };
+  }, []);
 
   const getField = (obj, field) => {
     if (!obj) return "";
@@ -377,10 +364,95 @@ const InstrumentsAdmin = () => {
         }
         return obj.category?.name || "N/A";
       }
-      return obj[key]?.[subKey] || "";
+      if (key === "type" && subKey === "name") {
+        const typeId = obj.type_id || (obj.type && obj.type.id);
+        if (typeId) {
+          const type = data.types.find((t) => t.id === typeId);
+          return type?.name || "N/A";
+        }
+        return obj.type?.name || "N/A";
+      }
+      return obj[key]?.[subKey] || "N/A";
     }
-    return obj[field] || "";
+    return obj[field] || "N/A";
   };
+
+  const filteredItems = useMemo(() => {
+    const tab = tabs[activeTab];
+    const key = tab.dataKey;
+    let filtered = [...(data[key] || [])];
+
+    if (tab.name === ENTITY_TYPES.INSTRUMENTS && filterCategoryId) {
+      filtered = filtered.filter(
+        (item) =>
+          item.category_id === parseInt(filterCategoryId) ||
+          (item.category && item.category.id === parseInt(filterCategoryId))
+      );
+    } else if (
+      tab.name === ENTITY_TYPES.INSTRUMENT_TYPES &&
+      filterTypeCategoryId
+    ) {
+      filtered = filtered.filter(
+        (item) =>
+          item.category_id === parseInt(filterTypeCategoryId) ||
+          (item.category && item.category.id === parseInt(filterTypeCategoryId))
+      );
+    } else if (
+      tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS &&
+      filterInstrumentId
+    ) {
+      filtered = filtered.filter(
+        (item) =>
+          item.instrument_id === parseInt(filterInstrumentId) ||
+          (item.instrument &&
+            item.instrument.id === parseInt(filterInstrumentId))
+      );
+    } else if (tab.name === ENTITY_TYPES.ADDON_TYPES && filterInstrumentId) {
+      filtered = filtered.filter((item) =>
+        item.instrument_ids?.includes(parseInt(filterInstrumentId))
+      );
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        tab.searchFields.some((field) =>
+          getField(item, field)
+            ?.toString()
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+      );
+    }
+
+    filtered.sort((a, b) => {
+      const fieldA = getField(a, sortConfig.field) || "";
+      const fieldB = getField(b, sortConfig.field) || "";
+      const multiplier = sortConfig.direction === "asc" ? 1 : -1;
+      if (sortConfig.field === "id" || sortConfig.field === "base_price") {
+        return (
+          multiplier *
+          ((a?.[sortConfig.field] || 0) - (b?.[sortConfig.field] || 0))
+        );
+      }
+      return multiplier * fieldA.toString().localeCompare(fieldB.toString());
+    });
+
+    return filtered;
+  }, [
+    activeTab,
+    data,
+    searchTerm,
+    sortConfig,
+    filterCategoryId,
+    filterInstrumentId,
+    filterTypeCategoryId,
+  ]);
+
+  useEffect(() => {
+    const tab = tabs[activeTab];
+    const key = tab.dataKey;
+    setFilteredData((prev) => ({ ...prev, [key]: filteredItems }));
+  }, [filteredItems, activeTab]);
 
   const handleSort = (field) => {
     setSortConfig((prev) => ({
@@ -402,6 +474,7 @@ const InstrumentsAdmin = () => {
     setAddonOptions([]);
     setNewOption({ label: "", code: "", price: "" });
     setImagePreview(null);
+    setModalError("");
     setOpenModal(true);
   };
 
@@ -414,6 +487,7 @@ const InstrumentsAdmin = () => {
     setModalData({ ...item });
     setModalType(tabs[activeTab].name);
     setImagePreview(item.image || null);
+    setModalError("");
     try {
       const access = localStorage.getItem("access");
       const headers = { Authorization: `Bearer ${access}` };
@@ -423,42 +497,46 @@ const InstrumentsAdmin = () => {
           headers,
           params: { field_id: item.id },
         });
-        const options = Array.isArray(response.data)
-          ? response.data.filter((opt) => opt.field_id === item.id)
-          : [];
-        setFieldOptions(options);
+        setFieldOptions(
+          Array.isArray(response.data)
+            ? response.data.filter((opt) => opt.field_id === item.id)
+            : []
+        );
       } else if (tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) {
         const response = await api.get(`/api/admin/addons/`, {
           headers,
           params: { addon_type_id: item.id },
         });
-        const addons = Array.isArray(response.data)
-          ? response.data.filter((addon) => addon.addon_type_id === item.id)
-          : [];
-        setAddonOptions(addons);
+        setAddonOptions(
+          Array.isArray(response.data)
+            ? response.data.filter((addon) => addon.addon_type_id === item.id)
+            : []
+        );
       }
     } catch (err) {
-      setError(
+      setModalError(
         `Failed to load options: ${
           err.response?.data?.detail || "Network error"
         }`
       );
-      setFieldOptions([]);
-      setAddonOptions([]);
     }
     setNewOption({ label: "", code: "", price: "" });
     setOpenModal(true);
   };
 
   const handleModalClose = () => {
+    setModalType("");
     setOpenModal(false);
     setModalData({});
-    setModalType("");
     setFieldOptions([]);
     setAddonOptions([]);
     setNewOption({ label: "", code: "", price: "" });
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
     setImagePreview(null);
     setError("");
+    setModalError("");
   };
 
   const validateImage = (file) => {
@@ -466,11 +544,11 @@ const InstrumentsAdmin = () => {
     const validTypes = ["image/jpeg", "image/png"];
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (!validTypes.includes(file.type)) {
-      setError("Image must be a JPEG or PNG file.");
+      setModalError("Image must be a JPEG or PNG file.");
       return false;
     }
     if (file.size > maxSize) {
-      setError("Image size must be less than 5MB.");
+      setModalError("Image size must be less than 5MB.");
       return false;
     }
     return true;
@@ -478,7 +556,7 @@ const InstrumentsAdmin = () => {
 
   const handleSave = async () => {
     if (userRole !== "admin") {
-      setError("You do not have permission to save items.");
+      setModalError("You do not have permission to save items.");
       return;
     }
 
@@ -494,17 +572,30 @@ const InstrumentsAdmin = () => {
         f !== "trigger_value" &&
         f !== "instrument_ids"
     );
+
+    if (tab.name === ENTITY_TYPES.CATEGORIES && !modalData.name) {
+      setModalError("Please select a category name.");
+      return;
+    }
+    if (
+      tab.name === ENTITY_TYPES.INSTRUMENT_TYPES &&
+      (!modalData.name || !modalData.category_id)
+    ) {
+      setModalError(
+        !modalData.name
+          ? "Please select an instrument type."
+          : "Please select a category."
+      );
+      return;
+    }
+
     for (const field of requiredFields) {
-      if (
-        !modalData[field] &&
-        modalData[field] !== 0 &&
-        modalData[field] !== false
-      ) {
-        setError(
-          `${field
+      if (!modalData[field] && modalData[field] !== 0) {
+        setModalError(
+          `Please provide ${field
             .replace("_id", "")
             .replace("_", " ")
-            .toUpperCase()} is required.`
+            .toLowerCase()}.`
         );
         return;
       }
@@ -538,12 +629,7 @@ const InstrumentsAdmin = () => {
           formData.append("image", "");
         }
 
-        const response = await api({
-          method,
-          url: endpoint,
-          data: formData,
-          headers,
-        });
+        await api({ method, url: endpoint, data: formData, headers });
         setSuccess(
           `${modalType} ${
             modalAction === "add" ? "added" : "updated"
@@ -551,9 +637,16 @@ const InstrumentsAdmin = () => {
         );
       } else {
         let payload = {};
-        if (tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
+        if (tab.name === ENTITY_TYPES.CATEGORIES) {
+          payload = { name: modalData.name || "" };
+        } else if (tab.name === ENTITY_TYPES.INSTRUMENT_TYPES) {
+          payload = {
+            name: modalData.name || "",
+            category_id: parseInt(modalData.category_id, 10),
+          };
+        } else if (tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
           if (!modalData.instrument_id) {
-            setError("Instrument is required.");
+            setModalError("Please select an instrument.");
             return;
           }
           payload = {
@@ -574,37 +667,35 @@ const InstrumentsAdmin = () => {
           };
         }
         headers["Content-Type"] = "application/json";
-        const response = await api({
-          method,
-          url: endpoint,
-          data: payload,
-          headers,
-        });
+        await api({ method, url: endpoint, data: payload, headers });
         setSuccess(
           `${modalType} ${
             modalAction === "add" ? "added" : "updated"
           } successfully!`
         );
       }
-      fetchData();
+      await fetchData();
       handleModalClose();
     } catch (err) {
       const errorMessage =
-        err.response?.data?.name?.[0] ||
-        err.response?.data?.type_id?.[0] ||
-        err.response?.data?.base_price?.[0] ||
-        err.response?.data?.instrument_id?.[0] ||
-        err.response?.data?.image?.[0] ||
         err.response?.data?.detail ||
         Object.values(err.response?.data || {})[0]?.[0] ||
-        "Network error";
-      setError(`Failed to save ${modalType}: ${errorMessage}`);
+        "Network error. Please try again.";
+      setModalError(
+        `Failed to save ${modalType.toLowerCase()}: ${errorMessage}`
+      );
     }
   };
 
   const handleAddFieldOption = async () => {
     if (!newOption.label || !newOption.code || !newOption.price) {
-      setError("Label, code, and price are required for field options.");
+      setModalError("Label, code, and price are required for field options.");
+      return;
+    }
+    if (!modalData.id) {
+      setModalError(
+        "Please save the configurable field before adding options."
+      );
       return;
     }
     try {
@@ -623,7 +714,7 @@ const InstrumentsAdmin = () => {
       setNewOption({ label: "", code: "", price: "" });
       setSuccess("Field option added successfully!");
     } catch (err) {
-      setError(
+      setModalError(
         `Failed to add field option: ${
           err.response?.data?.detail ||
           Object.values(err.response?.data || {})[0]?.[0] ||
@@ -635,7 +726,11 @@ const InstrumentsAdmin = () => {
 
   const handleAddAddon = async () => {
     if (!newOption.label || !newOption.code || !newOption.price) {
-      setError("Label, code, and price are required for addons.");
+      setModalError("Label, code, and price are required for addons.");
+      return;
+    }
+    if (!modalData.id) {
+      setModalError("Please save the addon type before adding addons.");
       return;
     }
     try {
@@ -654,7 +749,7 @@ const InstrumentsAdmin = () => {
       setNewOption({ label: "", code: "", price: "" });
       setSuccess("AddOn added successfully!");
     } catch (err) {
-      setError(
+      setModalError(
         `Failed to add addon: ${
           err.response?.data?.detail ||
           Object.values(err.response?.data || {})[0]?.[0] ||
@@ -734,7 +829,7 @@ const InstrumentsAdmin = () => {
           headers: { Authorization: `Bearer ${access}` },
         });
         setSuccess(`${tab.name} deleted successfully!`);
-        fetchData();
+        await fetchData();
       } catch (err) {
         setError(
           `Failed to delete ${tab.name}: ${
@@ -742,13 +837,121 @@ const InstrumentsAdmin = () => {
           }`
         );
       }
-    }, `Are you sure you want to delete this ${tabs[activeTab].name.toLowerCase().replace("s", "")}?`);
+    }, `Are you sure you want to delete this ${tabs[activeTab].name.toLowerCase().slice(0, -1)}?`);
   };
 
   const renderModalContent = () => {
+    if (!modalType) {
+      return null;
+    }
+
     const tab = tabs.find((t) => t.name === modalType);
     if (!tab) {
-      return <Alert severity="error">Invalid entity type: {modalType}</Alert>;
+      return null;
+    }
+
+    if (tab.name === ENTITY_TYPES.CATEGORIES) {
+      return (
+        <Box>
+          <FormControl fullWidth margin="normal" size="small" required>
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
+              Category Name
+            </InputLabel>
+            <Select
+              value={modalData.name || ""}
+              onChange={(e) =>
+                setModalData({ ...modalData, name: e.target.value })
+              }
+              sx={{ fontFamily: "Helvetica, sans-serif" }}
+            >
+              <MenuItem
+                value=""
+                disabled
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
+              >
+                Select a category
+              </MenuItem>
+              {CATEGORY_CHOICES.map((option) => (
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  sx={{ fontFamily: "Helvetica, sans-serif" }}
+                >
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      );
+    }
+
+    if (tab.name === ENTITY_TYPES.INSTRUMENT_TYPES) {
+      return (
+        <Box>
+          <FormControl fullWidth margin="normal" size="small" required>
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
+              Instrument Type
+            </InputLabel>
+            <Select
+              value={modalData.name || ""}
+              onChange={(e) =>
+                setModalData({ ...modalData, name: e.target.value })
+              }
+              sx={{ fontFamily: "Helvetica, sans-serif" }}
+            >
+              <MenuItem
+                value=""
+                disabled
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
+              >
+                Select an instrument type
+              </MenuItem>
+              {TYPE_CHOICES.map((option) => (
+                <MenuItem
+                  key={option.value}
+                  value={option.value}
+                  sx={{ fontFamily: "Helvetica, sans-serif" }}
+                >
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" size="small" required>
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
+              Category
+            </InputLabel>
+            <Select
+              value={modalData.category_id || ""}
+              onChange={(e) =>
+                setModalData({
+                  ...modalData,
+                  category_id: parseInt(e.target.value, 10) || null,
+                })
+              }
+              sx={{ fontFamily: "Helvetica, sans-serif" }}
+            >
+              <MenuItem
+                value=""
+                disabled
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
+              >
+                Select a category
+              </MenuItem>
+              {data.categories.map((category) => (
+                <MenuItem
+                  key={category.id}
+                  value={category.id}
+                  sx={{ fontFamily: "Helvetica, sans-serif" }}
+                >
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      );
     }
 
     if (tab.name === ENTITY_TYPES.INSTRUMENTS) {
@@ -757,7 +960,7 @@ const InstrumentsAdmin = () => {
           <Typography
             variant="h6"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
+              fontFamily: "Helvetica, sans-serif",
               mb: 2,
               fontWeight: "bold",
             }}
@@ -765,7 +968,7 @@ const InstrumentsAdmin = () => {
             Basic Info
           </Typography>
           <TextField
-            label="NAME"
+            label="Name"
             value={modalData.name || ""}
             onChange={(e) =>
               setModalData({ ...modalData, name: e.target.value })
@@ -775,15 +978,11 @@ const InstrumentsAdmin = () => {
             variant="outlined"
             size="small"
             required
-            InputLabelProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
-            InputProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
+            InputLabelProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
+            InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
           />
           <TextField
-            label="BASE PRICE (RM)"
+            label="Base Price (RM)"
             value={modalData.base_price || ""}
             onChange={(e) =>
               setModalData({ ...modalData, base_price: e.target.value })
@@ -795,16 +994,12 @@ const InstrumentsAdmin = () => {
             type="number"
             required
             inputProps={{ min: 0, step: "0.01" }}
-            InputLabelProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
-            InputProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
+            InputLabelProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
+            InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
           />
           <FormControl fullWidth margin="normal" size="small">
-            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif !important" }}>
-              TYPE
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
+              Type
             </InputLabel>
             <Select
               value={modalData.type_id || ""}
@@ -815,12 +1010,12 @@ const InstrumentsAdmin = () => {
                 })
               }
               required
-              sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              sx={{ fontFamily: "Helvetica, sans-serif" }}
             >
               <MenuItem
                 value=""
                 disabled
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
               >
                 Select a type
               </MenuItem>
@@ -828,7 +1023,7 @@ const InstrumentsAdmin = () => {
                 <MenuItem
                   key={item.id}
                   value={item.id}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "Helvetica, sans-serif" }}
                 >
                   {item.name}
                 </MenuItem>
@@ -836,7 +1031,7 @@ const InstrumentsAdmin = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth margin="normal" size="small">
-            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif !important" }}>
+            <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
               Is Available
             </InputLabel>
             <Select
@@ -847,17 +1042,17 @@ const InstrumentsAdmin = () => {
                   is_available: e.target.value === "true",
                 })
               }
-              sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+              sx={{ fontFamily: "Helvetica, sans-serif" }}
             >
               <MenuItem
                 value="true"
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
               >
                 Yes
               </MenuItem>
               <MenuItem
                 value="false"
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
               >
                 No
               </MenuItem>
@@ -868,7 +1063,7 @@ const InstrumentsAdmin = () => {
           <Typography
             variant="h6"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
+              fontFamily: "Helvetica, sans-serif",
               mb: 2,
               fontWeight: "bold",
             }}
@@ -876,7 +1071,7 @@ const InstrumentsAdmin = () => {
             Instrument Description
           </Typography>
           <TextField
-            label="DESCRIPTION"
+            label="Description"
             value={modalData.description || ""}
             onChange={(e) =>
               setModalData({ ...modalData, description: e.target.value })
@@ -887,15 +1082,11 @@ const InstrumentsAdmin = () => {
             size="small"
             multiline
             rows={4}
-            InputLabelProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
-            InputProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
+            InputLabelProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
+            InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
           />
           <TextField
-            label="SPECIFICATIONS"
+            label="Specifications"
             value={modalData.specifications || ""}
             onChange={(e) =>
               setModalData({ ...modalData, specifications: e.target.value })
@@ -906,19 +1097,15 @@ const InstrumentsAdmin = () => {
             size="small"
             multiline
             rows={4}
-            InputLabelProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
-            InputProps={{
-              sx: { fontFamily: "Helvetica, sans-serif !important" },
-            }}
+            InputLabelProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
+            InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
           />
 
           <Divider sx={{ my: 2 }} />
           <Typography
             variant="h6"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
+              fontFamily: "Helvetica, sans-serif",
               mb: 2,
               fontWeight: "bold",
             }}
@@ -931,10 +1118,10 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontSize: "0.875rem",
                 mb: 1,
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
               }}
             >
-              IMAGE
+              Image
             </Typography>
             <input
               type="file"
@@ -942,6 +1129,7 @@ const InstrumentsAdmin = () => {
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file && validateImage(file)) {
+                  if (imagePreview) URL.revokeObjectURL(imagePreview);
                   setModalData({ ...modalData, image: file });
                   setImagePreview(URL.createObjectURL(file));
                 }
@@ -964,6 +1152,7 @@ const InstrumentsAdmin = () => {
                 <CTAButton
                   size="small"
                   onClick={() => {
+                    if (imagePreview) URL.revokeObjectURL(imagePreview);
                     setModalData({ ...modalData, image: "" });
                     setImagePreview(null);
                   }}
@@ -986,14 +1175,12 @@ const InstrumentsAdmin = () => {
       return (
         <Box>
           {tab.writableFields.map((field) => {
-            if (tab.lookups && tab.lookups[field]) {
+            if (tab.lookups[field]) {
               const lookupKey = tab.lookups[field];
               const lookupItems = data[lookupKey] || [];
               return (
                 <FormControl fullWidth margin="normal" size="small" key={field}>
-                  <InputLabel
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                  >
+                  <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
                     {field.replace("_id", "").replace("_", " ").toUpperCase()}
                   </InputLabel>
                   <Select
@@ -1005,11 +1192,11 @@ const InstrumentsAdmin = () => {
                       })
                     }
                     required={field === "instrument_id"}
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                    sx={{ fontFamily: "Helvetica, sans-serif" }}
                   >
                     <MenuItem
                       value=""
-                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      sx={{ fontFamily: "Helvetica, sans-serif" }}
                     >
                       Select an option
                     </MenuItem>
@@ -1017,7 +1204,7 @@ const InstrumentsAdmin = () => {
                       <MenuItem
                         key={item.id}
                         value={item.id}
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "Helvetica, sans-serif" }}
                       >
                         {item.name || item.id}
                       </MenuItem>
@@ -1041,11 +1228,9 @@ const InstrumentsAdmin = () => {
                 size="small"
                 required={field === "name"}
                 InputLabelProps={{
-                  sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  sx: { fontFamily: "Helvetica, sans-serif" },
                 }}
-                InputProps={{
-                  sx: { fontFamily: "Helvetica, sans-serif !important" },
-                }}
+                InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
               />
             );
           })}
@@ -1055,7 +1240,7 @@ const InstrumentsAdmin = () => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   mb: 2,
                   fontWeight: "bold",
                 }}
@@ -1066,29 +1251,19 @@ const InstrumentsAdmin = () => {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         ID
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Label
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Code
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Price (RM)
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Actions
                       </TableCell>
                     </TableRow>
@@ -1096,32 +1271,16 @@ const InstrumentsAdmin = () => {
                   <TableBody>
                     {fieldOptions.map((option) => (
                       <TableRow key={option.id}>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {option.id}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {option.label}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {option.code}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {option.price
                             ? `RM ${parseFloat(option.price).toFixed(2)}`
                             : "N/A"}
@@ -1139,9 +1298,7 @@ const InstrumentsAdmin = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <Typography
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                >
+                <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
                   No field options available.
                 </Typography>
               )}
@@ -1156,11 +1313,9 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{ flex: 1 }}
                   InputLabelProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                    sx: { fontFamily: "Helvetica, sans-serif" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
                 />
                 <TextField
                   label="Option Code"
@@ -1172,11 +1327,9 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{ flex: 1 }}
                   InputLabelProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                    sx: { fontFamily: "Helvetica, sans-serif" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
                 />
                 <TextField
                   label="Price (RM)"
@@ -1188,14 +1341,11 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{ flex: 1 }}
                   type="number"
-                  required
                   inputProps={{ min: 0, step: "0.01" }}
                   InputLabelProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                    sx: { fontFamily: "Helvetica, sans-serif" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
                 />
                 <CTAButton variant="contained" onClick={handleAddFieldOption}>
                   Add Option
@@ -1215,10 +1365,8 @@ const InstrumentsAdmin = () => {
               const lookupItems = data.instruments || [];
               return (
                 <FormControl fullWidth margin="normal" size="small" key={field}>
-                  <InputLabel
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                  >
-                    INSTRUMENTS
+                  <InputLabel sx={{ fontFamily: "Helvetica, sans-serif" }}>
+                    Instruments
                   </InputLabel>
                   <Select
                     multiple
@@ -1239,13 +1387,13 @@ const InstrumentsAdmin = () => {
                         .filter(Boolean)
                         .join(", ")
                     }
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                    sx={{ fontFamily: "Helvetica, sans-serif" }}
                   >
                     {lookupItems.map((item) => (
                       <MenuItem
                         key={item.id}
                         value={item.id}
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "Helvetica, sans-serif" }}
                       >
                         {item.name || item.id}
                       </MenuItem>
@@ -1271,11 +1419,9 @@ const InstrumentsAdmin = () => {
                 size="small"
                 required={field === "name"}
                 InputLabelProps={{
-                  sx: { fontFamily: "Helvetica, sans-serif !important" },
+                  sx: { fontFamily: "Helvetica, sans-serif" },
                 }}
-                InputProps={{
-                  sx: { fontFamily: "Helvetica, sans-serif !important" },
-                }}
+                InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
               />
             );
           })}
@@ -1285,7 +1431,7 @@ const InstrumentsAdmin = () => {
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   mb: 2,
                   fontWeight: "bold",
                 }}
@@ -1296,29 +1442,19 @@ const InstrumentsAdmin = () => {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         ID
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Label
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Code
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Price (RM)
                       </TableCell>
-                      <TableCell
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                      >
+                      <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                         Actions
                       </TableCell>
                     </TableRow>
@@ -1326,32 +1462,16 @@ const InstrumentsAdmin = () => {
                   <TableBody>
                     {addonOptions.map((addon) => (
                       <TableRow key={addon.id}>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {addon.id}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {addon.label}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {addon.code}
                         </TableCell>
-                        <TableCell
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
+                        <TableCell sx={{ fontFamily: "Helvetica, sans-serif" }}>
                           {addon.price
                             ? `RM ${parseFloat(addon.price).toFixed(2)}`
                             : "N/A"}
@@ -1369,9 +1489,7 @@ const InstrumentsAdmin = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <Typography
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                >
+                <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
                   No addons available.
                 </Typography>
               )}
@@ -1386,11 +1504,9 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{ flex: 1 }}
                   InputLabelProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                    sx: { fontFamily: "Helvetica, sans-serif" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
                 />
                 <TextField
                   label="AddOn Code"
@@ -1402,11 +1518,9 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{ flex: 1 }}
                   InputLabelProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                    sx: { fontFamily: "Helvetica, sans-serif" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
                 />
                 <TextField
                   label="Price (RM)"
@@ -1418,14 +1532,11 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{ flex: 1 }}
                   type="number"
-                  required
                   inputProps={{ min: 0, step: "0.01" }}
                   InputLabelProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
+                    sx: { fontFamily: "Helvetica, sans-serif" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "Helvetica, sans-serif" } }}
                 />
                 <CTAButton variant="contained" onClick={handleAddAddon}>
                   Add AddOn
@@ -1442,7 +1553,7 @@ const InstrumentsAdmin = () => {
 
   const renderTable = () => {
     const tab = tabs[activeTab];
-    const items = filteredData[tab.name.toLowerCase().replace(" ", "")] || [];
+    const items = filteredData[tab.dataKey] || [];
     const placeholderImage = "https://via.placeholder.com/50";
 
     return (
@@ -1454,7 +1565,7 @@ const InstrumentsAdmin = () => {
                 key={field}
                 sx={{
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   bgcolor: "#f5f5f5",
                 }}
               >
@@ -1472,7 +1583,7 @@ const InstrumentsAdmin = () => {
             <TableCell
               sx={{
                 fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Helvetica, sans-serif",
                 bgcolor: "#f5f5f5",
               }}
             >
@@ -1486,7 +1597,7 @@ const InstrumentsAdmin = () => {
               <TableCell
                 colSpan={tab.fields.length + 1}
                 align="center"
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "Helvetica, sans-serif" }}
               >
                 <Typography sx={{ py: 2 }}>
                   No {tab.name.toLowerCase()} found.
@@ -1506,7 +1617,7 @@ const InstrumentsAdmin = () => {
                   <TableCell
                     key={field}
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Helvetica, sans-serif",
                       ...(field === "is_available" &&
                         tab.name === ENTITY_TYPES.INSTRUMENTS && {
                           color: item[field] ? "#388e3c" : "#d6393a",
@@ -1529,7 +1640,7 @@ const InstrumentsAdmin = () => {
                     ) : field.includes(".") ||
                       field === "instruments" ||
                       field === "base_price" ? (
-                      getField(item, field) || "N/A"
+                      getField(item, field)
                     ) : field === "is_available" ? (
                       item[field] ? (
                         "Yes"
@@ -1537,7 +1648,7 @@ const InstrumentsAdmin = () => {
                         "No"
                       )
                     ) : (
-                      item[field] || "N/A"
+                      item[field]
                     )}
                   </TableCell>
                 ))}
@@ -1576,7 +1687,6 @@ const InstrumentsAdmin = () => {
         }}
         className="instruments-admin-page"
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
@@ -1588,7 +1698,7 @@ const InstrumentsAdmin = () => {
                 sx={{
                   fontWeight: "bold",
                   color: "#000000",
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   textTransform: "uppercase",
                   mb: 4,
                   fontSize: { xs: "1.5rem", md: "2rem" },
@@ -1607,18 +1717,12 @@ const InstrumentsAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "Helvetica, sans-serif",
                     width: "100%",
                     color: "white",
                     backgroundColor: "#28a745",
-                    "& .MuiAlert-icon": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
-                    "& .MuiAlert-action": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
+                    "& .MuiAlert-icon": { color: "white" },
+                    "& .MuiAlert-action svg": { color: "white" },
                   }}
                 >
                   {success}
@@ -1633,7 +1737,7 @@ const InstrumentsAdmin = () => {
                 <Alert
                   severity="error"
                   onClose={() => setError("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "Helvetica, sans-serif" }}
                 >
                   {error}
                 </Alert>
@@ -1648,7 +1752,7 @@ const InstrumentsAdmin = () => {
                       variant="h6"
                       sx={{
                         mt: 2,
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "Helvetica, sans-serif",
                         fontWeight: "bold",
                         color: "#000000",
                       }}
@@ -1665,23 +1769,20 @@ const InstrumentsAdmin = () => {
                       setActiveTab(newValue);
                       setFilterInstrumentId("");
                       setFilterCategoryId("");
+                      setFilterTypeCategoryId("");
                     }}
                     variant="scrollable"
                     scrollButtons="auto"
                     sx={{
                       mb: 4,
                       "& .MuiTab-root": {
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "Helvetica, sans-serif",
                         textTransform: "none",
                         fontWeight: "bold",
                         color: "#666",
-                        "&.Mui-selected": {
-                          color: "#1976d2",
-                        },
+                        "&.Mui-selected": { color: "#1976d2" },
                       },
-                      "& .MuiTabs-indicator": {
-                        backgroundColor: "#1976d2",
-                      },
+                      "& .MuiTabs-indicator": { backgroundColor: "#1976d2" },
                     }}
                   >
                     {tabs.map((tab, index) => (
@@ -1689,7 +1790,7 @@ const InstrumentsAdmin = () => {
                         label={tab.name}
                         key={tab.name}
                         value={index}
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "Helvetica, sans-serif" }}
                       />
                     ))}
                   </Tabs>
@@ -1720,22 +1821,16 @@ const InstrumentsAdmin = () => {
                         variant="outlined"
                         size="small"
                         InputLabelProps={{
-                          sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
-                          },
+                          sx: { fontFamily: "Helvetica, sans-serif" },
                         }}
                         InputProps={{
-                          sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
-                          },
+                          sx: { fontFamily: "Helvetica, sans-serif" },
                         }}
                       />
                       {tabs[activeTab].name === ENTITY_TYPES.INSTRUMENTS && (
                         <FormControl sx={{ minWidth: "200px" }} size="small">
                           <InputLabel
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
+                            sx={{ fontFamily: "Helvetica, sans-serif" }}
                           >
                             Filter by Category
                           </InputLabel>
@@ -1745,15 +1840,11 @@ const InstrumentsAdmin = () => {
                               setFilterCategoryId(e.target.value)
                             }
                             label="Filter by Category"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
+                            sx={{ fontFamily: "Helvetica, sans-serif" }}
                           >
                             <MenuItem
                               value=""
-                              sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
-                              }}
+                              sx={{ fontFamily: "Helvetica, sans-serif" }}
                             >
                               All Categories
                             </MenuItem>
@@ -1761,10 +1852,41 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={category.id}
                                 value={category.id}
-                                sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
-                                }}
+                                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                              >
+                                {category.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                      {tabs[activeTab].name ===
+                        ENTITY_TYPES.INSTRUMENT_TYPES && (
+                        <FormControl sx={{ minWidth: "200px" }} size="small">
+                          <InputLabel
+                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                          >
+                            Filter by Category
+                          </InputLabel>
+                          <Select
+                            value={filterTypeCategoryId}
+                            onChange={(e) =>
+                              setFilterTypeCategoryId(e.target.value)
+                            }
+                            label="Filter by Category"
+                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                          >
+                            <MenuItem
+                              value=""
+                              sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            >
+                              All Categories
+                            </MenuItem>
+                            {data.categories.map((category) => (
+                              <MenuItem
+                                key={category.id}
+                                value={category.id}
+                                sx={{ fontFamily: "Helvetica, sans-serif" }}
                               >
                                 {category.name}
                               </MenuItem>
@@ -1777,9 +1899,7 @@ const InstrumentsAdmin = () => {
                         tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
                         <FormControl sx={{ minWidth: "200px" }} size="small">
                           <InputLabel
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
+                            sx={{ fontFamily: "Helvetica, sans-serif" }}
                           >
                             Filter by Instrument
                           </InputLabel>
@@ -1789,15 +1909,11 @@ const InstrumentsAdmin = () => {
                               setFilterInstrumentId(e.target.value)
                             }
                             label="Filter by Instrument"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
+                            sx={{ fontFamily: "Helvetica, sans-serif" }}
                           >
                             <MenuItem
                               value=""
-                              sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
-                              }}
+                              sx={{ fontFamily: "Helvetica, sans-serif" }}
                             >
                               All Instruments
                             </MenuItem>
@@ -1805,10 +1921,7 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={instrument.id}
                                 value={instrument.id}
-                                sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
-                                }}
+                                sx={{ fontFamily: "Helvetica, sans-serif" }}
                               >
                                 {instrument.name}
                               </MenuItem>
@@ -1836,17 +1949,12 @@ const InstrumentsAdmin = () => {
               maxWidth="md"
               fullWidth
               PaperProps={{
-                component: "form",
-                onSubmit: (e) => {
-                  e.preventDefault();
-                  handleSave();
-                },
                 sx: { borderRadius: 2, p: 2 },
               }}
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   fontWeight: "bold",
                   color: "#1976d2",
                 }}
@@ -1855,10 +1963,26 @@ const InstrumentsAdmin = () => {
                   ? `Add ${modalType}`
                   : `Edit ${modalType}`}
               </DialogTitle>
-              <DialogContent>{renderModalContent()}</DialogContent>
+              <DialogContent>
+                <Snackbar
+                  open={!!modalError}
+                  autoHideDuration={4000}
+                  onClose={() => setModalError("")}
+                  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                  <Alert
+                    severity="error"
+                    onClose={() => setModalError("")}
+                    sx={{ fontFamily: "Helvetica, sans-serif" }}
+                  >
+                    {modalError}
+                  </Alert>
+                </Snackbar>
+                {renderModalContent()}
+              </DialogContent>
               <DialogActions>
                 <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
-                <CTAButton type="submit" variant="contained">
+                <CTAButton variant="contained" onClick={handleSave}>
                   {modalAction === "add" ? "Create" : "Save"}
                 </CTAButton>
               </DialogActions>
@@ -1872,7 +1996,7 @@ const InstrumentsAdmin = () => {
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Helvetica, sans-serif",
                   fontWeight: "bold",
                   color: "#d6393a",
                 }}
@@ -1880,9 +2004,7 @@ const InstrumentsAdmin = () => {
                 Confirm Deletion
               </DialogTitle>
               <DialogContent>
-                <Typography
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                >
+                <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
                   {confirmMessage}
                 </Typography>
               </DialogContent>

@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from "react";
 import { format, parseISO } from "date-fns";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +38,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import DownloadIcon from "@mui/icons-material/Download";
 import SendIcon from "@mui/icons-material/Send";
 import api from "../api";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import "../styles/SubmittedQuotations.css";
 
@@ -135,8 +141,8 @@ const CTAButton = styled(Button)(({ theme, colorType }) => ({
 }));
 
 function SubmittedQuotations() {
+  const { userRole } = useContext(UserContext);
   const [quotations, setQuotations] = useState([]);
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [rejectingQuotationId, setRejectingQuotationId] = useState(null);
@@ -458,7 +464,6 @@ function SubmittedQuotations() {
       const userRes = await api.get("/api/users/me/", {
         headers: { Authorization: `Bearer ${access}` },
       });
-      setUserRole(userRes.data.role);
 
       const endpoint =
         userRes.data.role === "client"
@@ -712,7 +717,6 @@ function SubmittedQuotations() {
           bgcolor: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <Container

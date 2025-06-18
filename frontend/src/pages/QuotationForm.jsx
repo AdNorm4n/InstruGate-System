@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import "../styles/QuotationForm.css";
 
@@ -55,11 +55,11 @@ const ToolCard = styled(Box)(({ theme }) => ({
 }));
 
 function QuotationForm() {
+  const { userRole } = useContext(UserContext);
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedInstruments, setSelectedInstruments] = useState([]);
   const [userData, setUserData] = useState({});
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isClicked, setIsClicked] = useState(false);
   const [error, setError] = useState(null);
@@ -99,8 +99,7 @@ function QuotationForm() {
           JSON.stringify(userRes.data, null, 2)
         );
         setUserData(userRes.data);
-        setUserRole(userRes.data.role);
-        console.log("User role:", userRes.data.role);
+        console.log("User data:", userRes.data);
 
         setSelectedInstruments(location.state?.selectedInstruments || []);
       } catch (error) {
@@ -337,7 +336,6 @@ function QuotationForm() {
           background: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>

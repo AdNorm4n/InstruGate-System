@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import {
@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import "../styles/UserProfile.css";
 
@@ -80,6 +80,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 function UserProfile() {
+  const { userRole, loading } = useContext(UserContext);
   const [userData, setUserData] = useState({
     username: "",
     first_name: "",
@@ -90,8 +91,6 @@ function UserProfile() {
   });
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [openSuccess, setOpenSuccess] = useState(false);
@@ -179,8 +178,6 @@ function UserProfile() {
         JSON.stringify(newUserData, null, 2)
       );
       setUserData(newUserData);
-      setUserRole(userRes.data.role);
-      setLoading(false);
     } catch (err) {
       console.error("UserProfile: Error fetching user data:", {
         message: err.message,
@@ -189,7 +186,6 @@ function UserProfile() {
       });
       setError("Failed to load profile. Please try again or log in.");
       setOpenError(true);
-      setLoading(false);
       navigate("/login");
     }
   };
@@ -318,26 +314,14 @@ function UserProfile() {
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
+            justifyContent: "center",
             alignItems: "center",
-            textAlign: "center",
-            mt: "20vh",
+            minHeight: "100vh",
+            bgcolor: "#f8f9fa",
+            fontFamily: "Helvetica, sans-serif !important",
           }}
         >
-          <ToolCard sx={{ maxWidth: "500px", mx: "auto", p: 4 }}>
-            <CircularProgress size={48} sx={{ color: "#1976d2" }} />
-            <Typography
-              variant="h6"
-              sx={{
-                mt: 2,
-                fontFamily: "Helvetica, sans-serif !important",
-                fontWeight: "bold",
-                color: "#000000",
-              }}
-            >
-              Loading profile...
-            </Typography>
-          </ToolCard>
+          <CircularProgress size={48} sx={{ color: "#1976d2" }} />
         </Box>
       </Fade>
     );
@@ -352,14 +336,14 @@ function UserProfile() {
           flexDirection: "column",
           minHeight: "100vh",
           bgcolor: "#f8f9fa",
+          fontFamily: "Helvetica, sans-serif !important",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <Container maxWidth="md" sx={{ py: 6, mt: 8 }}>
             <Typography
-              variant="h6"
+              variant="h5"
               align="center"
               gutterBottom
               sx={{
@@ -368,19 +352,18 @@ function UserProfile() {
                 color: "#000000",
                 textTransform: "uppercase",
                 mb: 2,
-                fontSize: { xs: "1.5rem", md: "2rem" },
-                textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                fontSize: "1.5rem",
               }}
             >
               User Profile
             </Typography>
             <Typography
-              variant="body1"
+              variant="body2"
               align="center"
               sx={{
                 fontFamily: "Helvetica, sans-serif !important",
                 color: "#333",
-                mb: 6,
+                mb: 4,
                 fontSize: "0.9rem",
               }}
             >

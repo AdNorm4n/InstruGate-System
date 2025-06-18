@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import api from "../api";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import "../styles/Review.css";
 
 // Utility function to format price as RM10,000.00
@@ -67,12 +67,12 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 function Review() {
+  const { userRole } = useContext(UserContext);
   const location = useLocation();
   const navigate = useNavigate();
   const { instrument, selections, selectedAddOns, productCode, totalPrice } =
     location.state || {};
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
 
@@ -82,22 +82,6 @@ function Review() {
     : null;
 
   console.log("Review image:", instrument?.image, "Full URL:", imageUrl);
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const userRes = await api.get("/api/users/me/");
-        setUserRole(userRes.data.role);
-        console.log("User role:", userRes.data.role);
-      } catch (err) {
-        console.error("Failed to fetch user role:", err);
-        setUserRole("error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUserRole();
-  }, []);
 
   console.log("Review state:", {
     instrument,
@@ -187,25 +171,6 @@ function Review() {
       : []),
   ];
 
-  if (loading) {
-    return (
-      <Box sx={{ textAlign: "center", mt: "20vh" }}>
-        <CircularProgress />
-        <Typography
-          variant="h6"
-          sx={{
-            mt: 2,
-            fontFamily: "Helvetica, sans-serif",
-            fontWeight: "bold",
-            color: "#000000",
-          }}
-        >
-          Loading review...
-        </Typography>
-      </Box>
-    );
-  }
-
   if (!instrument) {
     return (
       <Box sx={{ textAlign: "center", mt: "20vh" }}>
@@ -234,7 +199,6 @@ function Review() {
           bgcolor: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>

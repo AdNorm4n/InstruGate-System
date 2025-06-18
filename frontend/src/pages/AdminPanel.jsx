@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -31,7 +31,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 
 ChartJS.register(
   CategoryScale,
@@ -206,7 +206,7 @@ class ErrorBoundary extends React.Component {
 
 const AdminPanel = () => {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState("");
+  const { userRole, loading: contextLoading } = useContext(UserContext);
   const [error, setError] = useState("");
   const [metricErrors, setMetricErrors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -219,7 +219,19 @@ const AdminPanel = () => {
     quotationStatuses: { pending: 0, approved: 0, rejected: 0, submitted: 0 },
   });
 
+  console.log(
+    "AdminPanel: userRole:",
+    userRole,
+    "contextLoading:",
+    contextLoading
+  );
+
   useEffect(() => {
+    if (contextLoading) {
+      console.log("AdminPanel: Waiting for UserContext to finish loading");
+      return;
+    }
+
     const fetchData = async () => {
       setError("");
       setMetricErrors([]);
@@ -232,6 +244,11 @@ const AdminPanel = () => {
         }
         const headers = { Authorization: `Bearer ${access}` };
 
+        console.log(
+          "AdminPanel: Fetching metrics with token:",
+          access ? "Present" : "Missing"
+        );
+
         const endpoints = [
           { url: "/api/users/list/", key: "users" },
           { url: "/api/quotations/review/", key: "quotations" },
@@ -240,14 +257,13 @@ const AdminPanel = () => {
             key: "instruments",
             params: { is_available: true },
           },
-          { url: "/api/users/me/", key: "user" },
         ];
 
         const responses = await Promise.all(
           endpoints.map(({ url, params }) =>
             api.get(url, { headers, params }).catch((err) => {
               console.error(
-                `Error fetching ${url}:`,
+                `AdminPanel: Error fetching ${url}:`,
                 err.response?.data || err.message
               );
               return {
@@ -305,18 +321,16 @@ const AdminPanel = () => {
             );
           } else if (index === 2) {
             newMetrics.totalInstrumentsAvailable = data.length;
-          } else if (index === 3) {
-            setUserRole(response.data?.role || "client");
           }
         });
 
-        console.log("Fetched Metrics:", newMetrics);
+        console.log("AdminPanel: Fetched Metrics:", newMetrics);
         setMetrics(newMetrics);
         if (errors.length > 0) {
           setMetricErrors(errors);
         }
       } catch (err) {
-        console.error("fetchData Error:", err, err.response?.data);
+        console.error("AdminPanel: fetchData Error:", err, err.response?.data);
         setError(
           `Error loading dashboard: ${
             err.response?.data?.detail || err.message
@@ -324,16 +338,31 @@ const AdminPanel = () => {
         );
       } finally {
         setLoading(false);
+        console.log("AdminPanel: Metrics fetch complete, loading:", false);
       }
     };
-    fetchData();
-  }, []);
 
-  const handleNavigation = (path) => {
-    if (!["admin", "proposal_engineer", "client"].includes(userRole)) {
-      setError("You do not have permission to access admin pages.");
+    if (userRole === null || userRole === undefined) {
+      console.log("AdminPanel: No userRole, redirecting to login");
+      setError("Please log in to access the admin panel.");
+      setLoading(false);
+      navigate("/login");
       return;
     }
+
+    if (userRole !== "admin") {
+      console.log("AdminPanel: User is not admin, redirecting to home");
+      setError("You do not have permission to access the admin panel.");
+      setLoading(false);
+      navigate("/");
+      return;
+    }
+
+    fetchData();
+  }, [contextLoading, userRole, navigate]);
+
+  const handleNavigation = (path) => {
+    console.log("AdminPanel: Navigating to:", path, "with userRole:", userRole);
     navigate(path);
   };
 
@@ -446,13 +475,19 @@ const AdminPanel = () => {
     },
   };
 
-  if (loading) {
+  if (contextLoading || loading) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa", pt: 8 }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
           <Container maxWidth="xl">
             <ToolCard
-              sx={{ p: 3, mx: "auto", maxWidth: "600px", textAlign: "center" }}
+              sx={{
+                p: 3,
+                mx: "auto",
+                maxWidth: "600px",
+                textAlign: "center",
+                mt: 8,
+              }}
             >
               <CircularProgress size={48} sx={{ color: "#1976d2" }} />
             </ToolCard>
@@ -465,9 +500,9 @@ const AdminPanel = () => {
   if (error) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa", pt: 8 }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
           <Container maxWidth="xl">
-            <ToolCard sx={{ p: 3, mx: "auto", maxWidth: "800px" }}>
+            <ToolCard sx={{ p: 3, mx: "auto", maxWidth: "800px", mt: 8 }}>
               <Alert severity="error" sx={{ borderRadius: 2 }}>
                 <Typography
                   variant="body1"
@@ -497,7 +532,6 @@ const AdminPanel = () => {
         }}
         className="admin-panel-page"
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>

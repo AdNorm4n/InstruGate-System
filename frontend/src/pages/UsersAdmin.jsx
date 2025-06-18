@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import {
   Container,
@@ -29,7 +29,7 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
 import "../styles/UsersAdmin.css";
 
@@ -87,6 +87,7 @@ const CancelButton = styled(Button)(({ theme }) => ({
 }));
 
 const UsersAdmin = () => {
+  const { userRole } = useContext(UserContext);
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -104,7 +105,6 @@ const UsersAdmin = () => {
     last_name: "",
   });
   const [modalAction, setModalAction] = useState("add");
-  const [userRole, setUserRole] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [sortConfig, setSortConfig] = useState({
@@ -125,15 +125,13 @@ const UsersAdmin = () => {
         return;
       }
       const headers = { Authorization: `Bearer ${access}` };
-      const [usersResponse, userResponse] = await Promise.all([
+      const [usersResponse] = await Promise.all([
         api.get("/api/users/list/", { headers }),
-        api.get("/api/users/me/", { headers }),
       ]);
       setUsers(Array.isArray(usersResponse.data) ? usersResponse.data : []);
       setFilteredUsers(
         Array.isArray(usersResponse.data) ? usersResponse.data : []
       );
-      setUserRole(userResponse.data?.role || "client");
     } catch (err) {
       console.error("fetchData Error:", err.response?.data || err.message);
       setError(
@@ -395,7 +393,6 @@ const UsersAdmin = () => {
           bgcolor: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
@@ -17,7 +17,7 @@ import {
 import { styled } from "@mui/material/styles";
 import api from "../api";
 import "../styles/Configurator.css";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 
 // Utility function to format price as RM10,000.00
 const formatPrice = (price) => {
@@ -72,6 +72,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 function Configurator({ navigateWithLoading }) {
+  const { userRole } = useContext(UserContext);
   const { instrumentId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -92,7 +93,6 @@ function Configurator({ navigateWithLoading }) {
   const [showAddOns, setShowAddOns] = useState(false);
   const [codeSegments, setCodeSegments] = useState([]);
   const [loading, setLoading] = useState(!state?.configData);
-  const [userRole, setUserRole] = useState(state?.userRole || null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(false);
   const [isClicked, setIsClicked] = useState(null);
   const [showError, setShowError] = useState(false);
@@ -119,44 +119,22 @@ function Configurator({ navigateWithLoading }) {
   );
 
   useEffect(() => {
-    if (!state?.configData || !state?.userRole) {
+    if (!state?.configData) {
       const fetchData = async () => {
         try {
-          const requests = [];
-          if (!state?.userRole) requests.push(api.get("/api/users/me/"));
-          if (!state?.configData)
-            requests.push(api.get(`/api/instruments/${instrumentId}/config/`));
+          const instrumentRes = await api.get(
+            `/api/instruments/${instrumentId}/config/`
+          );
 
-          const responses = await Promise.all(requests);
-          let userRes, instrumentRes;
-
-          if (!state?.userRole && !state?.configData) {
-            [userRes, instrumentRes] = responses;
-            setUserRole(userRes.data.role);
-            setInstrument({
-              ...instrumentRes.data,
-              image: state?.instrument?.image || instrumentRes.data.image,
-              description:
-                state?.instrument?.description ||
-                instrumentRes.data.description ||
-                "No description available",
-            });
-            setFields(instrumentRes.data.fields || []);
-          } else if (!state?.userRole) {
-            [userRes] = responses;
-            setUserRole(userRes.data.role);
-          } else if (!state?.configData) {
-            [instrumentRes] = responses;
-            setInstrument({
-              ...instrumentRes.data,
-              image: state?.instrument?.image || instrumentRes.data.image,
-              description:
-                state?.instrument?.description ||
-                instrumentRes.data.description ||
-                "No description available",
-            });
-            setFields(instrumentRes.data.fields || []);
-          }
+          setInstrument({
+            ...instrumentRes.data,
+            image: state?.instrument?.image || instrumentRes.data.image,
+            description:
+              state?.instrument?.description ||
+              instrumentRes.data.description ||
+              "No description available",
+          });
+          setFields(instrumentRes.data.fields || []);
 
           console.log("Instrument API response:", instrumentRes?.data);
         } catch (err) {
@@ -364,7 +342,6 @@ function Configurator({ navigateWithLoading }) {
           bgcolor: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <Container maxWidth="lg" sx={{ py: 6, mt: 6 }}>

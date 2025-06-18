@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -17,7 +17,7 @@ import {
 import { styled } from "@mui/material/styles";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import api from "../api";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import "../styles/SelectedInstruments.css";
 
 // Utility function to format price as RM10,000.00
@@ -98,6 +98,7 @@ const DangerButton = styled(Button)(({ theme }) => ({
 }));
 
 function SelectedInstruments() {
+  const { userRole } = useContext(UserContext);
   const navigate = useNavigate();
   const [selectedInstruments, setSelectedInstruments] = useState([]);
   const [userData, setUserData] = useState({
@@ -105,7 +106,6 @@ function SelectedInstruments() {
     first_name: "",
     company: "",
   });
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isClicked, setIsClicked] = useState(null);
   const [isImageEnlarged, setIsImageEnlarged] = useState(null);
@@ -117,7 +117,6 @@ function SelectedInstruments() {
     const fetchData = async () => {
       try {
         const userRes = await api.get("/api/users/me/");
-        setUserRole(userRes.data.role);
         setUserData({
           username: userRes.data.username || "Guest",
           first_name: userRes.data.first_name || "Guest",
@@ -140,7 +139,6 @@ function SelectedInstruments() {
         console.log("Selected instruments:", updatedCart);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setUserRole("error");
         navigate("/login");
       } finally {
         setLoading(false);
@@ -302,7 +300,7 @@ function SelectedInstruments() {
     );
   }
 
-  if (userRole === "error") {
+  if (!userRole) {
     return (
       <Box sx={{ textAlign: "center", mt: "20vh" }}>
         <Typography
@@ -330,7 +328,6 @@ function SelectedInstruments() {
           bgcolor: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>
@@ -587,7 +584,7 @@ function SelectedInstruments() {
                             sx={{
                               width: "150px",
                               height: "150px",
-                              bgcolor: "#e0e0e0",
+                              bgcolor: "e0e0e0",
                               borderRadius: "8px",
                               display: "flex",
                               alignItems: "center",

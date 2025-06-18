@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Container,
@@ -31,8 +32,8 @@ import {
 } from "@mui/material";
 import { Visibility, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import Navbar from "../components/Navbar";
 import ErrorBoundary from "../components/ErrorBoundary";
+import { UserContext } from "../contexts/UserContext";
 import "../styles/quotationsadmin.css";
 
 const api = axios.create({
@@ -66,6 +67,8 @@ const CancelButton = styled(Button)(({ theme }) => ({
 }));
 
 const QuotationsAdmin = () => {
+  const navigate = useNavigate();
+  const { userRole, loading: contextLoading } = useContext(UserContext);
   const [data, setData] = useState({
     quotations: [],
     instruments: [],
@@ -80,7 +83,6 @@ const QuotationsAdmin = () => {
   const [openModal, setOpenModal] = useState(false);
   const [modalData, setModalData] = useState({});
   const [modalAction, setModalAction] = useState("view");
-  const [userRole, setUserRole] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortConfig, setSortConfig] = useState({
@@ -93,6 +95,13 @@ const QuotationsAdmin = () => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState("");
+
+  console.log(
+    "QuotationsAdmin: userRole:",
+    userRole,
+    "contextLoading:",
+    contextLoading
+  );
 
   const tabs = [
     {
@@ -134,23 +143,27 @@ const QuotationsAdmin = () => {
     try {
       const access = localStorage.getItem("access");
       if (!access) {
-        setError("Please log in to access the admin panel.");
+        setError("Please log in to access the quotations management page.");
         return;
       }
       const headers = { Authorization: `Bearer ${access}` };
+      console.log(
+        "QuotationsAdmin: Fetching data with token:",
+        access ? "Present" : "Missing"
+      );
       const endpoints = [
         "/api/admin/quotations/",
         "/api/instruments/",
         "/api/users/list/",
-        "/api/users/me/",
       ];
       const responses = await Promise.all(
         endpoints.map((endpoint) =>
           api.get(endpoint, { headers }).catch((err) => {
-            setError(
-              `Error fetching ${endpoint}: ${
-                err.response?.data?.detail || err.message
-              }`
+            console.error(
+              "QuotationsAdmin: Error fetching",
+              endpoint,
+              ":",
+              err.response?.data || err.message
             );
             return {
               error: err.response?.data?.detail || err.message,
@@ -172,27 +185,55 @@ const QuotationsAdmin = () => {
           : [],
       };
 
+      console.log("QuotationsAdmin: Data fetched:", newData);
       setData(newData);
       setFilteredData({
         quotations: newData.quotations,
       });
-      setUserRole(responses[3].data?.role || "client");
 
       if (responses.some((res) => res.error)) {
         setError("Some data could not be loaded. Please try again.");
       }
     } catch (err) {
+      console.error(
+        "QuotationsAdmin: fetchData Error:",
+        err.response?.data || err.message
+      );
       setError(
         `Error loading data: ${err.response?.data?.detail || err.message}`
       );
     } finally {
       setLoading(false);
+      console.log("QuotationsAdmin: Fetch complete, loading:", false);
     }
   };
 
   useEffect(() => {
+    if (contextLoading) {
+      console.log("QuotationsAdmin: Waiting for UserContext to finish loading");
+      return;
+    }
+
+    if (userRole === null || userRole === undefined) {
+      console.log("QuotationsAdmin: No userRole, redirecting to login");
+      setError("Please log in to access the quotations management page.");
+      setLoading(false);
+      navigate("/login");
+      return;
+    }
+
+    if (userRole !== "admin") {
+      console.log("QuotationsAdmin: User is not admin, redirecting to home");
+      setError(
+        "You do not have permission to access the quotations management page."
+      );
+      setLoading(false);
+      navigate("/");
+      return;
+    }
+
     fetchData();
-  }, []);
+  }, [contextLoading, userRole, navigate]);
 
   useEffect(() => {
     const tab = tabs[0];
@@ -287,6 +328,7 @@ const QuotationsAdmin = () => {
     try {
       const access = localStorage.getItem("access");
       const headers = { Authorization: `Bearer ${access}` };
+      console.log("QuotationsAdmin: Fetching quotation items for ID:", item.id);
       const quotationItemsResponse = await api.get(
         "/api/admin/quotation-items/",
         {
@@ -300,7 +342,12 @@ const QuotationsAdmin = () => {
           )
         : [];
       setQuotationItems(items);
+      console.log("QuotationsAdmin: Quotation items fetched:", items);
     } catch (err) {
+      console.error(
+        "QuotationsAdmin: Quotation items fetch Error:",
+        err.response?.data || err.message
+      );
       setError(
         `Failed to load quotation items: ${
           err.response?.data?.detail || err.message
@@ -344,12 +391,18 @@ const QuotationsAdmin = () => {
     handleOpenConfirmDialog(async () => {
       try {
         const access = localStorage.getItem("access");
+        console.log("QuotationsAdmin: Deleting quotation ID:", id);
         await api.delete(`${tabs[0].endpoint}${id}/`, {
           headers: { Authorization: `Bearer ${access}` },
         });
         setSuccess("Quotation deleted successfully!");
+        console.log("QuotationsAdmin: Quotation deleted, ID:", id);
         fetchData();
       } catch (err) {
+        console.error(
+          "QuotationsAdmin: Delete Error:",
+          err.response?.data || err.message
+        );
         setError(
           `Failed to delete quotation: ${
             err.response?.data?.detail || err.message
@@ -376,6 +429,14 @@ const QuotationsAdmin = () => {
         }
         payload.remarks = remarks;
       }
+      console.log(
+        "QuotationsAdmin: Performing action",
+        action,
+        "on quotation ID:",
+        id,
+        "with payload:",
+        payload
+      );
       await api.patch(`/api/admin/quotations/${id}/`, payload, {
         headers: { Authorization: `Bearer ${access}` },
       });
@@ -384,8 +445,18 @@ const QuotationsAdmin = () => {
           action === "approve" ? "approved" : "rejected"
         } successfully!`
       );
+      console.log(
+        "QuotationsAdmin: Quotation action",
+        action,
+        "successful for ID:",
+        id
+      );
       fetchData();
     } catch (err) {
+      console.error(
+        "QuotationsAdmin: Quotation action Error:",
+        err.response?.data || err.message
+      );
       setError(
         `Failed to ${action} quotation: ${
           err.response?.data?.detail || err.message
@@ -649,7 +720,6 @@ const QuotationsAdmin = () => {
             gap: 2,
           }}
         >
-          {/* Created By */}
           <TextField
             label="Created By"
             value={getField(modalData, "created_by.first_name")}
@@ -673,7 +743,6 @@ const QuotationsAdmin = () => {
               },
             }}
           />
-          {/* Company */}
           <TextField
             label="Company"
             value={modalData.company || ""}
@@ -697,7 +766,6 @@ const QuotationsAdmin = () => {
               },
             }}
           />
-          {/* Project Name */}
           <TextField
             label="Project Name"
             value={modalData.project_name || ""}
@@ -721,7 +789,6 @@ const QuotationsAdmin = () => {
               },
             }}
           />
-          {/* Updated At */}
           <TextField
             label="Updated At"
             value={
@@ -749,7 +816,6 @@ const QuotationsAdmin = () => {
               },
             }}
           />
-          {/* Emailed At */}
           <TextField
             label="Emailed At"
             value={
@@ -777,7 +843,6 @@ const QuotationsAdmin = () => {
               },
             }}
           />
-          {/* Total Quotation Price */}
           <TextField
             label="Total Quotation Price (RM)"
             value={
@@ -928,6 +993,46 @@ const QuotationsAdmin = () => {
     );
   };
 
+  if (contextLoading || loading) {
+    return (
+      <Fade in>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
+          <Container maxWidth="xl">
+            <ToolCard
+              sx={{ maxWidth: 400, mx: "auto", textAlign: "center", mt: 8 }}
+            >
+              <CircularProgress size={48} sx={{ color: "#d4a028" }} />
+            </ToolCard>
+          </Container>
+        </Box>
+      </Fade>
+    );
+  }
+
+  if (error) {
+    return (
+      <Fade in>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
+          <Container maxWidth="xl">
+            <ToolCard sx={{ maxWidth: 800, mx: "auto", mt: 8 }}>
+              <Alert severity="error" sx={{ borderRadius: 2 }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  {error}
+                </Typography>
+              </Alert>
+            </ToolCard>
+          </Container>
+        </Box>
+      </Fade>
+    );
+  }
+
   return (
     <Fade in timeout={800}>
       <Box
@@ -939,7 +1044,6 @@ const QuotationsAdmin = () => {
         }}
         className="quotations-admin-page"
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
@@ -1001,257 +1105,236 @@ const QuotationsAdmin = () => {
                   {error}
                 </Alert>
               </Snackbar>
-              {loading ? (
-                <Box sx={{ textAlign: "center", mt: "20vh" }}>
-                  <ToolCard
-                    sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
-                  >
-                    <CircularProgress size={48} sx={{ color: "#d4a028" }} />
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        mt: 2,
-                        fontFamily: "Helvetica, sans-serif !important",
-                        fontWeight: "bold",
-                        color: "#000000",
-                      }}
-                    >
-                      Loading data...
-                    </Typography>
-                  </ToolCard>
-                </Box>
-              ) : (
-                <ToolCard>
+              <ToolCard>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    mb: 4,
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
                       gap: 2,
-                      mb: 4,
                       flexWrap: "wrap",
-                      alignItems: "center",
+                      flex: 1,
+                      width: "100%",
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 2,
-                        flexWrap: "wrap",
-                        flex: 1,
-                        width: "100%",
+                    <TextField
+                      label={`Search by ${tabs[0].searchFields
+                        .map((field) => tabs[0].displayFields[field])
+                        .join(" or ")}`}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      sx={{ flex: 2, minWidth: "300px" }}
+                      variant="outlined"
+                      size="small"
+                      InputLabelProps={{
+                        sx: {
+                          fontFamily: "Helvetica, sans-serif !important",
+                        },
                       }}
+                      InputProps={{
+                        sx: {
+                          fontFamily: "Helvetica, sans-serif !important",
+                        },
+                      }}
+                    />
+                    <FormControl
+                      sx={{ flex: 1, minWidth: "200px" }}
+                      size="small"
                     >
-                      <TextField
-                        label={`Search by ${tabs[0].searchFields
-                          .map((field) => tabs[0].displayFields[field])
-                          .join(" or ")}`}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        sx={{ flex: 2, minWidth: "300px" }}
-                        variant="outlined"
-                        size="small"
-                        InputLabelProps={{
-                          sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
-                          },
+                      <InputLabel
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif !important",
                         }}
-                        InputProps={{
-                          sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
-                          },
-                        }}
-                      />
-                      <FormControl
-                        sx={{ flex: 1, minWidth: "200px" }}
-                        size="small"
                       >
-                        <InputLabel
+                        Status
+                      </InputLabel>
+                      <Select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        label="Status"
+                        sx={{
+                          fontFamily: "Helvetica, sans-serif !important",
+                        }}
+                      >
+                        <MenuItem
+                          value=""
                           sx={{
                             fontFamily: "Helvetica, sans-serif !important",
                           }}
                         >
-                          Status
-                        </InputLabel>
-                        <Select
-                          value={statusFilter}
-                          onChange={(e) => setStatusFilter(e.target.value)}
-                          label="Status"
+                          All Statuses
+                        </MenuItem>
+                        <MenuItem
+                          value="pending"
                           sx={{
                             fontFamily: "Helvetica, sans-serif !important",
                           }}
                         >
-                          <MenuItem
-                            value=""
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            All Statuses
-                          </MenuItem>
-                          <MenuItem
-                            value="pending"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Pending
-                          </MenuItem>
-                          <MenuItem
-                            value="approved"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Approved
-                          </MenuItem>
-                          <MenuItem
-                            value="rejected"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Rejected
-                          </MenuItem>
-                          <MenuItem
-                            value="submitted"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Submitted
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
+                          Pending
+                        </MenuItem>
+                        <MenuItem
+                          value="approved"
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          Approved
+                        </MenuItem>
+                        <MenuItem
+                          value="rejected"
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          Rejected
+                        </MenuItem>
+                        <MenuItem
+                          value="submitted"
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif !important",
+                          }}
+                        >
+                          Submitted
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
                   </Box>
-                  {renderTable()}
-                </ToolCard>
-              )}
-              <Dialog
-                open={openModal}
-                onClose={handleModalClose}
-                maxWidth={modalAction === "reject" ? "sm" : "lg"}
-                fullWidth
-                PaperProps={{
-                  component: "form",
-                  onSubmit: (e) => {
-                    e.preventDefault();
-                    if (modalAction === "reject") {
-                      handleQuotationAction(
-                        modalData.id,
-                        "reject",
-                        modalData.remarks
-                      );
-                      handleModalClose();
-                    }
-                  },
-                  sx: { borderRadius: 2, p: 2 },
+                </Box>
+                {renderTable()}
+              </ToolCard>
+            </Container>
+            <Dialog
+              open={openModal}
+              onClose={handleModalClose}
+              maxWidth={modalAction === "reject" ? "sm" : "lg"}
+              fullWidth
+              PaperProps={{
+                component: "form",
+                onSubmit: (e) => {
+                  e.preventDefault();
+                  if (modalAction === "reject") {
+                    handleQuotationAction(
+                      modalData.id,
+                      "reject",
+                      modalData.remarks
+                    );
+                    handleModalClose();
+                  }
+                },
+                sx: { borderRadius: 2, p: 2 },
+              }}
+            >
+              <DialogTitle
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  color: "#1976d2",
                 }}
               >
-                <DialogTitle
-                  sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#1976d2",
-                  }}
-                >
-                  {modalAction === "reject"
-                    ? "Reject Quotation"
-                    : "View Quotation"}
-                </DialogTitle>
-                <DialogContent>{renderModalContent()}</DialogContent>
-                <DialogActions>
-                  <CancelButton onClick={handleModalClose}>Close</CancelButton>
-                  {modalAction === "reject" && (
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      sx={{
-                        bgcolor: "#d6393a",
-                        "&:hover": { bgcolor: "#b71c1c" },
-                        fontFamily: "Helvetica, sans-serif !important",
-                      }}
-                    >
-                      Submit
-                    </Button>
-                  )}
-                </DialogActions>
-              </Dialog>
-              <Dialog
-                open={openRemarksDialog}
-                onClose={handleCloseRemarksDialog}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                  sx: { borderRadius: 2, p: 2 },
-                }}
-              >
-                <DialogTitle
-                  sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#1976d2",
-                  }}
-                >
-                  Full Remarks
-                </DialogTitle>
-                <DialogContent>
-                  <Typography
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {selectedRemarks}
-                  </Typography>
-                </DialogContent>
-                <DialogActions>
-                  <CancelButton onClick={handleCloseRemarksDialog}>
-                    Close
-                  </CancelButton>
-                </DialogActions>
-              </Dialog>
-              <Dialog
-                open={openConfirmDialog}
-                onClose={handleCloseConfirmDialog}
-                maxWidth="xs"
-                fullWidth
-                PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
-              >
-                <DialogTitle
-                  sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#d6393a",
-                  }}
-                >
-                  Confirm Deletion
-                </DialogTitle>
-                <DialogContent>
-                  <Typography
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                  >
-                    {confirmMessage}
-                  </Typography>
-                </DialogContent>
-                <DialogActions>
-                  <CancelButton onClick={handleCloseConfirmDialog}>
-                    Cancel
-                  </CancelButton>
+                {modalAction === "reject"
+                  ? "Reject Quotation"
+                  : "View Quotation"}
+              </DialogTitle>
+              <DialogContent>{renderModalContent()}</DialogContent>
+              <DialogActions>
+                <CancelButton onClick={handleModalClose}>Close</CancelButton>
+                {modalAction === "reject" && (
                   <Button
+                    type="submit"
                     variant="contained"
-                    onClick={handleConfirmAction}
                     sx={{
                       bgcolor: "#d6393a",
                       "&:hover": { bgcolor: "#b71c1c" },
                       fontFamily: "Helvetica, sans-serif !important",
                     }}
                   >
-                    Delete
+                    Submit
                   </Button>
-                </DialogActions>
-              </Dialog>
-            </Container>
+                )}
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              open={openRemarksDialog}
+              onClose={handleCloseRemarksDialog}
+              maxWidth="sm"
+              fullWidth
+              PaperProps={{
+                sx: { borderRadius: 2, p: 2 },
+              }}
+            >
+              <DialogTitle
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  color: "#1976d2",
+                }}
+              >
+                Full Remarks
+              </DialogTitle>
+              <DialogContent>
+                <Typography
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif !important",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {selectedRemarks}
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <CancelButton onClick={handleCloseRemarksDialog}>
+                  Close
+                </CancelButton>
+              </DialogActions>
+            </Dialog>
+            <Dialog
+              open={openConfirmDialog}
+              onClose={handleCloseConfirmDialog}
+              maxWidth="xs"
+              fullWidth
+              PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+            >
+              <DialogTitle
+                sx={{
+                  fontFamily: "Helvetica, sans-serif !important",
+                  fontWeight: "bold",
+                  color: "#d6393a",
+                }}
+              >
+                Confirm Deletion
+              </DialogTitle>
+              <DialogContent>
+                <Typography
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                >
+                  {confirmMessage}
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <CancelButton onClick={handleCloseConfirmDialog}>
+                  Cancel
+                </CancelButton>
+                <Button
+                  variant="contained"
+                  onClick={handleConfirmAction}
+                  sx={{
+                    bgcolor: "#d6393a",
+                    "&:hover": { bgcolor: "#b71c1c" },
+                    fontFamily: "Helvetica, sans-serif !important",
+                  }}
+                >
+                  Delete
+                </Button>
+              </DialogActions>
+            </Dialog>
           </ErrorBoundary>
         </main>
       </Box>

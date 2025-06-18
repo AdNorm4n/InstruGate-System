@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Box,
   Container,
@@ -16,7 +16,7 @@ import {
   Alert,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import "../styles/Tools.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -124,6 +124,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
 }));
 
 function Tools() {
+  const { userRole } = useContext(UserContext);
   const [activeTool, setActiveTool] = useState("unitConverter");
   // Unit Converter state
   const [converterValue, setConverterValue] = useState("");
@@ -562,7 +563,6 @@ function Tools() {
           fontFamily: "Helvetica, sans-serif !important",
         }}
       >
-        <Navbar userRole={null} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
@@ -724,6 +724,18 @@ function Tools() {
                         : `${converterValue} ${fromUnit} = ${converterResult} ${toUnit}`}
                     </Typography>
                   )}
+                  <Alert
+                    severity="info"
+                    sx={{
+                      mt: 3,
+                      fontFamily: "Helvetica, sans-serif !important",
+                      fontSize: "0.85rem",
+                      backgroundColor: "#e3f2fd",
+                    }}
+                  >
+                    This guide is for general information only. Consult project
+                    proposal engineers for critical applications.
+                  </Alert>
                 </Box>
               )}
               {activeTool === "wakeFrequency" && (
@@ -894,6 +906,18 @@ function Tools() {
                       )}
                     </Box>
                   )}
+                  <Alert
+                    severity="info"
+                    sx={{
+                      mt: 3,
+                      fontFamily: "Helvetica, sans-serif !important",
+                      fontSize: "0.85rem",
+                      backgroundColor: "#e3f2fd",
+                    }}
+                  >
+                    This guide is for general information only. Consult project
+                    proposal engineers for critical applications.
+                  </Alert>
                 </Box>
               )}
               {activeTool === "materialSelection" && (
@@ -1347,6 +1371,18 @@ function Tools() {
                       )}
                     </Box>
                   )}
+                  <Alert
+                    severity="info"
+                    sx={{
+                      mt: 3,
+                      fontFamily: "Helvetica, sans-serif !important",
+                      fontSize: "0.85rem",
+                      backgroundColor: "#e3f2fd",
+                    }}
+                  >
+                    This guide is for general information only. Consult project
+                    proposal engineers for critical applications.
+                  </Alert>
                 </Box>
               )}
             </ToolCard>

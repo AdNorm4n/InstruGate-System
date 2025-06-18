@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Box,
   Container,
@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { LocationOn, Phone, Email, LinkedIn } from "@mui/icons-material";
-import Navbar from "../components/Navbar.jsx";
+import { UserContext } from "../contexts/UserContext";
 import companylogo from "../assets/companylogo.png";
 import pressImage from "../assets/press.jpg";
 import tempImage from "../assets/temp.jpg";
@@ -88,6 +88,8 @@ const ProductCard = styled(Card)(({ theme }) => ({
 }));
 
 function About() {
+  const { userRole } = useContext(UserContext);
+
   return (
     <Fade in timeout={800}>
       <Box
@@ -98,7 +100,6 @@ function About() {
           fontFamily: "Helvetica, sans-serif !important",
         }}
       >
-        <Navbar userRole={null} />
         <DrawerHeader />
         <main>
           <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>

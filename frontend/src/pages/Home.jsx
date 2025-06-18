@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
-import Navbar from "../components/Navbar";
+import { UserContext } from "../contexts/UserContext";
 import "../styles/Home.css";
 import { styled } from "@mui/material/styles";
 import {
@@ -110,22 +109,17 @@ const ProductCard = styled(Card)(({ theme }) => ({
 
 function Home() {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
+  const { userRole, loading } = useContext(UserContext);
   const [isClicked, setIsClicked] = useState(null);
 
   useEffect(() => {
-    api
-      .get("/api/users/me/")
-      .then((res) => setUserRole(res.data.role))
-      .catch((err) => {
-        console.error("Failed to fetch user role:", err);
-        setUserRole(null);
-      });
-  }, []);
+    if (!userRole && !loading) {
+      navigate("/login");
+    }
+  }, [userRole, loading, navigate]);
 
   const handleClick = (action, path) => {
     setIsClicked(action);
-    console.log("handleClick called:", { action, path });
     setTimeout(() => {
       try {
         navigate(path);
@@ -138,7 +132,19 @@ function Home() {
     }, 300);
   };
 
-  if (userRole === null) {
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
@@ -153,7 +159,6 @@ function Home() {
           fontFamily: "Helvetica, sans-serif !important",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <section className="home-hero">

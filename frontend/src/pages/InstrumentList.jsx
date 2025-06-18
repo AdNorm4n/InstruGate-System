@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Grid,
@@ -14,8 +14,8 @@ import {
 } from "@mui/material";
 import api from "../api";
 import InstrumentCard from "../components/InstrumentCard";
-import Navbar from "../components/Navbar";
 import { styled } from "@mui/material/styles";
+import { UserContext } from "../contexts/UserContext";
 import "../styles/InstrumentList.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -66,22 +66,17 @@ const ToolCard = styled(Box)(({ theme }) => ({
 }));
 
 const InstrumentList = () => {
+  const { userRole } = useContext(UserContext);
   const [groupedData, setGroupedData] = useState({});
-  const [userRole, setUserRole] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [configCache, setConfigCache] = useState({});
 
-  // Fetch user role, instruments, and prefetch configs
+  // Fetch instruments and prefetch configs
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userRes, instrumentsRes] = await Promise.all([
-          api.get("/api/users/me/"),
-          api.get("/api/instruments/"),
-        ]);
-
-        setUserRole(userRes.data.role);
+        const instrumentsRes = await api.get("/api/instruments/");
 
         const instruments = instrumentsRes.data.filter((i) => i.is_available);
         console.log("Instruments API response:", instruments);
@@ -119,7 +114,6 @@ const InstrumentList = () => {
         setConfigCache(newConfigCache);
       } catch (err) {
         console.error("Error fetching data:", err);
-        setUserRole("error");
       } finally {
         setLoading(false);
       }
@@ -134,7 +128,7 @@ const InstrumentList = () => {
   };
 
   // Error fallback
-  if (userRole === "error") {
+  if (!userRole) {
     return (
       <Fade in timeout={800}>
         <Box sx={{ display: "flex", justifyContent: "center", mt: "20vh" }}>
@@ -165,7 +159,6 @@ const InstrumentList = () => {
           bgcolor: "#f8f9fa",
         }}
       >
-        <Navbar userRole={userRole} />
         <DrawerHeader />
 
         <main style={{ flex: 1 }}>
