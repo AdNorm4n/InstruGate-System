@@ -653,6 +653,9 @@ const ChatComponent = () => {
     }
   };
 
+  // Restrict chat access to non-admin users
+  if (user?.role === "admin") return null;
+
   // Render error state
   if (
     error &&
