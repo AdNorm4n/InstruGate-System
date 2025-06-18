@@ -7,7 +7,7 @@ from .views import (
     FieldOptionListView, FieldOptionDetailView,
     AddOnTypeListView, AddOnTypeDetailView,
     AddOnListView, AddOnDetailView, InstrumentOptionListView,
-    QuotationCreateView, SubmittedQuotationView, QuotationReviewView, QuotationSubmitView,
+    QuotationCreateView, SubmittedQuotationView, QuotationReviewView, QuotationSubmitView, QuotationDownloadView,
     QuotationItemListView, QuotationItemDetailView,
     QuotationItemSelectionListView, QuotationItemSelectionDetailView,
     QuotationItemAddOnListView, QuotationItemAddOnDetailView,
@@ -67,6 +67,7 @@ urlpatterns = [
     path('quotations/review/<int:pk>/', QuotationReviewView.as_view(), name='quotation-review'),
     path('quotations/review/', QuotationReviewView.as_view(), name='quotation-review-list'),
     path('quotations/<int:pk>/submit/', QuotationSubmitView.as_view(), name='quotation-submit'),
+    path('quotations/<int:pk>/download-pdf/', QuotationDownloadView.as_view(), name='quotation-download-pdf'),
 
     # QuotationItem endpoints
     path('quotation-items/', QuotationItemListView.as_view(), name='quotation-item-list'),

@@ -31,7 +31,6 @@ import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import DownloadIcon from "@mui/icons-material/Download";
 import SendIcon from "@mui/icons-material/Send";
-import jsPDF from "jspdf";
 import api from "../api";
 import Navbar from "../components/Navbar";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
@@ -381,186 +380,48 @@ function SubmittedQuotations() {
     }
   }, []);
 
-  const handleDownloadPDF = (quotation) => {
+  const handleDownloadPDF = async (quotation) => {
     try {
-      console.log("Generating PDF for quotation:", quotation.id);
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 15;
-      const lineHeight = 5;
-      let y = 40;
-
-      // Add Letterhead
-      try {
-        doc.addImage("/images/letterhead.jpg", "JPEG", 0, 0, 210, 297);
-      } catch (imgError) {
-        console.warn("Letterhead image failed to load:", imgError);
+      console.log("Downloading PDF for quotation:", quotation.id);
+      const access = getToken();
+      if (!access) {
+        throw new Error("No access token found.");
       }
 
-      // Title
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.text(
-        `Purchase Order Quotation #${quotation.id || "Unknown"}`,
-        margin,
-        y
+      const response = await api.get(
+        `/api/quotations/${quotation.id}/download-pdf/`,
+        {
+          headers: { Authorization: `Bearer ${access}` },
+          responseType: "blob",
+        }
       );
-      y += lineHeight + 2;
 
-      // Status
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`Status: ${formatStatusText(quotation.status)}`, margin, y);
-      y += lineHeight + 4;
-
-      // Separator Line
-      doc.setDrawColor(100, 100, 100);
-      doc.setLineWidth(0.3);
-      doc.line(margin, y, pageWidth - margin, y);
-      y += lineHeight + 2;
-
-      // Details Section
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.text("Details", margin, y);
-      y += lineHeight + 8;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      const details = [
-        {
-          label: "Submitted by:",
-          value: quotation.created_by_first_name || "N/A",
-        },
-        { label: "Company:", value: quotation.company || "N/A" },
-        { label: "Project:", value: quotation.project_name || "N/A" },
-        {
-          label: "Total Quotation Price:",
-          value: formatPrice(quotation.total_price),
-        },
-        {
-          label: "Submitted at:",
-          value: quotation.submitted_at
-            ? format(parseISO(quotation.submitted_at), "MMM dd, yyyy, h:mm a")
-            : "Unknown",
-        },
-        {
-          label: "Reviewed by:",
-          value: quotation.reviewed_by_name || "N/A",
-          show: quotation.status !== "pending",
-        },
-        {
-          label: "Approved at:",
-          value: quotation.approved_at
-            ? format(parseISO(quotation.approved_at), "MMM dd, yyyy, h:mm a")
-            : "N/A",
-          show: quotation.status === "approved",
-        },
-        {
-          label: "Rejected at:",
-          value: quotation.rejected_at
-            ? format(parseISO(quotation.rejected_at), "MMM dd, yyyy, h:mm a")
-            : "N/A",
-          show: quotation.status === "rejected",
-        },
-        {
-          label: "Emailed at:",
-          value: quotation.emailed_at
-            ? format(parseISO(quotation.emailed_at), "MMM dd, yyyy, h:mm a")
-            : "N/A",
-          show: !!quotation.emailed_at,
-        },
-      ].filter((item) => item.show !== false);
-
-      // Two-column layout for Details
-      const colWidth = 90;
-      const indent = 5;
-      const midPoint = Math.ceil(details.length / 2);
-      details.slice(0, midPoint).forEach((item, index) => {
-        doc.text(
-          `${item.label} ${item.value}`,
-          margin + indent,
-          y + index * (lineHeight + 1)
-        );
-      });
-      details.slice(midPoint).forEach((item, index) => {
-        doc.text(
-          `${item.label} ${item.value}`,
-          margin + colWidth + indent,
-          y + index * (lineHeight + 1)
-        );
-      });
-      y += Math.max(midPoint, details.length - midPoint) * (lineHeight + 1) + 8;
-
-      // Instruments Section
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      doc.text("Instruments", margin, y);
-      y += lineHeight + 8;
-
-      // Instruments List
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      const items = Array.isArray(quotation.items) ? quotation.items : [];
-      if (items.length === 0) {
-        doc.text("No instruments listed.", margin + indent, y);
-        y += lineHeight + 8;
-      } else {
-        items.forEach((item, index) => {
-          const itemHeight = 4 * (lineHeight + 1) + 8;
-          if (y + itemHeight > pageHeight - margin) {
-            doc.addPage();
-            try {
-              doc.addImage("/images/letterhead.jpg", "JPEG", 0, 0, 210, 40);
-            } catch (imgError) {
-              console.warn(
-                "Letterhead image failed to load on new page:",
-                imgError
-              );
-            }
-            y = 40;
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text("Instruments (Continued)", margin, y);
-            y += lineHeight + 8;
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-          }
-          const instrumentName =
-            item.instrument?.name || item.name || "Unknown";
-          const productCode = item.product_code || "N/A";
-          const quantity = item.quantity || "1";
-          const totalPrice = formatPrice(item.total_price);
-          doc.setFont("helvetica", "bold");
-          doc.text(`Item #${index + 1}`, margin + indent, y);
-          y += lineHeight + 1;
-          doc.setFont("helvetica", "normal");
-          doc.text(`Instrument Name: ${instrumentName}`, margin + indent, y);
-          y += lineHeight + 1;
-          doc.text(`Product Code: ${productCode}`, margin + indent, y);
-          y += lineHeight + 1;
-          doc.text(`Qty: ${quantity}`, margin + indent, y);
-          y += lineHeight + 1;
-          doc.text(`Total Price: ${totalPrice}`, margin + indent, y);
-          y += lineHeight + 8;
-        });
-      }
-
-      // Save PDF
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: "application/pdf" })
+      );
+      const link = document.createElement("a");
+      link.href = url;
       const safeCompany = (quotation.company || "Unknown").replace(
         /[^a-zA-Z0-9]/g,
         "_"
       );
-      doc.save(
-        `Purchase Order ${safeCompany} #${quotation.id || "Unknown"}.pdf`
+      link.setAttribute(
+        "download",
+        `Purchase_Order_${safeCompany}_#${quotation.id}.pdf`
       );
-      setSuccessMessage("PDF generated successfully!");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      setSuccessMessage("PDF downloaded successfully!");
       setOpenSuccess(true);
     } catch (err) {
-      console.error("Error generating PDF:", err);
+      console.error("Error downloading PDF:", err);
       setErrorMessage(
-        "Failed to generate PDF. Please check the console for details."
+        `Failed to download PDF: ${
+          err.response?.data?.detail || err.message || "Unknown error"
+        }`
       );
       setOpenError(true);
     }
