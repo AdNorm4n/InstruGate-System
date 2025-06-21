@@ -102,10 +102,19 @@ TEMPLATES = [
 ASGI_APPLICATION = "backend.asgi.application"
 
 # For simplicity, use in‐memory channel layer
+#CHANNEL_LAYERS = {
+    #'default': {
+        #'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    #}
+#}
+
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    }
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(os.environ.get("REDIS_URL", "redis://localhost:6379"))],
+        },
+    },
 }
 
 
