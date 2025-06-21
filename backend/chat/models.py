@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from cloudinary_storage.storage import RawMediaCloudinaryStorage  # ✅ Add this
 
 class ChatMessage(models.Model):
     ROOM_NAME_MAX_LENGTH = 150
@@ -17,14 +18,24 @@ class ChatMessage(models.Model):
         blank=True,
         related_name='assisted_messages'
     )
+
     SENDER_CHOICES = (
         ('client', 'Client'),
         ('agent', 'Agent'),
         ('system', 'System'),
     )
+
     sender_type = models.CharField(max_length=10, choices=SENDER_CHOICES)
     content = models.TextField(blank=True)  # Allow blank for file-only messages
-    file = models.FileField(upload_to='chat_files/%Y/%m/%d/', null=True, blank=True)
+
+    # ✅ Update this line to use RawMediaCloudinaryStorage
+    file = models.FileField(
+        upload_to='chat_files/%Y/%m/%d/',
+        storage=RawMediaCloudinaryStorage(),
+        null=True,
+        blank=True
+    )
+
     file_name = models.CharField(max_length=255, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
