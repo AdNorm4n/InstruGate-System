@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
-import os
+import dj_database_url
 
 load_dotenv()
 
@@ -25,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hkp(*1-zvy=7&=)oq!9fo2#^w!c-*xkednpff*)*qu+2j%2n76'
+SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret-if-needed")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -111,19 +112,26 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
+#DATABASES = {
+    #'default': {
         #'ENGINE': 'django.db.backends.sqlite3',
         #'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'egRjrhDPfoQnDzKbQwiawIviCKPavTfQ',
-        'HOST': 'shuttle.proxy.rlwy.net',
-        'PORT': '21605',
-    }
-}
+        #'ENGINE': 'django.db.backends.postgresql',
+        #'NAME': 'railway',
+        #'USER': 'postgres',
+        #'PASSWORD': 'egRjrhDPfoQnDzKbQwiawIviCKPavTfQ',
+        #'HOST': 'shuttle.proxy.rlwy.net',
+        #'PORT': '21605',
+    #}
+#}
 
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
