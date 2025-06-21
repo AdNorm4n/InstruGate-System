@@ -16,3 +16,5 @@ channels-redis
 dj-database-url
 daphne
 whitenoise
+cloudinary
+django-cloudinary-storage

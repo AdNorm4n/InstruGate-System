@@ -51,7 +51,9 @@ const normalizeFileUrl = (fileUrl) => {
   // Ensure single leading slash
   cleanedUrl = `/${cleanedUrl.replace(/^\/+/, "")}`;
 
-  const finalUrl = `http://127.0.0.1:8000${cleanedUrl}`;
+  // Use VITE_API_URL for the base URL
+  const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+  const finalUrl = `${baseUrl}${cleanedUrl}`;
   console.log("Original file_url:", fileUrl, "Normalized:", finalUrl);
   return finalUrl;
 };
@@ -71,16 +73,35 @@ const ChatComponent = () => {
   const ws = useRef(null);
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
-  const reconnectDelay = 3000;
+  const reconnectDelay = 5000;
   const messagesEndRef = useRef(null);
   const pendingMarkRead = useRef([]);
   const fileInputRef = useRef(null);
   const processedMessageIds = useRef(new Set());
+  const isConnecting = useRef(false); // Track connection attempts
+
+  // Check if on public pages
+  const publicPages = [
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+  ];
+  const isPublicPage = publicPages.includes(window.location.pathname);
 
   // Authenticate user and fetch profile
   useEffect(() => {
+    if (isPublicPage) {
+      console.log(
+        "Skipping user fetch on public page:",
+        window.location.pathname
+      );
+      return;
+    }
+
     const token = localStorage.getItem(ACCESS_TOKEN);
     if (!token) {
+      console.log("No token found, redirecting to login");
       setError("Please log in to continue.");
       window.location.href = "/login";
       return;
@@ -90,6 +111,7 @@ const ChatComponent = () => {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const exp = payload.exp * 1000;
       if (Date.now() > exp) {
+        console.log("Token expired, redirecting to login");
         setError("Session expired. Please log in again.");
         localStorage.removeItem(ACCESS_TOKEN);
         window.location.href = "/login";
@@ -108,6 +130,7 @@ const ChatComponent = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
+        console.log("User fetched:", res.data);
         setUser({
           username: res.data.username,
           role: res.data.role,
@@ -121,7 +144,7 @@ const ChatComponent = () => {
         localStorage.removeItem(ACCESS_TOKEN);
         window.location.href = "/login";
       });
-  }, []);
+  }, [isPublicPage]);
 
   // Auto-hide error message after 5 seconds
   useEffect(() => {
@@ -135,25 +158,60 @@ const ChatComponent = () => {
 
   // Handle WebSocket connection
   const connectWebSocket = () => {
-    if (!user || ws.current?.readyState === WebSocket.OPEN) return;
+    if (
+      !user ||
+      ws.current?.readyState === WebSocket.OPEN ||
+      isPublicPage ||
+      isConnecting.current
+    ) {
+      if (isPublicPage)
+        console.log(
+          "Skipping WebSocket connection on public page:",
+          window.location.pathname
+        );
+      if (isConnecting.current)
+        console.log("WebSocket connection already in progress");
+      return;
+    }
 
     const token = localStorage.getItem(ACCESS_TOKEN);
-    const socketUrl = `ws://127.0.0.1:8000/ws/chat/${
+    if (!token) {
+      console.log("No token for WebSocket, skipping connection");
+      return;
+    }
+
+    isConnecting.current = true;
+    console.log("Environment variables:", {
+      VITE_WS_URL: import.meta.env.VITE_WS_URL,
+      VITE_API_URL: import.meta.env.VITE_API_URL,
+      DEV: import.meta.env.DEV,
+    });
+    const baseWSUrl =
+      import.meta.env.VITE_WS_URL || "wss://instrugate-system.onrender.com";
+    const socketUrl = `${baseWSUrl}/ws/chat/${
       user.username
     }/?token=${encodeURIComponent(token)}`;
+    console.log("Connecting to WebSocket:", socketUrl);
     ws.current = new WebSocket(socketUrl);
 
     ws.current.onopen = () => {
-      console.log("WebSocket connected");
+      console.log("WebSocket connected to:", socketUrl);
       setWsConnected(true);
+      isConnecting.current = false;
       reconnectAttempts.current = 0;
       setError("");
       pendingMarkRead.current.forEach((payload) => {
-        try {
-          ws.current.send(JSON.stringify(payload));
-          console.log("Retried mark_read:", payload);
-        } catch (e) {
-          console.error("Failed to retry mark_read:", e);
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          try {
+            ws.current.send(JSON.stringify(payload));
+            console.log("Retried mark_read:", payload);
+          } catch (e) {
+            console.error("Failed to retry mark_read:", e);
+            pendingMarkRead.current.push(payload); // Re-queue if failed
+          }
+        } else {
+          console.log("WebSocket not open, re-queuing mark_read:", payload);
+          pendingMarkRead.current.push(payload);
         }
       });
       pendingMarkRead.current = [];
@@ -395,6 +453,7 @@ const ChatComponent = () => {
     ws.current.onclose = () => {
       console.log("WebSocket closed");
       setWsConnected(false);
+      isConnecting.current = false;
       processedMessageIds.current.clear();
       if (user?.senderType === "agent") {
         setClients([]);
@@ -403,45 +462,67 @@ const ChatComponent = () => {
       }
       if (reconnectAttempts.current < maxReconnectAttempts) {
         reconnectAttempts.current += 1;
-        console.log(`Reconnecting attempt ${reconnectAttempts.current}...`);
-        setError(
-          `Connection lost. Reconnecting (${reconnectAttempts.current}/${maxReconnectAttempts})...`
+        console.log(
+          `Attempting to reconnect: attempt ${reconnectAttempts.current}...`
         );
-        setTimeout(connectWebSocket, reconnectDelay);
+        setError(
+          `Connection lost. Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})...`
+        );
+        setTimeout(() => {
+          connectWebSocket();
+        }, reconnectDelay);
       } else {
-        setError("Unable to connect to chat. Please refresh or log in again.");
+        setError("Failed to connect to chat. Please refresh or log in again.");
       }
     };
 
     ws.current.onerror = (e) => {
       console.error("WebSocket error:", {
         message: e.message || "Unknown error",
-        type: e.type,
-        target: e.target?.url || "No URL",
+        type: e.type || "unknown",
+        target: e.target?.url || "unknown",
       });
       setError("Chat connection failed. Retrying...");
+      isConnecting.current = false;
       ws.current?.close();
     };
   };
 
-  // Initialize WebSocket on user load
+  // Initialize WebSocket connection on user load with delay
   useEffect(() => {
-    connectWebSocket();
-    return () => {
-      if (ws.current) ws.current.close();
-    };
-  }, [user]);
+    if (!isPublicPage && user) {
+      const timer = setTimeout(() => {
+        if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+          connectWebSocket();
+        }
+      }, 1000); // 1-second delay to allow backend stabilization
+      return () => {
+        clearTimeout(timer);
+        if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
+          console.log("Cleaning up WebSocket: preserving CONNECTING state");
+          isConnecting.current = false;
+        } else if (ws.current && ws.current.readyState !== WebSocket.CLOSED) {
+          console.log("Cleaning up WebSocket: closing connection");
+          isConnecting.current = false;
+          ws.current.close();
+        }
+      };
+    }
+  }, [user, isPublicPage]);
 
   // Mark messages as read
   const sendMarkRead = (payload) => {
-    if (!ws.current || !wsConnected) {
+    if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
       pendingMarkRead.current.push(payload);
-      console.log("Queued mark_read:", payload);
+      console.log(
+        "Pending mark_read queued due to WebSocket not ready:",
+        payload
+      );
       return false;
     }
     try {
       ws.current.send(JSON.stringify(payload));
-      console.log("Sent mark_read:", payload);
+      console.log("Mark read sent:", payload);
       return true;
     } catch (err) {
       console.error("Failed to send mark_read:", err);
@@ -453,29 +534,36 @@ const ChatComponent = () => {
 
   // Auto-mark messages as read
   useEffect(() => {
-    if (user && wsConnected) {
+    if (
+      user &&
+      wsConnected &&
+      ws.current &&
+      ws.current.readyState === WebSocket.OPEN
+    ) {
       if (user.senderType === "agent" && selectedClient) {
         const payload = {
           message_type: "mark_read",
           sender_type: user.senderType,
           room_name: selectedClient,
         };
-        sendMarkRead(payload);
-        setUnreadMessages((prev) => ({
-          ...prev,
-          [selectedClient]: 0,
-        }));
+        if (sendMarkRead(payload)) {
+          setUnreadMessages((prev) => ({
+            ...prev,
+            [selectedClient]: 0,
+          }));
+        }
       } else if (user?.senderType === "client" && isOpen) {
         const payload = {
           message_type: "mark_read",
           sender_type: user.senderType,
           room_name: user.username,
         };
-        sendMarkRead(payload);
-        setUnreadMessages((prev) => ({
-          ...prev,
-          [user.username]: 0,
-        }));
+        if (sendMarkRead(payload)) {
+          setUnreadMessages((prev) => ({
+            ...prev,
+            [user.username]: 0,
+          }));
+        }
       }
     }
   }, [selectedClient, isOpen, user, wsConnected]);
@@ -652,6 +740,15 @@ const ChatComponent = () => {
       closeChat(client);
     }
   };
+
+  // Don’t render on public pages
+  if (isPublicPage) {
+    console.log(
+      "ChatComponent not rendering on public page:",
+      window.location.pathname
+    );
+    return null;
+  }
 
   // Restrict chat access to non-admin users
   if (user?.role === "admin") return null;
