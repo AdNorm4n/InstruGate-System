@@ -13,4 +13,4 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("api/users/", include("users.urls")),
     path('api/chat/upload/', upload_file, name='upload_file'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
