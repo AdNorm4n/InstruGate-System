@@ -29,21 +29,21 @@ import "../styles/ChatComponent.css";
 const normalizeFileUrl = (fileUrl) => {
   if (!fileUrl) return null;
 
-  // If it's a full Cloudinary URL, clean it
+  // Handle full Cloudinary URLs
   if (fileUrl.includes("res.cloudinary.com")) {
-    // Remove fl_attachment and nested URLs
+    // Remove fl_attachment, double slashes, and nested URLs
     let cleanedUrl = fileUrl
-      .replace(/fl_attachment\/fl_attachment/g, "")
-      .replace(/fl_attachment/g, "")
+      .replace(/fl_attachment/g, "") // Remove all fl_attachment
+      .replace(/\/\/+/g, "/") // Remove double slashes
       .replace(
-        /https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/.*\/v1\/media\//,
+        /https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\//g,
         "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/"
-      )
+      ) // Remove nested URLs
       .replace(
-        /\/chat_files\/\d{4}\/\d{2}\/\d{2}\/chat_files\/\d{4}\/\d{2}\/\d{2}\//,
-        "/chat_files/2025/06/22/"
-      );
-    console.log("Cloudinary URL cleaned:", cleanedUrl);
+        /https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/chat_files\/\d{4}\/\d{2}\/\d{2}\/chat_files\/\d{4}\/\d{2}\/\d{2}\//g,
+        "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/chat_files/2025/06/22/chat_files/2025/06/21/"
+      ); // Fix nested paths
+    console.log("Cloudinary URL cleaned:", fileUrl, "to:", cleanedUrl);
     return cleanedUrl;
   }
 
@@ -55,12 +55,10 @@ const normalizeFileUrl = (fileUrl) => {
     return cleanedUrl;
   }
 
-  // Handle local paths (fallback, unlikely)
+  // Handle local paths (fallback)
   let cleanedUrl = fileUrl.replace(/^\/+media\//, "");
   if (!cleanedUrl.startsWith("media/")) {
-    cleanedUrl = `media/${
-      cleanedUrl.startsWith("chat_files/") ? "" : "chat_files/2025/06/22/"
-    }${cleanedUrl}`;
+    cleanedUrl = `media/chat_files/2025/06/22/chat_files/2025/06/21/${cleanedUrl}`;
   }
   cleanedUrl = cleanedUrl.replace(/\/media\/media\//g, "/media/");
   cleanedUrl = `/${cleanedUrl.replace(/^\/+/, "")}`;
@@ -624,6 +622,11 @@ const ChatComponent = () => {
       const { file_url, file_name, room_name, sender, sender_type } =
         response.data;
       console.log("Backend file_url:", file_url);
+
+      // Normalize file_url before sending to WebSocket
+      const normalizedFileUrl = normalizeFileUrl(file_url);
+      console.log("Normalized file_url for WebSocket:", normalizedFileUrl);
+
       const receiver = user.senderType === "client" ? "" : selectedClient || "";
       const effectiveRoom =
         user.senderType === "client" ? user.username : room_name;
@@ -633,7 +636,7 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_url,
+        file_url: normalizedFileUrl, // Use normalized URL
         file_name,
       };
 
