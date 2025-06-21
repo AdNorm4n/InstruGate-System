@@ -35,14 +35,8 @@ const normalizeFileUrl = (fileUrl) => {
     return fileUrl;
   }
 
-  // Strip any leading /media/ prefixes to avoid duplication
+  // Handle local file paths (if any)
   let cleanedUrl = fileUrl.replace(/^\/+media\//, "");
-
-  // Handle nested chat_files/YYYY/MM/DD/ paths
-  cleanedUrl = cleanedUrl.replace(
-    /^chat_files\/\d{4}\/\d{2}\/\d{2}\/chat_files\/\d{4}\/\d{2}\/\d{2}\//,
-    "chat_files/2025/06/10/"
-  );
 
   // Ensure the URL starts with /media/
   if (!cleanedUrl.startsWith("media/")) {
@@ -271,7 +265,6 @@ const ChatComponent = () => {
           file_name,
         } = data;
         const key = user.senderType === "client" ? user.username : client;
-        const normalizedFileUrl = normalizeFileUrl(file_url);
 
         console.log("Processed message:", {
           message,
@@ -283,7 +276,6 @@ const ChatComponent = () => {
           message_id,
           file_url,
           file_name,
-          normalizedFileUrl,
         });
 
         if (sender_type === "system") {
@@ -378,7 +370,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: normalizedFileUrl,
+              fileUrl: file_url, // Use raw file_url
               fileName: file_name,
             };
             return {
@@ -418,7 +410,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: normalizedFileUrl,
+              fileUrl: file_url, // Use raw file_url
               fileName: file_name,
             };
             console.log("Adding new message to state:", newMessage);
@@ -644,7 +636,7 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_url,
+        file_url, // Use raw file_url from backend
         file_name,
       };
 
