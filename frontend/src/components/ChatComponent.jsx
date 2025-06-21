@@ -29,50 +29,44 @@ import "../styles/ChatComponent.css";
 const normalizeFileUrl = (fileUrl) => {
   if (!fileUrl) return null;
 
-  // If it's a Cloudinary URL, clean and return it
+  // If it's a full Cloudinary URL, clean it
   if (fileUrl.includes("res.cloudinary.com")) {
-    // Remove duplicate fl_attachment and nested URLs
-    let cleanedUrl = fileUrl;
-    if (cleanedUrl.includes("fl_attachment/fl_attachment")) {
-      cleanedUrl = cleanedUrl.replace(
-        /fl_attachment\/fl_attachment/g,
-        "fl_attachment"
-      );
-    }
-    if (
-      cleanedUrl.includes(
-        "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/https://"
+    // Remove fl_attachment and nested URLs
+    let cleanedUrl = fileUrl
+      .replace(/fl_attachment\/fl_attachment/g, "")
+      .replace(/fl_attachment/g, "")
+      .replace(
+        /https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/.*\/v1\/media\//,
+        "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/"
       )
-    ) {
-      cleanedUrl = cleanedUrl.replace(
-        /.*(https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/chat_files\/.*\.pdf)/,
-        "$1"
+      .replace(
+        /\/chat_files\/\d{4}\/\d{2}\/\d{2}\/chat_files\/\d{4}\/\d{2}\/\d{2}\//,
+        "/chat_files/2025/06/22/"
       );
-    }
-    console.log("Cloudinary URL detected, cleaned:", cleanedUrl);
+    console.log("Cloudinary URL cleaned:", cleanedUrl);
     return cleanedUrl;
   }
 
-  // Handle local file paths (if any)
-  let cleanedUrl = fileUrl.replace(/^\/+media\//, "");
-
-  // Ensure the URL starts with /media/
-  if (!cleanedUrl.startsWith("media/")) {
-    cleanedUrl = `media/${
-      cleanedUrl.startsWith("chat_files/") ? "" : "chat_files/2025/06/10/"
-    }${cleanedUrl}`;
+  // Handle backend relative paths (e.g., media/chat_files/...)
+  if (fileUrl.startsWith("media/")) {
+    const baseUrl = "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/";
+    const cleanedUrl = `${baseUrl}${fileUrl}`;
+    console.log("Relative path normalized:", fileUrl, "to:", cleanedUrl);
+    return cleanedUrl;
   }
 
-  // Remove any double /media/media/ occurrences
+  // Handle local paths (fallback, unlikely)
+  let cleanedUrl = fileUrl.replace(/^\/+media\//, "");
+  if (!cleanedUrl.startsWith("media/")) {
+    cleanedUrl = `media/${
+      cleanedUrl.startsWith("chat_files/") ? "" : "chat_files/2025/06/22/"
+    }${cleanedUrl}`;
+  }
   cleanedUrl = cleanedUrl.replace(/\/media\/media\//g, "/media/");
-
-  // Ensure single leading slash
   cleanedUrl = `/${cleanedUrl.replace(/^\/+/, "")}`;
-
-  // Use VITE_API_URL for the base URL
   const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
   const finalUrl = `${baseUrl}${cleanedUrl}`;
-  console.log("Original file_url:", fileUrl, "Normalized:", finalUrl);
+  console.log("Local path normalized:", fileUrl, "to:", finalUrl);
   return finalUrl;
 };
 
@@ -96,9 +90,8 @@ const ChatComponent = () => {
   const pendingMarkRead = useRef([]);
   const fileInputRef = useRef(null);
   const processedMessageIds = useRef(new Set());
-  const isConnecting = useRef(false); // Track connection attempts
+  const isConnecting = useRef(false);
 
-  // Check if on public pages
   const publicPages = [
     "/login",
     "/register",
@@ -107,7 +100,6 @@ const ChatComponent = () => {
   ];
   const isPublicPage = publicPages.includes(window.location.pathname);
 
-  // Authenticate user and fetch profile
   useEffect(() => {
     if (isPublicPage) {
       console.log(
@@ -164,17 +156,13 @@ const ChatComponent = () => {
       });
   }, [isPublicPage]);
 
-  // Auto-hide error message after 5 seconds
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => {
-        setError("");
-      }, 5000);
+      const timer = setTimeout(() => setError(""), 5000);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
-  // Handle WebSocket connection
   const connectWebSocket = () => {
     if (
       !user ||
@@ -225,7 +213,7 @@ const ChatComponent = () => {
             console.log("Retried mark_read:", payload);
           } catch (e) {
             console.error("Failed to retry mark_read:", e);
-            pendingMarkRead.current.push(payload); // Re-queue if failed
+            pendingMarkRead.current.push(payload);
           }
         } else {
           console.log("WebSocket not open, re-queuing mark_read:", payload);
@@ -261,7 +249,6 @@ const ChatComponent = () => {
           return;
         }
 
-        // Allow messages with file_url and file_name even if message is empty
         if (
           (!data.message && !(data.file_url && data.file_name)) ||
           !data.sender_type ||
@@ -388,7 +375,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: normalizeFileUrl(file_url), // Clean file_url
+              fileUrl: normalizeFileUrl(file_url),
               fileName: file_name,
             };
             return {
@@ -428,7 +415,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: normalizeFileUrl(file_url), // Clean file_url
+              fileUrl: normalizeFileUrl(file_url),
               fileName: file_name,
             };
             console.log("Adding new message to state:", newMessage);
@@ -484,9 +471,7 @@ const ChatComponent = () => {
         setError(
           `Connection lost. Attempting to reconnect (${reconnectAttempts.current}/${maxReconnectAttempts})...`
         );
-        setTimeout(() => {
-          connectWebSocket();
-        }, reconnectDelay);
+        setTimeout(() => connectWebSocket(), reconnectDelay);
       } else {
         setError("Failed to connect to chat. Please refresh or log in again.");
       }
@@ -504,14 +489,13 @@ const ChatComponent = () => {
     };
   };
 
-  // Initialize WebSocket connection on user load with delay
   useEffect(() => {
     if (!isPublicPage && user) {
       const timer = setTimeout(() => {
         if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
           connectWebSocket();
         }
-      }, 1000); // 1-second delay to allow backend stabilization
+      }, 1000);
       return () => {
         clearTimeout(timer);
         if (ws.current && ws.current.readyState === WebSocket.CONNECTING) {
@@ -526,7 +510,6 @@ const ChatComponent = () => {
     }
   }, [user, isPublicPage]);
 
-  // Mark messages as read
   const sendMarkRead = (payload) => {
     if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
       pendingMarkRead.current.push(payload);
@@ -548,7 +531,6 @@ const ChatComponent = () => {
     }
   };
 
-  // Auto-mark messages as read
   useEffect(() => {
     if (
       user &&
@@ -584,14 +566,12 @@ const ChatComponent = () => {
     }
   }, [selectedClient, isOpen, user, wsConnected]);
 
-  // Auto-scroll messages
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, selectedClient]);
 
-  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (!file) {
@@ -618,7 +598,6 @@ const ChatComponent = () => {
     setError("");
   };
 
-  // Handle file upload
   const handleFileUpload = async () => {
     if (!ws.current || !wsConnected || !user || !selectedFile) return;
     if (user.senderType === "agent" && !selectedClient) {
@@ -654,7 +633,7 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_url, // Use raw file_url from backend
+        file_url,
         file_name,
       };
 
@@ -671,7 +650,6 @@ const ChatComponent = () => {
     }
   };
 
-  // Send user message
   const sendMessage = () => {
     if (!ws.current || !wsConnected || !input.trim() || !user) return;
 
@@ -699,7 +677,6 @@ const ChatComponent = () => {
     }
   };
 
-  // Handle Enter keypress
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -711,7 +688,6 @@ const ChatComponent = () => {
     }
   };
 
-  // Handle client selection
   const handleClientSelect = (client) => {
     setSelectedClient(client);
     if (user.senderType === "agent") {
@@ -729,7 +705,6 @@ const ChatComponent = () => {
     console.log("Selected client:", client);
   };
 
-  // Close chat session
   const closeChat = (client) => {
     if (user?.senderType === "agent") {
       setClients((prev) => prev.filter((c) => c !== client));
@@ -749,7 +724,6 @@ const ChatComponent = () => {
     }
   };
 
-  // Confirm chat closure
   const handleCloseChat = (client, event) => {
     event?.stopPropagation();
     if (window.confirm(`Close chat with ${client}?`)) {
@@ -757,7 +731,6 @@ const ChatComponent = () => {
     }
   };
 
-  // Don’t render on public pages
   if (isPublicPage) {
     console.log(
       "ChatComponent not rendering on public page:",
@@ -766,10 +739,8 @@ const ChatComponent = () => {
     return null;
   }
 
-  // Restrict chat access to non-admin users
   if (user?.role === "admin") return null;
 
-  // Render error state
   if (
     error &&
     !wsConnected &&
@@ -811,10 +782,7 @@ const ChatComponent = () => {
               localStorage.removeItem(ACCESS_TOKEN);
               window.location.href = "/login";
             }}
-            sx={{
-              width: "100%",
-              textTransform: "none",
-            }}
+            sx={{ width: "100%", textTransform: "none" }}
           >
             Go to Login
           </Button>
@@ -830,7 +798,6 @@ const ChatComponent = () => {
       ? unreadMessages[user.username] || 0
       : Object.values(unreadMessages).reduce((sum, count) => sum + count, 0);
 
-  // Render chat UI
   return (
     <Box
       className="chat-widget"
@@ -858,10 +825,7 @@ const ChatComponent = () => {
             height: 60,
             cursor: "pointer",
             transition: "all 0.3s ease",
-            "&:hover": {
-              bgcolor: "primary.dark",
-              transform: "scale(1.05)",
-            },
+            "&:hover": { bgcolor: "primary.dark", transform: "scale(1.05)" },
           }}
         >
           <Badge
@@ -934,11 +898,7 @@ const ChatComponent = () => {
           </Box>
           {error && (
             <Box
-              sx={{
-                padding: 1,
-                bgcolor: "error.light",
-                textAlign: "center",
-              }}
+              sx={{ padding: 1, bgcolor: "error.light", textAlign: "center" }}
             >
               <Typography sx={{ color: "white", fontSize: "0.875rem" }}>
                 {error}
@@ -1074,10 +1034,7 @@ const ChatComponent = () => {
                         }}
                       >
                         <Box
-                          sx={{
-                            fontSize: "0.9rem",
-                            wordBreak: "break-word",
-                          }}
+                          sx={{ fontSize: "0.9rem", wordBreak: "break-word" }}
                         >
                           {msg.senderType === "system" ? (
                             <Typography sx={{ color: "inherit" }}>
@@ -1191,13 +1148,7 @@ const ChatComponent = () => {
                     flexShrink: 0,
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -1230,13 +1181,7 @@ const ChatComponent = () => {
                       </Typography>
                     )}
                   </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
-                  >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <TextField
                       fullWidth
                       size="small"
