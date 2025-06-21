@@ -29,10 +29,28 @@ import "../styles/ChatComponent.css";
 const normalizeFileUrl = (fileUrl) => {
   if (!fileUrl) return null;
 
-  // If it's a Cloudinary URL, return it unchanged
+  // If it's a Cloudinary URL, clean and return it
   if (fileUrl.includes("res.cloudinary.com")) {
-    console.log("Cloudinary URL detected, returning unchanged:", fileUrl);
-    return fileUrl;
+    // Remove duplicate fl_attachment and nested URLs
+    let cleanedUrl = fileUrl;
+    if (cleanedUrl.includes("fl_attachment/fl_attachment")) {
+      cleanedUrl = cleanedUrl.replace(
+        /fl_attachment\/fl_attachment/g,
+        "fl_attachment"
+      );
+    }
+    if (
+      cleanedUrl.includes(
+        "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/https://"
+      )
+    ) {
+      cleanedUrl = cleanedUrl.replace(
+        /.*(https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/chat_files\/.*\.pdf)/,
+        "$1"
+      );
+    }
+    console.log("Cloudinary URL detected, cleaned:", cleanedUrl);
+    return cleanedUrl;
   }
 
   // Handle local file paths (if any)
@@ -370,7 +388,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: file_url, // Use raw file_url
+              fileUrl: normalizeFileUrl(file_url), // Clean file_url
               fileName: file_name,
             };
             return {
@@ -410,7 +428,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: file_url, // Use raw file_url
+              fileUrl: normalizeFileUrl(file_url), // Clean file_url
               fileName: file_name,
             };
             console.log("Adding new message to state:", newMessage);
