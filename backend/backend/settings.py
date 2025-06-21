@@ -59,11 +59,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     "rest_framework",
     "corsheaders",
     "channels",
-
+    "cloudinary",
+    "cloudinary_storage",
     "api",
     "users",
     "chat"
@@ -184,10 +184,6 @@ CSRF_TRUSTED_ORIGINS = [
     "https://instrugate-system.onrender.com",
     "http://localhost:5173",
 ]
-
-# Media files (Uploaded images)
-#MEDIA_URL = '/media/'
-#MEDIA_ROOT = BASE_DIR / 'media'
 
 # Cloudinary configuration for media storage
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
