@@ -14,3 +14,4 @@ uvicorn
 channels
 channels-redis
 dj-database-url
+daphne
