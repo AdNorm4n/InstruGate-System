@@ -21,7 +21,6 @@ load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -29,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -69,7 +68,6 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "users.CustomUser"
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -101,13 +99,6 @@ TEMPLATES = [
 
 ASGI_APPLICATION = "backend.asgi.application"
 
-# For simplicity, use in‐memory channel layer
-#CHANNEL_LAYERS = {
-    #'default': {
-        #'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    #}
-#}
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -117,7 +108,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -125,25 +115,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        #'ENGINE': 'django.db.backends.postgresql',
-        #'NAME': 'railway',
-        #'USER': 'postgres',
-        #'PASSWORD': 'egRjrhDPfoQnDzKbQwiawIviCKPavTfQ',
-        #'HOST': 'shuttle.proxy.rlwy.net',
-        #'PORT': '21605',
     }
 }
 
 database_url = os.environ.get("DATABASE_URL")
 DATABASES["default"] = dj_database_url.parse(database_url)
-
-#DATABASES = {
-    #'default': dj_database_url.config(
-        #default=os.environ.get('DATABASE_URL'),
-        #conn_max_age=600,
-        #ssl_require=True  # For Render PostgreSQL
-    #)
-#}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -163,7 +139,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -175,13 +150,9 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'backend' / 'static',
@@ -194,7 +165,12 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    "https://instrugate-system.onrender.com",
+    "http://localhost:5173",
+]
 
 # Media files (Uploaded images)
 MEDIA_URL = '/media/'
@@ -203,7 +179,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ✅ FRONTEND URL for password reset links
 FRONTEND_URL = "http://localhost:5173"
 DEFAULT_FROM_EMAIL = "InstruGate System <instrugate.system@gmail.com>"
-
 
 # EMAIL SMTP 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
