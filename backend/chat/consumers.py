@@ -10,12 +10,6 @@ User = get_user_model()
 
 client_engineer_map = {}  # {client_username: engineer_username}
 
-def add_cloudinary_attachment(url):
-    """Add fl_attachment to Cloudinary URL for downloadable PDFs."""
-    if url and 'res.cloudinary.com' in url and '/raw/upload/' in url:
-        return url.replace('/raw/upload/', '/raw/upload/fl_attachment/')
-    return url
-
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.username = self.scope['url_route']['kwargs']['room_name']
@@ -170,7 +164,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 elif message:
                     msg = await self._save_message(sender.username, sender, 'client', message, assistance=None)
                 if msg:
-                    file_url = add_cloudinary_attachment(msg.file.url) if msg.file else None
+                    file_url = msg.file.url if msg.file else None  # Use raw file URL
                     file_name = msg.file_name if msg.file else None
                     await self.channel_layer.group_send(
                         f'chat_{sender.username}',
@@ -281,7 +275,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 elif message:
                     msg = await self._save_message(receiver, sender, 'agent', message, sender)
                 if msg:
-                    file_url = add_cloudinary_attachment(msg.file.url) if msg.file else None
+                    file_url = msg.file.url if msg.file else None  # Use raw file URL
                     file_name = msg.file_name if msg.file else None
                     await self._update_conversation_assistance(receiver, sender)
                     await self.channel_layer.group_send(
@@ -320,7 +314,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def chat_message(self, event):
         try:
-            file_url = add_cloudinary_attachment(event.get('file_url')) if event.get('file_url') else None
             await self.send(text_data=json.dumps({
                 'message': event['message'],
                 'sender': event['sender'],
@@ -329,7 +322,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'is_read': event.get('is_read', False),
                 'timestamp': event.get('timestamp'),
                 'message_id': event.get('message_id'),
-                'file_url': file_url,
+                'file_url': event.get('file_url'),  # Use raw file_url
                 'file_name': event.get('file_name'),
             }))
         except Exception as e:
@@ -382,7 +375,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 room_name__in=client_engineer_map.keys()
             ).values('id', 'room_name', 'sender__username', 'sender_type', 'content', 'is_read', 'timestamp', 'file', 'file_name'))
             for msg in messages:
-                msg['file_url'] = add_cloudinary_attachment(msg['file'].url) if msg['file'] else None
+                msg['file_url'] = msg['file'].url if msg['file'] else None  # Use raw file URL
             return messages
         except Exception as e:
             logger.error(f"Error fetching offline messages: {str(e)}")
@@ -437,7 +430,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
             for msg in updated_messages:
-                file_url = add_cloudinary_attachment(msg['file'].url) if msg['file'] else None
+                file_url = msg['file'].url if msg['file'] else None  # Use raw file URL
                 file_name = msg['file_name'] if msg['file'] else None
                 await self.channel_layer.group_send(
                     f'chat_{msg["room_name"]}',

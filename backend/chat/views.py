@@ -9,12 +9,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def add_cloudinary_attachment(url):
-    """Add fl_attachment to Cloudinary URL for downloadable PDFs."""
-    if 'res.cloudinary.com' in url and '/raw/upload/' in url:
-        return url.replace('/raw/upload/', '/raw/upload/fl_attachment/')
-    return url
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def upload_file(request):
@@ -57,7 +51,7 @@ def upload_file(request):
 
         logger.info(f"File uploaded successfully: {file_name} by {request.user.username} to {room_name}")
         return Response({
-            'file_url': add_cloudinary_attachment(msg.file.url),
+            'file_url': msg.file.url,  # Use raw Cloudinary URL
             'file_name': file_name,
             'room_name': room_name,
             'sender_type': sender_type,

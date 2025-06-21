@@ -586,18 +586,6 @@ const ChatComponent = () => {
         sender_type,
       });
 
-      // Minimal correction if file_url is malformed
-      let finalFileUrl = file_url;
-      if (
-        file_url.includes("fl_attachment") ||
-        file_url.includes("//v1/media/https://")
-      ) {
-        console.warn("Malformed file_url detected:", file_url);
-        const expectedPath = `media/chat_files/2025/06/22/chat_files/2025/06/21/${file_name}`;
-        finalFileUrl = `https://res.cloudinary.com/dbsvawpab/raw/upload/v1/${expectedPath}`;
-        console.log("Corrected file_url:", finalFileUrl);
-      }
-
       const receiver = user.senderType === "client" ? "" : selectedClient || "";
       const effectiveRoom =
         user.senderType === "client" ? user.username : room_name;
@@ -607,7 +595,7 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_url: finalFileUrl, // Use corrected or raw file_url
+        file_url, // Use raw file_url from backend
         file_name,
       };
 
