@@ -25,49 +25,6 @@ import api from "../api";
 import { ACCESS_TOKEN } from "../constants";
 import "../styles/ChatComponent.css";
 
-// Utility function to normalize file_url
-const normalizeFileUrl = (fileUrl) => {
-  if (!fileUrl) return null;
-
-  // Handle full Cloudinary URLs
-  if (fileUrl.includes("res.cloudinary.com")) {
-    // Remove fl_attachment, double slashes, and nested URLs
-    let cleanedUrl = fileUrl
-      .replace(/fl_attachment/g, "") // Remove all fl_attachment
-      .replace(/\/\/+/g, "/") // Remove double slashes
-      .replace(
-        /https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\//g,
-        "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/"
-      ) // Remove nested URLs
-      .replace(
-        /https:\/\/res\.cloudinary\.com\/dbsvawpab\/raw\/upload\/v1\/media\/chat_files\/\d{4}\/\d{2}\/\d{2}\/chat_files\/\d{4}\/\d{2}\/\d{2}\//g,
-        "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/media/chat_files/2025/06/22/chat_files/2025/06/21/"
-      ); // Fix nested paths
-    console.log("Cloudinary URL cleaned:", fileUrl, "to:", cleanedUrl);
-    return cleanedUrl;
-  }
-
-  // Handle backend relative paths (e.g., media/chat_files/...)
-  if (fileUrl.startsWith("media/")) {
-    const baseUrl = "https://res.cloudinary.com/dbsvawpab/raw/upload/v1/";
-    const cleanedUrl = `${baseUrl}${fileUrl}`;
-    console.log("Relative path normalized:", fileUrl, "to:", cleanedUrl);
-    return cleanedUrl;
-  }
-
-  // Handle local paths (fallback)
-  let cleanedUrl = fileUrl.replace(/^\/+media\//, "");
-  if (!cleanedUrl.startsWith("media/")) {
-    cleanedUrl = `media/chat_files/2025/06/22/chat_files/2025/06/21/${cleanedUrl}`;
-  }
-  cleanedUrl = cleanedUrl.replace(/\/media\/media\//g, "/media/");
-  cleanedUrl = `/${cleanedUrl.replace(/^\/+/, "")}`;
-  const baseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-  const finalUrl = `${baseUrl}${cleanedUrl}`;
-  console.log("Local path normalized:", fileUrl, "to:", finalUrl);
-  return finalUrl;
-};
-
 const ChatComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
@@ -373,7 +330,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: normalizeFileUrl(file_url),
+              fileUrl: file_url, // Use raw file_url
               fileName: file_name,
             };
             return {
@@ -413,7 +370,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: normalizeFileUrl(file_url),
+              fileUrl: file_url, // Use raw file_url
               fileName: file_name,
             };
             console.log("Adding new message to state:", newMessage);
@@ -621,11 +578,25 @@ const ChatComponent = () => {
       });
       const { file_url, file_name, room_name, sender, sender_type } =
         response.data;
-      console.log("Backend file_url:", file_url);
+      console.log("Backend upload response:", {
+        file_url,
+        file_name,
+        room_name,
+        sender,
+        sender_type,
+      });
 
-      // Normalize file_url before sending to WebSocket
-      const normalizedFileUrl = normalizeFileUrl(file_url);
-      console.log("Normalized file_url for WebSocket:", normalizedFileUrl);
+      // Minimal correction if file_url is malformed
+      let finalFileUrl = file_url;
+      if (
+        file_url.includes("fl_attachment") ||
+        file_url.includes("//v1/media/https://")
+      ) {
+        console.warn("Malformed file_url detected:", file_url);
+        const expectedPath = `media/chat_files/2025/06/22/chat_files/2025/06/21/${file_name}`;
+        finalFileUrl = `https://res.cloudinary.com/dbsvawpab/raw/upload/v1/${expectedPath}`;
+        console.log("Corrected file_url:", finalFileUrl);
+      }
 
       const receiver = user.senderType === "client" ? "" : selectedClient || "";
       const effectiveRoom =
@@ -636,7 +607,7 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_url: normalizedFileUrl, // Use normalized URL
+        file_url: finalFileUrl, // Use corrected or raw file_url
         file_name,
       };
 
