@@ -11,3 +11,4 @@ python-dotenv
 reportlab
 gunicorn
 uvicorn
+channels
