@@ -25,9 +25,15 @@ import api from "../api";
 import { ACCESS_TOKEN } from "../constants";
 import "../styles/ChatComponent.css";
 
-// Utility function to normalize file_url to /media/chat_files/YYYY/MM/DD/filename.pdf
+// Utility function to normalize file_url
 const normalizeFileUrl = (fileUrl) => {
   if (!fileUrl) return null;
+
+  // If it's a Cloudinary URL, return it unchanged
+  if (fileUrl.includes("res.cloudinary.com")) {
+    console.log("Cloudinary URL detected, returning unchanged:", fileUrl);
+    return fileUrl;
+  }
 
   // Strip any leading /media/ prefixes to avoid duplication
   let cleanedUrl = fileUrl.replace(/^\/+media\//, "");

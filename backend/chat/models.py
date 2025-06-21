@@ -28,10 +28,11 @@ class ChatMessage(models.Model):
     sender_type = models.CharField(max_length=10, choices=SENDER_CHOICES)
     content = models.TextField(blank=True)  # Allow blank for file-only messages
 
-    # ✅ Update this line to use RawMediaCloudinaryStorage
+    # ✅ Update this line to use RawMediaCloudinaryStorage and increase max_length
     file = models.FileField(
         upload_to='chat_files/%Y/%m/%d/',
         storage=RawMediaCloudinaryStorage(),
+        max_length=255,  # Increased to accommodate Cloudinary URLs
         null=True,
         blank=True
     )
