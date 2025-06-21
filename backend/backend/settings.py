@@ -102,20 +102,12 @@ TEMPLATES = [
 ASGI_APPLICATION = "backend.asgi.application"
 
 # For simplicity, use in‐memory channel layer
-# CHANNEL_LAYERS = {
-    # 'default': {
-      #   'BACKEND': 'channels.layers.InMemoryChannelLayer',
-  #   }
-# }
-
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [os.environ.get('REDIS_URL')],
-        },
-    },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
 }
+
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -135,9 +127,9 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True
+        ssl_require=True  # For Render PostgreSQL
     )
 }
 
