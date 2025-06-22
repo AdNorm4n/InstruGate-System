@@ -535,7 +535,7 @@ const ChatComponent = () => {
       return;
     }
 
-    if (!file.name.toLowerCase().endswith(".pdf")) {
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
       setError("Only PDF files are allowed.");
       setSelectedFile(null);
       fileInputRef.current.value = null;
