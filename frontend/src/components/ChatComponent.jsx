@@ -330,7 +330,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: file_url,
+              fileUrl: file_url, // Use raw file_url
               fileName: file_name,
             };
             return {
@@ -370,7 +370,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: file_url,
+              fileUrl: file_url, // Use raw file_url
               fileName: file_name,
             };
             console.log("Adding new message to state:", newMessage);
@@ -576,9 +576,10 @@ const ChatComponent = () => {
           Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
         },
       });
-      const { file_name, room_name, sender, sender_type } = response.data;
+      const { file_url, file_name, room_name, sender, sender_type } =
+        response.data;
       console.log("Backend upload response:", {
-        file_url: response.data.file_url,
+        file_url,
         file_name,
         room_name,
         sender,
@@ -594,7 +595,8 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_name, // Only send file_name, not file_url
+        file_url, // Use raw file_url from backend
+        file_name,
       };
 
       ws.current.send(JSON.stringify(payload));
@@ -1031,7 +1033,6 @@ const ChatComponent = () => {
                                     variant="outlined"
                                     size="small"
                                     href={msg.fileUrl}
-                                    download={msg.fileName} // Ensure download
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     sx={{

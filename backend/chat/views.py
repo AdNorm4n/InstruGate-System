@@ -45,17 +45,13 @@ def upload_file(request):
             is_read=False,
             assistance=None if sender_type == 'client' else request.user
         )
-        # Ensure clean file path
         file_path = f"chat_files/{timezone.now().strftime('%Y/%m/%d')}/{file_name}"
         msg.file.save(file_path, ContentFile(file.read()))
         msg.save()
 
-        # Log the saved file URL and path
         logger.info(f"File uploaded successfully: {file_name} by {request.user.username} to {room_name}")
-        logger.debug(f"Saved file URL: {msg.file.url}, Path: {msg.file.name}")
-
         return Response({
-            'file_url': msg.file.url,  # Return raw Cloudinary URL
+            'file_url': msg.file.url,  # Use raw Cloudinary URL
             'file_name': file_name,
             'room_name': room_name,
             'sender_type': sender_type,
