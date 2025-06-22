@@ -129,7 +129,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         message_type = data.get('message_type', 'message')
         message = data.get('message', '').strip()
-        file_url = data.get('file_url')
         file_name = data.get('file_name')
         sender_type = data.get('sender_type')
         receiver = data.get('receiver', '').strip()
@@ -154,17 +153,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if sender_type == 'client':
                 await self._mark_messages_read(sender.username)
                 msg = None
-                if file_url and file_name:
+                if file_name:
                     if not file_name.lower().endswith('.pdf'):
                         await self.send(text_data=json.dumps({'error': 'Only PDF files are allowed'}))
                         return
                     msg = await self._save_file_message(
-                        sender.username, sender, 'client', message, file_url, file_name, assistance=None
+                        sender.username, sender, 'client', message, file_name, assistance=None
                     )
                 elif message:
                     msg = await self._save_message(sender.username, sender, 'client', message, assistance=None)
                 if msg:
-                    file_url = msg.file.url if msg.file else None  # Use raw file URL
+                    file_url = msg.file.url if msg.file else None
                     file_name = msg.file_name if msg.file else None
                     await self.channel_layer.group_send(
                         f'chat_{sender.username}',
@@ -221,6 +220,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     return
                 if receiver in client_engineer_map and client_engineer_map[receiver] != sender.username:
                     await self.send(text_data=json.dumps({
+                        'type': 'chat.message',
                         'message': f'{receiver} is with another engineer.',
                         'sender': 'system',
                         'sender_type': 'system',
@@ -265,17 +265,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     )
 
                 msg = None
-                if file_url and file_name:
+                if file_name:
                     if not file_name.lower().endswith('.pdf'):
                         await self.send(text_data=json.dumps({'error': 'Only PDF files allowed'}))
                         return
                     msg = await self._save_file_message(
-                        receiver, sender, 'agent', message, file_url, file_name, sender
+                        receiver, sender, 'agent', message, file_name, sender
                     )
                 elif message:
                     msg = await self._save_message(receiver, sender, 'agent', message, sender)
                 if msg:
-                    file_url = msg.file.url if msg.file else None  # Use raw file URL
+                    file_url = msg.file.url if msg.file else None
                     file_name = msg.file_name if msg.file else None
                     await self._update_conversation_assistance(receiver, sender)
                     await self.channel_layer.group_send(
@@ -322,7 +322,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'is_read': event.get('is_read', False),
                 'timestamp': event.get('timestamp'),
                 'message_id': event.get('message_id'),
-                'file_url': event.get('file_url'),  # Use raw file_url
+                'file_url': event.get('file_url'),
                 'file_name': event.get('file_name'),
             }))
         except Exception as e:
@@ -350,20 +350,30 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
-    def _save_file_message(self, room_name, user, sender_type, content, file_url, file_name, assistance=None):
-        msg = ChatMessage.objects.create(
-            room_name=room_name,
-            sender=user,
-            sender_type=sender_type,
-            content=content,
-            file_name=file_name,
-            is_read=False,
-            assistance=assistance
-        )
-        if file_url:
-            msg.file = file_url
-            msg.save()
-        return msg
+    def _save_file_message(self, room_name, user, sender_type, content, file_name, assistance=None):
+        # Find the most recent ChatMessage with matching file_name and sender
+        try:
+            msg = ChatMessage.objects.filter(
+                room_name=room_name,
+                sender=user,
+                sender_type=sender_type,
+                file_name=file_name
+            ).latest('timestamp')
+            logger.debug(f"Found existing file message: room={room_name}, file_name={file_name}, file_url={msg.file.url if msg.file else None}")
+            return msg
+        except ChatMessage.DoesNotExist:
+            # Fallback: Create new message (should be rare)
+            msg = ChatMessage.objects.create(
+                room_name=room_name,
+                sender=user,
+                sender_type=sender_type,
+                content=content,
+                file_name=file_name,
+                is_read=False,
+                assistance=assistance
+            )
+            logger.warning(f"No existing file message found, created new: room={room_name}, file_name={file_name}")
+            return msg
 
     @database_sync_to_async
     def _get_offline_messages(self):
@@ -375,7 +385,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 room_name__in=client_engineer_map.keys()
             ).values('id', 'room_name', 'sender__username', 'sender_type', 'content', 'is_read', 'timestamp', 'file', 'file_name'))
             for msg in messages:
-                msg['file_url'] = msg['file'].url if msg['file'] else None  # Use raw file URL
+                msg['file_url'] = msg['file'].url if msg['file'] else None
             return messages
         except Exception as e:
             logger.error(f"Error fetching offline messages: {str(e)}")
@@ -430,7 +440,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     }
                 )
             for msg in updated_messages:
-                file_url = msg['file'].url if msg['file'] else None  # Use raw file URL
+                file_url = msg['file'].url if msg['file'] else None
                 file_name = msg['file_name'] if msg['file'] else None
                 await self.channel_layer.group_send(
                     f'chat_{msg["room_name"]}',

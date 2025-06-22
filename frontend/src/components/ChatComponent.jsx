@@ -204,12 +204,12 @@ const ChatComponent = () => {
           return;
         }
 
-        if (
-          (!data.message && !(data.file_url && data.file_name)) ||
-          !data.sender_type ||
-          !data.client
-        ) {
-          console.log("Invalid message format:", data);
+        // Relax validation to allow file-only messages
+        if (!data.sender_type || !data.client) {
+          console.log(
+            "Invalid message format (missing sender_type or client):",
+            data
+          );
           return;
         }
 
@@ -330,7 +330,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: file_url, // Use raw file_url
+              fileUrl: file_url,
               fileName: file_name,
             };
             return {
@@ -370,7 +370,7 @@ const ChatComponent = () => {
               timestamp: timestamp || new Date().toISOString(),
               isRead: is_read ?? false,
               messageId: message_id,
-              fileUrl: file_url, // Use raw file_url
+              fileUrl: file_url,
               fileName: file_name,
             };
             console.log("Adding new message to state:", newMessage);
@@ -535,7 +535,7 @@ const ChatComponent = () => {
       return;
     }
 
-    if (!file.name.toLowerCase().endsWith(".pdf")) {
+    if (!file.name.toLowerCase().endswith(".pdf")) {
       setError("Only PDF files are allowed.");
       setSelectedFile(null);
       fileInputRef.current.value = null;
@@ -576,14 +576,15 @@ const ChatComponent = () => {
           Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
         },
       });
-      const { file_url, file_name, room_name, sender, sender_type } =
+      const { file_name, room_name, sender, sender_type, message_id } =
         response.data;
       console.log("Backend upload response:", {
-        file_url,
+        file_url: response.data.file_url,
         file_name,
         room_name,
         sender,
         sender_type,
+        message_id,
       });
 
       const receiver = user.senderType === "client" ? "" : selectedClient || "";
@@ -595,8 +596,8 @@ const ChatComponent = () => {
         sender_type: user.senderType,
         receiver,
         room_name: effectiveRoom,
-        file_url, // Use raw file_url from backend
         file_name,
+        message_id, // Include message_id to help backend locate the message
       };
 
       ws.current.send(JSON.stringify(payload));
@@ -1033,6 +1034,7 @@ const ChatComponent = () => {
                                     variant="outlined"
                                     size="small"
                                     href={msg.fileUrl}
+                                    download={msg.fileName}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     sx={{
