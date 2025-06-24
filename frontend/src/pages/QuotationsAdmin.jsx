@@ -34,7 +34,7 @@ import { styled } from "@mui/material/styles";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { UserContext } from "../contexts/UserContext";
 import api from "../api"; // Import the shared api module
-import "../styles/quotationsadmin.css";
+import "../styles/QuotationsAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
