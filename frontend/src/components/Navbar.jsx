@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -21,23 +21,11 @@ export default function Navbar() {
   const { userRole, loading } = useContext(UserContext);
   const [hideTopToolbar, setHideTopToolbar] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const scrollContainerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const scrollContainer =
-      document.querySelector(".instruments-admin-page") || window;
-
     const handleScroll = () => {
-      const currentScrollY =
-        scrollContainer === window ? window.scrollY : scrollContainer.scrollTop;
-
-      console.log(
-        "Scroll position:",
-        currentScrollY,
-        "hideTopToolbar:",
-        hideTopToolbar
-      );
+      const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
         setHideTopToolbar(true);
@@ -48,8 +36,8 @@ export default function Navbar() {
       setLastScrollY(currentScrollY);
     };
 
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   const handleAdminPanel = () => {
@@ -125,7 +113,7 @@ export default function Navbar() {
       >
         <Toolbar
           sx={{
-            height: 100,
+            minHeight: 100,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -184,14 +172,14 @@ export default function Navbar() {
         boxSizing: "border-box",
         zIndex: 1100,
       }}
-      ref={scrollContainerRef}
     >
       <Toolbar
         sx={{
-          height: hideTopToolbar ? 0 : 100,
+          minHeight: hideTopToolbar ? 0 : 100,
+          maxHeight: hideTopToolbar ? 0 : 100,
           opacity: hideTopToolbar ? 0 : 1,
           overflow: "hidden",
-          transition: "height 0.3s ease, opacity 0.3s ease",
+          transition: "all 0.3s ease",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -200,7 +188,7 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
-          willChange: "height, opacity",
+          willChange: "max-height, opacity", // Optimize transition
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
