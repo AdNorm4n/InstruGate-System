@@ -1834,7 +1834,7 @@ const InstrumentsAdmin = () => {
                     fontWeight: 600,
                     fontFamily: "'Inter', sans-serif",
                     bgcolor: "#2a2a2a",
-                    color: "#3b82f6", // Blue for headings
+                    color: "#ffffff", // Blue for headings
                     fontSize: "0.9rem",
                     py: 2.5,
                     px: 4,
@@ -1896,14 +1896,14 @@ const InstrumentsAdmin = () => {
                   align="center"
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    color: "#9ca3af",
+                    color: "#ffffff",
                     py: 5,
                     fontSize: "0.95rem",
                     border: "none",
                   }}
                 >
                   <Typography
-                    sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
+                    sx={{ fontFamily: "'Inter', sans-serif", color: "#ffffff" }}
                   >
                     No {tab.name.toLowerCase()} found.
                   </Typography>
@@ -2001,7 +2001,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         color: "#3b82f6",
-                        "&:hover": { color: "#2563eb", bgcolor: "#3b82f61a" },
+                        "&:hover": { color: "#2563eb", bgcolor: "#ffffff" },
                         mr: 1,
                       }}
                     >
@@ -2012,7 +2012,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         color: "#ef4444",
-                        "&:hover": { color: "#dc2626", bgcolor: "#ef44441a" },
+                        "&:hover": { color: "#dc2626", bgcolor: "#d6393a" },
                       }}
                     >
                       <Delete sx={{ fontSize: "1.2rem" }} />
@@ -2068,9 +2068,9 @@ const InstrumentsAdmin = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 700,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   fontFamily: "'Inter', sans-serif",
-                  mb: 5,
+                  mb: 6,
                   fontSize: { xs: "1.75rem", md: "2.25rem" },
                   letterSpacing: "-0.02em",
                   textTransform: "none",
