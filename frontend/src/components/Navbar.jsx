@@ -197,12 +197,12 @@ export default function Navbar() {
             startIcon={<PersonIcon sx={{ color: "#d6393a" }} />}
             onClick={() => navigate("/profile")}
             sx={{
-              color: "#d6393a",
+              color: "#ffffff",
               textTransform: "none",
               fontWeight: "bold",
               fontSize: "0.85rem",
               bgcolor: "transparent",
-              "&:hover": { bgcolor: "#ffffff" },
+              "&:hover": { bgcolor: "#333333" },
               fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1,
             }}
@@ -213,12 +213,12 @@ export default function Navbar() {
             startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
             onClick={handleLogout}
             sx={{
-              color: "#d6393a",
+              color: "#ffffff",
               textTransform: "none",
               fontWeight: "bold",
               fontSize: "0.85rem",
               bgcolor: "transparent",
-              "&:hover": { bgcolor: "#ffffff" },
+              "&:hover": { bgcolor: "#333333" },
               fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1,
             }}
