@@ -1751,7 +1751,7 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#333",
+          bgcolor: "#1a1a1a",
           width: "100vw", // Full-page width
           overflowX: "hidden", // Prevent horizontal scroll
         }}
@@ -1767,7 +1767,7 @@ const InstrumentsAdmin = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 700,
-                  color: "#1a1a1a",
+                  color: "#fffff",
                   fontFamily: "'Inter', Helvetica, sans-serif",
                   mb: 6,
                   fontSize: { xs: "2rem", md: "2.5rem" },
