@@ -1751,8 +1751,7 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#f4f7fa", // Updated for a softer, modern background
-          background: "linear-gradient(135deg, #f4f7fa 0%, #e8eef5 100%)", // Subtle gradient
+          bgcolor: "#5c5c5c", // Light teal solid color
           width: "100vw", // Full-page width
           overflowX: "hidden", // Prevent horizontal scroll
         }}
@@ -1808,7 +1807,6 @@ const InstrumentsAdmin = () => {
                     borderRadius: "8px",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     "& .MuiAlert-icon": { color: "white" },
-                    "& .MuiAlert-action svg": { color: "white" },
                     p: 1.5,
                   }}
                 >
@@ -1831,7 +1829,6 @@ const InstrumentsAdmin = () => {
                     borderRadius: "8px",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     "& .MuiAlert-icon": { color: "white" },
-                    "& .MuiAlert-action svg": { color: "white" },
                     p: 1.5,
                   }}
                 >
@@ -2178,7 +2175,6 @@ const InstrumentsAdmin = () => {
                       borderRadius: "8px",
                       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                       "& .MuiAlert-icon": { color: "white" },
-                      "& .MuiAlert-action svg": { color: "white" },
                       p: 1.5,
                     }}
                   >
