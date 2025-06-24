@@ -89,32 +89,33 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100vw",
           boxSizing: "border-box",
+          zIndex: 1100,
         }}
       >
         <Toolbar
           sx={{
-            minHeight: 100,
+            minHeight: 80,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             backgroundColor: "#e0f7fa",
-            px: { xs: 2, sm: 3 },
+            px: { xs: 1.5, sm: 2 },
             width: "100%",
             maxWidth: "100%",
             boxSizing: "border-box",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box>
               <img
                 src={logo}
                 alt="New Logo"
-                style={{ height: "30px", paddingBottom: "7px" }}
+                style={{ height: "25px", paddingBottom: "5px" }}
               />
               <img
                 src={headerBanner}
                 alt="Header Banner"
-                style={{ height: "50px" }}
+                style={{ height: "40px" }}
               />
             </Box>
           </Box>
@@ -130,11 +131,11 @@ export default function Navbar() {
             <img
               src={centerLogo}
               alt="Center Logo"
-              style={{ height: "40px" }}
+              style={{ height: "32px" }}
             />
           </Box>
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <CircularProgress size={20} sx={{ color: "#d6393a" }} />
+          <Box sx={{ display: "flex", gap: 1.5 }}>
+            <CircularProgress size={16} sx={{ color: "#d6393a" }} />
           </Box>
         </Toolbar>
       </AppBar>
@@ -150,33 +151,33 @@ export default function Navbar() {
         width: "100%",
         maxWidth: "100vw",
         boxSizing: "border-box",
-        zIndex: 1100, // Above content, below dialogs
+        zIndex: 1100,
       }}
     >
       <Toolbar
         sx={{
-          minHeight: 100,
+          minHeight: 80,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          backgroundColor: "#ffffff",
-          px: { xs: 2, sm: 3 },
+          backgroundColor: "#1e1e1e",
+          px: { xs: 1.5, sm: 2 },
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box>
             <img
               src={logo}
               alt="New Logo"
-              style={{ height: "30px", paddingBottom: "7px" }}
+              style={{ height: "25px", paddingBottom: "5px" }}
             />
             <img
               src={headerBanner}
               alt="Header Banner"
-              style={{ height: "50px" }}
+              style={{ height: "40px" }}
             />
           </Box>
         </Box>
@@ -189,9 +190,9 @@ export default function Navbar() {
             alignItems: "center",
           }}
         >
-          <img src={centerLogo} alt="Center Logo" style={{ height: "40px" }} />
+          <img src={centerLogo} alt="Center Logo" style={{ height: "32px" }} />
         </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
           <Button
             startIcon={<PersonIcon sx={{ color: "#d6393a" }} />}
             onClick={() => navigate("/profile")}
@@ -199,9 +200,11 @@ export default function Navbar() {
               color: "#d6393a",
               textTransform: "none",
               fontWeight: "bold",
-              bgcolor: "#ffffff",
-              "&:hover": { bgcolor: "#e0e0e0" },
+              fontSize: "0.85rem",
+              bgcolor: "transparent",
+              "&:hover": { bgcolor: "#333333" },
               fontFamily: "'Inter', Helvetica, sans-serif",
+              px: 1,
             }}
           >
             Profile
@@ -213,9 +216,11 @@ export default function Navbar() {
               color: "#d6393a",
               textTransform: "none",
               fontWeight: "bold",
-              bgcolor: "#ffffff",
-              "&:hover": { bgcolor: "#e0e0e0" },
+              fontSize: "0.85rem",
+              bgcolor: "transparent",
+              "&:hover": { bgcolor: "#333333" },
               fontFamily: "'Inter', Helvetica, sans-serif",
+              px: 1,
             }}
           >
             Logout
@@ -224,30 +229,32 @@ export default function Navbar() {
       </Toolbar>
       <Toolbar
         sx={{
-          minHeight: 64,
+          minHeight: 56,
           display: "flex",
           justifyContent: "center",
           backgroundColor: "#d6393a",
-          px: { xs: 2, sm: 3 },
+          px: { xs: 1.5, sm: 2 },
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
         }}
       >
-        <Box sx={{ display: "flex", gap: 3 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           {menuItems.map((item) => (
             <Button
               key={item.text}
               startIcon={React.cloneElement(item.icon, {
-                sx: { color: "#ffffff" },
+                sx: { color: "#ffffff", fontSize: "1.1rem" },
               })}
               onClick={item.action || (() => navigate(item.path))}
               sx={{
                 color: "#ffffff",
                 textTransform: "none",
                 fontWeight: 500,
+                fontSize: "0.85rem",
                 "&:hover": { bgcolor: "#b32b2e" },
                 fontFamily: "'Inter', Helvetica, sans-serif",
+                px: 1,
               }}
             >
               {item.text}
