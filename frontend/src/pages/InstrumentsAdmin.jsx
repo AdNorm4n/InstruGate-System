@@ -32,7 +32,7 @@ import styled from "@emotion/styled";
 import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
 import api from "../api";
-import "./InstrumentsAdmin.css";
+import "../styles/InstrumentsAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
