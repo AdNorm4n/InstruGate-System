@@ -1785,6 +1785,7 @@ const InstrumentsAdmin = () => {
                     left: "50%",
                     transform: "translateX(-50%)",
                     borderRadius: "2px",
+                    textTransform: "uppercase",
                   },
                 }}
               >
