@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useContext } from "react";
+import { useContext } from "react";
 import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -19,34 +19,7 @@ import { UserContext } from "../contexts/UserContext";
 
 export default function Navbar() {
   const { userRole, loading } = useContext(UserContext);
-  const [instruments, setInstruments] = useState([]);
-  const [hideTopToolbar, setHideTopToolbar] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setHideTopToolbar(true);
-      } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
-        setHideTopToolbar(false);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
-
-  useEffect(() => {
-    api
-      .get("/api/instruments/")
-      .then((res) => setInstruments(res.data))
-      .catch(() => alert("Failed to load instruments"));
-  }, []);
 
   const handleAdminPanel = () => {
     navigate("/admin-panel");
@@ -109,11 +82,13 @@ export default function Navbar() {
   if (loading) {
     return (
       <AppBar
-        position="fixed"
+        position="relative"
         sx={{
-          boxShadow: 0,
-          transition: "all 0.3s ease",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           backgroundColor: "transparent",
+          width: "100%",
+          maxWidth: "100vw",
+          boxSizing: "border-box",
         }}
       >
         <Toolbar
@@ -122,12 +97,15 @@ export default function Navbar() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            position: "relative",
             backgroundColor: "#e0f7fa",
+            px: { xs: 2, sm: 3 },
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{}}>
+            <Box>
               <img
                 src={logo}
                 alt="New Logo"
@@ -165,13 +143,14 @@ export default function Navbar() {
 
   return (
     <AppBar
-      position="fixed"
+      position="relative"
       sx={{
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         backgroundColor: "transparent",
-        width: "100%", // Full width
-        maxWidth: "100vw", // Prevent overflow
+        width: "100%",
+        maxWidth: "100vw",
         boxSizing: "border-box",
+        zIndex: 1100, // Above content, below dialogs
       }}
     >
       <Toolbar
@@ -180,20 +159,15 @@ export default function Navbar() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          position: "relative",
-          maxHeight: hideTopToolbar ? 0 : 100,
-          opacity: hideTopToolbar ? 0 : 1,
-          overflow: "hidden",
-          transition: "max-height 0.3s ease, opacity 0.3s ease",
           backgroundColor: "#ffffff",
-          px: { xs: 2, sm: 3 }, // Consistent padding
-          width: "100%", // Ensure full width
-          maxWidth: "100%", // Prevent overflow
+          px: { xs: 2, sm: 3 },
+          width: "100%",
+          maxWidth: "100%",
           boxSizing: "border-box",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box sx={{}}>
+          <Box>
             <img
               src={logo}
               alt="New Logo"
@@ -254,12 +228,9 @@ export default function Navbar() {
           display: "flex",
           justifyContent: "center",
           backgroundColor: "#d6393a",
-          transform: hideTopToolbar ? "translateY(-64px)" : "translateY(0)",
-          transition: "transform 0.3s ease",
-          zIndex: 1100,
-          px: { xs: 2, sm: 3 }, // Consistent padding
+          px: { xs: 2, sm: 3 },
           width: "100%",
-          maxWidth: "100%", // Prevent overflow
+          maxWidth: "100%",
           boxSizing: "border-box",
         }}
       >

@@ -2007,14 +2007,11 @@ const InstrumentsAdmin = () => {
         }}
         className="instruments-admin-page"
       >
-        <Box sx={{ height: "164px" }} />{" "}
-        {/* Spacer for fixed navbar (100px + 64px) */}
         <main
           style={{
-            flex: 1,
             display: "flex",
             justifyContent: "center",
-            minHeight: "calc(100vh - 164px)", // Ensure main fills remaining space
+            minHeight: "100vh", // Ensure main fills viewport height
           }}
         >
           <ErrorBoundary>
