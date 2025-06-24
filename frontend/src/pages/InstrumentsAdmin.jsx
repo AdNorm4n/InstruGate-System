@@ -1751,7 +1751,7 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#5c5c5c", // Light teal solid color
+          bgcolor: "#e3e3e3", // Light teal solid color
           width: "100vw", // Full-page width
           overflowX: "hidden", // Prevent horizontal scroll
         }}
