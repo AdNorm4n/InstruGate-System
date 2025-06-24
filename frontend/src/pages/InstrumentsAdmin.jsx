@@ -1998,34 +1998,32 @@ const InstrumentsAdmin = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
-          bgcolor: "#000000", // Black background
-          width: "100vw", // Ensure full width
-          height: "100%", // Ensure full height
-          margin: 0, // Remove default margins
-          padding: 0, // Remove default padding
-          boxSizing: "border-box", // Ensure padding doesn’t add to width/height
-          overflow: "hidden", // Prevent overflow causing gaps
+          minHeight: "calc(100vh - 164px)", // Adjust for navbar height (100px top + 64px bottom)
+          bgcolor: "#000000",
+          width: "100%",
+          margin: 0,
+          padding: 0,
+          boxSizing: "border-box",
+          overflowX: "hidden", // Prevent horizontal scroll
         }}
         className="instruments-admin-page"
       >
-        <DrawerHeader />
-        <main style={{ flex: 1 }}>
+        <Box sx={{ height: "164px" }} />{" "}
+        {/* Spacer for fixed navbar (100px + 64px) */}
+        <main style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           <ErrorBoundary>
             <Container
-              maxWidth="xl"
+              maxWidth="lg" // Use 'lg' for better table width control
               sx={{
-                py: 0, // Remove vertical padding
-                px: 0, // Remove horizontal padding
-                mt: 0, // Remove top margin
-                width: "100%", // Ensure full width
-                maxWidth: "100%", // Override maxWidth to match viewport
+                py: 4, // Add vertical padding
+                px: { xs: 2, sm: 3 }, // Responsive horizontal padding
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center", // Center content horizontally
                 boxSizing: "border-box",
-                margin: 0, // Remove default margins
-                padding: 0, // Remove default padding
               }}
             >
-              {/* Rest of the content remains unchanged */}
               <Typography
                 variant="h4"
                 align="center"
@@ -2131,7 +2129,7 @@ const InstrumentsAdmin = () => {
                 </Alert>
               </Snackbar>
               {loading ? (
-                <Box sx={{ textAlign: "center", mt: "15vh" }}>
+                <Box sx={{ textAlign: "center", mt: 8 }}>
                   <ToolCard
                     sx={{
                       maxWidth: 350,
@@ -2163,6 +2161,8 @@ const InstrumentsAdmin = () => {
                     p: { xs: 2, md: 3 },
                     borderRadius: "12px",
                     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+                    width: "100%",
+                    maxWidth: "1200px", // Limit card width for centering
                   }}
                 >
                   <Tabs
@@ -2584,5 +2584,4 @@ const InstrumentsAdmin = () => {
     </Fade>
   );
 };
-
 export default InstrumentsAdmin;
