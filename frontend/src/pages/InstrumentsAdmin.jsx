@@ -1999,48 +1999,35 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          width: "100vw", // Full viewport width
-          bgcolor: "#000000", // Black background
-          m: 0, // No margins
-          p: 0, // No padding
+          bgcolor: "#000000",
+          width: "100%",
+          maxWidth: "100vw",
           boxSizing: "border-box",
           fontFamily: "'Inter', sans-serif",
         }}
         className="instruments-admin-page"
       >
-        <DrawerHeader sx={{ display: "none" }} />{" "}
-        {/* Hide DrawerHeader to remove top spacing */}
-        <main
-          style={{
-            flex: 1, // Fill available space
-            width: "100%", // Full width
-            height: "100%", // Full height
-            margin: 0, // No margins
-            padding: 0, // No padding
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        <DrawerHeader />
+        <main style={{ flex: 1 }}>
           <ErrorBoundary>
             <Container
-              disableGutters // Remove default padding
-              maxWidth={false} // Remove width constraint
+              maxWidth="lg"
               sx={{
-                flex: 1, // Fill available space
-                width: "100%", // Full width
-                height: "100%", // Full height
-                m: 0, // No margins
-                p: 0, // No padding
-                bgcolor: "#000000", // Black background
+                py: 6,
+                px: { xs: 2, sm: 3, md: 4 },
+                mt: 8,
+                width: "100%",
+                maxWidth: "100%",
                 boxSizing: "border-box",
               }}
             >
               <Typography
                 variant="h4"
                 align="center"
+                gutterBottom
                 sx={{
                   fontWeight: 700,
-                  color: "#ffffff", // White title
+                  color: "#ffffff",
                   fontFamily: "'Inter', sans-serif",
                   mb: 4,
                   fontSize: { xs: "1.8rem", md: "2.2rem" },
@@ -2139,16 +2126,7 @@ const InstrumentsAdmin = () => {
                 </Alert>
               </Snackbar>
               {loading ? (
-                <Box
-                  sx={{
-                    flex: 1, // Fill available space
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    height: "100%",
-                  }}
-                >
+                <Box sx={{ textAlign: "center", mt: "15vh" }}>
                   <ToolCard
                     sx={{
                       maxWidth: 350,
@@ -2156,7 +2134,6 @@ const InstrumentsAdmin = () => {
                       textAlign: "center",
                       p: 3,
                       borderRadius: "12px",
-                      bgcolor: "#1e1e1e",
                     }}
                   >
                     <CircularProgress
@@ -2178,13 +2155,9 @@ const InstrumentsAdmin = () => {
               ) : (
                 <ToolCard
                   sx={{
-                    p: { xs: 2, md: 3 }, // Internal padding for content
+                    p: { xs: 2, md: 3 },
                     borderRadius: "12px",
                     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
-                    bgcolor: "#1e1e1e",
-                    width: "100%", // Full width
-                    height: "100%", // Full height
-                    m: 0, // No margins
                   }}
                 >
                   <Tabs
@@ -2237,7 +2210,6 @@ const InstrumentsAdmin = () => {
                       flexWrap: "wrap",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      width: "100%",
                     }}
                   >
                     <Box
@@ -2589,13 +2561,14 @@ const InstrumentsAdmin = () => {
                     Cancel
                   </CancelButton>
                   <CTAButton
+                    variant="contained"
                     onClick={handleConfirmAction}
                     sx={{
-                      bgcolor: "#ef4444",
-                      "&:hover": { bgcolor: "#dc2626" },
+                      bgcolor: "#d6393a",
+                      "&:hover": { bgcolor: "#b71c1c" },
                     }}
                   >
-                    Confirm
+                    Delete
                   </CTAButton>
                 </DialogActions>
               </Dialog>
