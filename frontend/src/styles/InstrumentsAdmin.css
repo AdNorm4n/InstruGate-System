@@ -1,16 +1,22 @@
 .instruments-admin-page {
   min-height: 100vh;
-  width: 100vw;
-  overflow-x: hidden;
+  width: 100%; /* Respect parent container */
+  max-width: 100vw; /* Prevent overflow */
+  box-sizing: border-box; /* Include padding/margins in width */
+  overflow-x: hidden; /* Explicitly prevent horizontal scrolling */
   padding-bottom: 80px;
   font-family: "Inter", Helvetica, sans-serif !important;
 }
 
+/* Ensure tables don’t overflow */
 .instruments-admin-page .MuiTable-root {
   border-radius: 12px;
   overflow: hidden;
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%; /* Fit container */
+  max-width: 100%; /* Prevent overflow */
+  table-layout: fixed; /* Prevent columns from expanding too wide */
 }
 
 .instruments-admin-page .MuiTableCell-head {
@@ -34,12 +40,22 @@
   transition: background-color 0.2s ease;
 }
 
+/* Ensure dialogs don’t overflow */
 .instruments-admin-page .MuiDialog-paper {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   border-radius: 12px;
   background-color: #ffffff;
+  max-width: 100%; /* Prevent dialog overflow */
+  width: calc(100% - 32px); /* Account for margins */
+  margin: 16px; /* Prevent edge-touching on small screens */
 }
 
+/* Style alert icons to be white */
+.instruments-admin-page .MuiSnackbar-root .MuiAlert-root .MuiAlert-icon {
+  color: #ffffff !important; /* White icons for success/error alerts */
+}
+
+/* General alert styling */
 .instruments-admin-page .MuiSnackbar-root .MuiAlert-root {
   border-radius: 8px;
   padding: 12px 16px;
@@ -48,25 +64,45 @@
   font-weight: 500;
 }
 
+/* Prevent overflow in TextField and FormControl */
 .instruments-admin-page .MuiTextField-root,
 .instruments-admin-page .MuiFormControl-root {
   transition: all 0.2s ease;
+  width: 100%; /* Ensure inputs fit container */
+  max-width: 100%; /* Prevent overflow */
+  box-sizing: border-box;
 }
 
+/* Ensure buttons don’t overflow */
 .instruments-admin-page .MuiButton-root {
   transition: all 0.2s ease;
+  max-width: 100%; /* Prevent button overflow */
 }
 
+/* Ensure icon buttons don’t overflow */
 .instruments-admin-page .MuiIconButton-root {
   transition: color 0.2s ease;
 }
 
+/* Ensure tabs don’t overflow */
+.instruments-admin-page .MuiTabs-root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* Allow horizontal scrolling within tabs if needed */
+}
+
+/* Divider styling */
 .instruments-admin-page .MuiDivider-root {
   background-color: #e0e0e0;
 }
 
-/* Responsive Design */
+/* Responsive adjustments */
 @media (max-width: 600px) {
+  .instruments-admin-page .MuiContainer-root {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
   .instruments-admin-page .MuiTypography-h4 {
     font-size: 1.75rem;
   }
@@ -86,6 +122,7 @@
   .instruments-admin-page .MuiTableCell-root {
     font-size: 0.85rem;
     padding: 10px;
+    word-break: break-word; /* Prevent text overflow */
   }
 
   .instruments-admin-page .MuiTabs-root {
@@ -100,8 +137,8 @@
 
 @media (max-width: 960px) {
   .instruments-admin-page .MuiContainer-root {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .instruments-admin-page .MuiTypography-h4 {

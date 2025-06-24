@@ -1751,16 +1751,28 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#1a1a1a",
-          width: "100vw", // Full-page width
-          overflowX: "hidden", // Prevent horizontal scroll
+          bgcolor: "#f4f7fa",
+          background: "linear-gradient(135deg, #f4f7fa 0%, #e8eef5 100%)",
+          width: "100%", // Changed from 100vw to 100% to respect parent container
+          maxWidth: "100vw", // Prevent overflow
+          boxSizing: "border-box", // Ensure padding/margins are included in width
         }}
         className="instruments-admin-page"
       >
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
-            <Container maxWidth="xl" sx={{ py: 8, mt: 10 }}>
+            <Container
+              maxWidth="xl"
+              sx={{
+                py: 8,
+                px: { xs: 2, sm: 3, md: 4 }, // Responsive padding
+                mt: 10,
+                width: "100%",
+                maxWidth: "100%", // Ensure container doesn’t exceed viewport
+                boxSizing: "border-box",
+              }}
+            >
               <Typography
                 variant="h4"
                 align="center"
