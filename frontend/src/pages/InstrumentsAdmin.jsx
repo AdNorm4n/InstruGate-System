@@ -1785,11 +1785,10 @@ const InstrumentsAdmin = () => {
                     left: "50%",
                     transform: "translateX(-50%)",
                     borderRadius: "2px",
-                    textTransform: "uppercase",
                   },
                 }}
               >
-                Instruments Management
+                INSTRUMENTS MANAGEMENT
               </Typography>
               <Snackbar
                 open={!!success}
