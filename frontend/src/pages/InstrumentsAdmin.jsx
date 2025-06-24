@@ -2123,7 +2123,10 @@ const InstrumentsAdmin = () => {
                         fontWeight: 600,
                       }}
                     >
-                      Add {tabs[activeTab].name.slice(0, -1)}
+                      Add{" "}
+                      {tabs[activeTab].name === "Categories"
+                        ? "Category"
+                        : tabs[activeTab].name.slice(0, -1)}
                     </CTAButton>
                   </Box>
                   {renderTable()}
