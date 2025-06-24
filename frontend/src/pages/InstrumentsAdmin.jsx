@@ -30,7 +30,7 @@ import {
   Fade,
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
-import { styled } from "@mui/material/styles"; // Added import for styled
+import { styled } from "@mui/material/styles";
 import api from "../api";
 import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
@@ -44,7 +44,7 @@ const ToolCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   backgroundColor: "#ffffff",
   borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.12)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
@@ -109,7 +109,7 @@ const TYPE_CHOICES = [
   { value: "Pressure Switches", label: "Pressure Switches" },
   { value: "Pressure Sensors", label: "Pressure Sensors" },
   {
-    value: "Diaphragm Seals - Isolators",
+    value: "Diaphragm Seals - isolates",
     label: "Diaphragm Seals - Isolators",
   },
   { value: "Threaded Seals", label: "Threaded Seals" },
@@ -167,6 +167,35 @@ const InstrumentsAdmin = () => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState("");
+
+  const validateImage = (file) => {
+    const validTypes = ["image/jpeg", "image/png"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (!validTypes.includes(file.type)) {
+      setModalError("Only JPEG or PNG images are allowed.");
+      return false;
+    }
+    if (file.size > maxSize) {
+      setModalError("Image size must be less than 5MB.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleModalClose = () => {
+    setOpenModal(false);
+    setModalData({});
+    setModalType("");
+    setModalAction("add");
+    setModalError("");
+    setFieldOptions([]);
+    setAddonOptions([]);
+    setNewOption({ label: "", code: "", price: "" });
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+    }
+  };
 
   const tabs = [
     {
@@ -413,7 +442,7 @@ const InstrumentsAdmin = () => {
       filtered = filtered.filter((item) =>
         tab.searchFields.some((field) =>
           getField(item, field)
-            ?.toString()
+            ?.bloated?.toString()
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
         )
@@ -480,7 +509,7 @@ const InstrumentsAdmin = () => {
       return;
     }
     setModalAction("edit");
-    setModalData({ ...item });
+    setModalData({ ...item, image: item.image || null });
     setModalType(tabs[activeTab].name);
     setImagePreview(item.image || null);
     setModalError("");
@@ -518,36 +547,6 @@ const InstrumentsAdmin = () => {
     }
     setNewOption({ label: "", code: "", price: "" });
     setOpenModal(true);
-  };
-
-  const handleModalClose = () => {
-    setModalType("");
-    setOpenModal(false);
-    setModalData({});
-    setFieldOptions([]);
-    setAddonOptions([]);
-    setNewOption({ label: "", code: "", price: "" });
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-    }
-    setImagePreview(null);
-    setError("");
-    setModalError("");
-  };
-
-  const validateImage = (file) => {
-    if (!file) return true;
-    const validTypes = ["image/jpeg", "image/png"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (!validTypes.includes(file.type)) {
-      setModalError("Image must be a JPEG or PNG file.");
-      return false;
-    }
-    if (file.size > maxSize) {
-      setModalError("Image size must be less than 5MB.");
-      return false;
-    }
-    return true;
   };
 
   const handleSave = async () => {
@@ -609,23 +608,48 @@ const InstrumentsAdmin = () => {
       if (tab.name === ENTITY_TYPES.INSTRUMENTS) {
         const formData = new FormData();
         formData.append("name", modalData.name || "");
-        if (modalData.type_id) formData.append("type_id", modalData.type_id);
-        formData.append("base_price", modalData.base_price || 0);
+        if (!modalData.type_id || isNaN(parseInt(modalData.type_id, 10))) {
+          setModalError("Please select a valid instrument type.");
+          return;
+        }
+        formData.append("type_id", parseInt(modalData.type_id, 10));
+        const basePrice = parseFloat(modalData.base_price);
+        if (isNaN(basePrice)) {
+          setModalError("Please provide a valid base price.");
+          return;
+        }
+        formData.append("base_price", basePrice.toFixed(2));
         formData.append("description", modalData.description || "");
         formData.append("specifications", modalData.specifications || "");
         formData.append(
           "is_available",
-          modalData.is_available ? "true" : "false"
+          modalData.is_available === true ? "true" : "false"
         );
 
+        // Handle image field
         if (modalData.image instanceof File) {
           if (!validateImage(modalData.image)) return;
           formData.append("image", modalData.image);
-        } else if (modalAction === "edit" && modalData.image === "") {
-          formData.append("image", "");
+        } else if (modalAction === "edit" && modalData.image === null) {
+          formData.append("image", ""); // Explicitly send empty string to clear image
         }
 
-        await api({ method, url: endpoint, data: formData, headers });
+        // Log FormData contents for debugging
+        console.log("FormData contents:");
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}: ${value instanceof File ? value.name : value}`);
+        }
+
+        // Send request without setting Content-Type (let FormData handle it)
+        await api({
+          method,
+          url: endpoint,
+          data: formData,
+          headers: {
+            Authorization: `Bearer ${access}`,
+            // Do not set Content-Type here; FormData sets it to multipart/form-data
+          },
+        });
         setSuccess(
           `${modalType} ${
             modalAction === "add" ? "added" : "updated"
@@ -675,10 +699,17 @@ const InstrumentsAdmin = () => {
     } catch (err) {
       const errorMessage =
         err.response?.data?.detail ||
-        Object.values(err.response?.data || {})[0]?.[0] ||
+        Object.entries(err.response?.data || {})
+          .map(([key, value]) => `${key}: ${value[0] || value}`)
+          .join(", ") ||
         "Network error. Please try again.";
       setModalError(
         `Failed to save ${modalType.toLowerCase()}: ${errorMessage}`
+      );
+      console.error(
+        "API Error:",
+        JSON.stringify(err.response?.data, null, 2),
+        err
       );
     }
   };
@@ -1128,6 +1159,9 @@ const InstrumentsAdmin = () => {
                   if (imagePreview) URL.revokeObjectURL(imagePreview);
                   setModalData({ ...modalData, image: file });
                   setImagePreview(URL.createObjectURL(file));
+                } else if (!file) {
+                  setModalData({ ...modalData, image: null });
+                  setImagePreview(null);
                 }
               }}
               style={{ width: "100%", marginBottom: "10px" }}
@@ -1137,19 +1171,33 @@ const InstrumentsAdmin = () => {
               <Box sx={{ mt: 2 }}>
                 <img
                   src={imagePreview || modalData.image}
-                  alt="Preview"
+                  alt="Instrument Preview"
                   style={{
                     maxWidth: "200px",
                     maxHeight: "200px",
                     objectFit: "contain",
                     borderRadius: "8px",
                   }}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "block";
+                  }}
                 />
+                <Typography
+                  sx={{
+                    fontFamily: "Helvetica, sans-serif",
+                    color: "text.secondary",
+                    display: "none",
+                    mt: 1,
+                  }}
+                >
+                  Image unavailable
+                </Typography>
                 <CTAButton
                   size="small"
                   onClick={() => {
                     if (imagePreview) URL.revokeObjectURL(imagePreview);
-                    setModalData({ ...modalData, image: "" });
+                    setModalData({ ...modalData, image: null });
                     setImagePreview(null);
                   }}
                   sx={{
@@ -1550,7 +1598,6 @@ const InstrumentsAdmin = () => {
   const renderTable = () => {
     const tab = tabs[activeTab];
     const items = filteredData[tab.dataKey] || [];
-    const placeholderImage = "https://via.placeholder.com/50";
 
     return (
       <Table>
@@ -1622,17 +1669,42 @@ const InstrumentsAdmin = () => {
                     }}
                   >
                     {field === "image" ? (
-                      <img
-                        src={item[field] || placeholderImage}
-                        alt={item.name || "Instrument"}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                        onError={(e) => (e.target.src = placeholderImage)}
-                      />
+                      item[field] ? (
+                        <>
+                          <img
+                            src={item[field]}
+                            alt={item.name || "Instrument"}
+                            style={{
+                              width: "50px",
+                              height: "50px",
+                              objectFit: "cover",
+                              borderRadius: "4px",
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "block";
+                            }}
+                          />
+                          <Typography
+                            sx={{
+                              fontFamily: "Helvetica, sans-serif",
+                              color: "text.secondary",
+                              display: "none",
+                            }}
+                          >
+                            Image unavailable
+                          </Typography>
+                        </>
+                      ) : (
+                        <Typography
+                          sx={{
+                            fontFamily: "Helvetica, sans-serif",
+                            color: "text.secondary",
+                          }}
+                        >
+                          No image
+                        </Typography>
+                      )
                     ) : field.includes(".") ||
                       field === "instruments" ||
                       field === "base_price" ? (
@@ -1679,26 +1751,42 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#f8f9fa",
+          bgcolor: "#f4f7fa", // Updated for a softer, modern background
+          background: "linear-gradient(135deg, #f4f7fa 0%, #e8eef5 100%)", // Subtle gradient
+          width: "100vw", // Full-page width
+          overflowX: "hidden", // Prevent horizontal scroll
         }}
         className="instruments-admin-page"
       >
         <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
-            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+            <Container maxWidth="xl" sx={{ py: 8, mt: 10 }}>
               <Typography
-                variant="h6"
+                variant="h4"
                 align="center"
                 gutterBottom
                 sx={{
-                  fontWeight: "bold",
-                  color: "#000000",
-                  fontFamily: "Helvetica, sans-serif",
-                  textTransform: "uppercase",
-                  mb: 4,
-                  fontSize: { xs: "1.5rem", md: "2rem" },
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                  fontWeight: 700,
+                  color: "#1a1a1a",
+                  fontFamily: "'Inter', Helvetica, sans-serif",
+                  mb: 6,
+                  fontSize: { xs: "2rem", md: "2.5rem" },
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    width: "60px",
+                    height: "4px",
+                    bgcolor: "#1976d2",
+                    position: "absolute",
+                    bottom: "-12px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderRadius: "2px",
+                  },
                 }}
               >
                 Instruments Management
@@ -1713,12 +1801,15 @@ const InstrumentsAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "'Inter', Helvetica, sans-serif",
                     width: "100%",
+                    bgcolor: "#28a745",
                     color: "white",
-                    backgroundColor: "#28a745",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
                     "& .MuiAlert-icon": { color: "white" },
                     "& .MuiAlert-action svg": { color: "white" },
+                    p: 1.5,
                   }}
                 >
                   {success}
@@ -1733,7 +1824,16 @@ const InstrumentsAdmin = () => {
                 <Alert
                   severity="error"
                   onClose={() => setError("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif" }}
+                  sx={{
+                    fontFamily: "'Inter', Helvetica, sans-serif",
+                    bgcolor: "#d6393a",
+                    color: "white",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                    "& .MuiAlert-icon": { color: "white" },
+                    "& .MuiAlert-action svg": { color: "white" },
+                    p: 1.5,
+                  }}
                 >
                   {error}
                 </Alert>
@@ -1741,16 +1841,24 @@ const InstrumentsAdmin = () => {
               {loading ? (
                 <Box sx={{ textAlign: "center", mt: "20vh" }}>
                   <ToolCard
-                    sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
+                    sx={{
+                      maxWidth: 400,
+                      mx: "auto",
+                      textAlign: "center",
+                      p: 4,
+                      borderRadius: "12px",
+                    }}
                   >
-                    <CircularProgress size={48} sx={{ color: "#1976d2" }} />
+                    <CircularProgress
+                      size={48}
+                      sx={{ color: "#1976d2", mb: 2 }}
+                    />
                     <Typography
                       variant="h6"
                       sx={{
-                        mt: 2,
-                        fontFamily: "Helvetica, sans-serif",
-                        fontWeight: "bold",
-                        color: "#000000",
+                        fontFamily: "'Inter', Helvetica, sans-serif",
+                        fontWeight: 600,
+                        color: "#1a1a1a",
                       }}
                     >
                       Loading data...
@@ -1758,7 +1866,13 @@ const InstrumentsAdmin = () => {
                   </ToolCard>
                 </Box>
               ) : (
-                <ToolCard>
+                <ToolCard
+                  sx={{
+                    p: { xs: 3, md: 5 },
+                    borderRadius: "16px",
+                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)",
+                  }}
+                >
                   <Tabs
                     value={activeTab}
                     onChange={(e, newValue) => {
@@ -1770,15 +1884,26 @@ const InstrumentsAdmin = () => {
                     variant="scrollable"
                     scrollButtons="auto"
                     sx={{
-                      mb: 4,
+                      mb: 5,
+                      borderBottom: "1px solid #e0e0e0",
                       "& .MuiTab-root": {
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "'Inter', Helvetica, sans-serif",
                         textTransform: "none",
-                        fontWeight: "bold",
+                        fontWeight: 600,
+                        fontSize: "1rem",
                         color: "#666",
-                        "&.Mui-selected": { color: "#1976d2" },
+                        px: 3,
+                        py: 2,
+                        "&.Mui-selected": {
+                          color: "#1976d2",
+                          fontWeight: 700,
+                        },
                       },
-                      "& .MuiTabs-indicator": { backgroundColor: "#1976d2" },
+                      "& .MuiTabs-indicator": {
+                        backgroundColor: "#1976d2",
+                        height: "3px",
+                        borderRadius: "2px",
+                      },
                     }}
                   >
                     {tabs.map((tab, index) => (
@@ -1786,15 +1911,15 @@ const InstrumentsAdmin = () => {
                         label={tab.name}
                         key={tab.name}
                         value={index}
-                        sx={{ fontFamily: "Helvetica, sans-serif" }}
+                        sx={{ fontFamily: "'Inter', Helvetica, sans-serif" }}
                       />
                     ))}
                   </Tabs>
                   <Box
                     sx={{
                       display: "flex",
-                      gap: 2,
-                      mb: 4,
+                      gap: 3,
+                      mb: 5,
                       flexWrap: "wrap",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -1813,20 +1938,34 @@ const InstrumentsAdmin = () => {
                         label={`Search ${tabs[activeTab].name}`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        sx={{ flex: 1, minWidth: "200px" }}
+                        sx={{
+                          flex: 1,
+                          minWidth: "200px",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            fontFamily: "'Inter', Helvetica, sans-serif",
+                            "& fieldset": {
+                              borderColor: "#d0d7de",
+                            },
+                            "&:hover fieldset": {
+                              borderColor: "#1976d2",
+                            },
+                          },
+                          "& .MuiInputLabel-root": {
+                            fontFamily: "'Inter', Helvetica, sans-serif",
+                            color: "#555",
+                          },
+                        }}
                         variant="outlined"
                         size="small"
-                        InputLabelProps={{
-                          sx: { fontFamily: "Helvetica, sans-serif" },
-                        }}
-                        InputProps={{
-                          sx: { fontFamily: "Helvetica, sans-serif" },
-                        }}
                       />
                       {tabs[activeTab].name === ENTITY_TYPES.INSTRUMENTS && (
                         <FormControl sx={{ minWidth: "200px" }} size="small">
                           <InputLabel
-                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            sx={{
+                              fontFamily: "'Inter', Helvetica, sans-serif",
+                              color: "#555",
+                            }}
                           >
                             Filter by Category
                           </InputLabel>
@@ -1836,11 +1975,22 @@ const InstrumentsAdmin = () => {
                               setFilterCategoryId(e.target.value)
                             }
                             label="Filter by Category"
-                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            sx={{
+                              borderRadius: "8px",
+                              fontFamily: "'Inter', Helvetica, sans-serif",
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#d0d7de",
+                              },
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#1976d2",
+                              },
+                            }}
                           >
                             <MenuItem
                               value=""
-                              sx={{ fontFamily: "Helvetica, sans-serif" }}
+                              sx={{
+                                fontFamily: "'Inter', Helvetica, sans-serif",
+                              }}
                             >
                               All Categories
                             </MenuItem>
@@ -1848,7 +1998,9 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={category.id}
                                 value={category.id}
-                                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                                sx={{
+                                  fontFamily: "'Inter', Helvetica, sans-serif",
+                                }}
                               >
                                 {category.name}
                               </MenuItem>
@@ -1860,7 +2012,10 @@ const InstrumentsAdmin = () => {
                         ENTITY_TYPES.INSTRUMENT_TYPES && (
                         <FormControl sx={{ minWidth: "200px" }} size="small">
                           <InputLabel
-                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            sx={{
+                              fontFamily: "'Inter', Helvetica, sans-serif",
+                              color: "#555",
+                            }}
                           >
                             Filter by Category
                           </InputLabel>
@@ -1870,11 +2025,22 @@ const InstrumentsAdmin = () => {
                               setFilterTypeCategoryId(e.target.value)
                             }
                             label="Filter by Category"
-                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            sx={{
+                              borderRadius: "8px",
+                              fontFamily: "'Inter', Helvetica, sans-serif",
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#d0d7de",
+                              },
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#1976d2",
+                              },
+                            }}
                           >
                             <MenuItem
                               value=""
-                              sx={{ fontFamily: "Helvetica, sans-serif" }}
+                              sx={{
+                                fontFamily: "'Inter', Helvetica, sans-serif",
+                              }}
                             >
                               All Categories
                             </MenuItem>
@@ -1882,7 +2048,9 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={category.id}
                                 value={category.id}
-                                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                                sx={{
+                                  fontFamily: "'Inter', Helvetica, sans-serif",
+                                }}
                               >
                                 {category.name}
                               </MenuItem>
@@ -1895,7 +2063,10 @@ const InstrumentsAdmin = () => {
                         tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
                         <FormControl sx={{ minWidth: "200px" }} size="small">
                           <InputLabel
-                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            sx={{
+                              fontFamily: "'Inter', Helvetica, sans-serif",
+                              color: "#555",
+                            }}
                           >
                             Filter by Instrument
                           </InputLabel>
@@ -1905,11 +2076,22 @@ const InstrumentsAdmin = () => {
                               setFilterInstrumentId(e.target.value)
                             }
                             label="Filter by Instrument"
-                            sx={{ fontFamily: "Helvetica, sans-serif" }}
+                            sx={{
+                              borderRadius: "8px",
+                              fontFamily: "'Inter', Helvetica, sans-serif",
+                              "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#d0d7de",
+                              },
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#1976d2",
+                              },
+                            }}
                           >
                             <MenuItem
                               value=""
-                              sx={{ fontFamily: "Helvetica, sans-serif" }}
+                              sx={{
+                                fontFamily: "'Inter', Helvetica, sans-serif",
+                              }}
                             >
                               All Instruments
                             </MenuItem>
@@ -1917,7 +2099,9 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={instrument.id}
                                 value={instrument.id}
-                                sx={{ fontFamily: "Helvetica, sans-serif" }}
+                                sx={{
+                                  fontFamily: "'Inter', Helvetica, sans-serif",
+                                }}
                               >
                                 {instrument.name}
                               </MenuItem>
@@ -1931,6 +2115,13 @@ const InstrumentsAdmin = () => {
                       startIcon={<Add sx={{ color: "white" }} />}
                       onClick={openAddModal}
                       disabled={userRole !== "admin"}
+                      sx={{
+                        borderRadius: "8px",
+                        px: 4,
+                        py: 1.2,
+                        fontSize: "0.95rem",
+                        fontWeight: 600,
+                      }}
                     >
                       Add {tabs[activeTab].name.slice(0, -1)}
                     </CTAButton>
@@ -1945,21 +2136,29 @@ const InstrumentsAdmin = () => {
               maxWidth="md"
               fullWidth
               PaperProps={{
-                sx: { borderRadius: 2, p: 2 },
+                sx: {
+                  borderRadius: "12px",
+                  p: { xs: 2, md: 3 },
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                  bgcolor: "#fff",
+                },
               }}
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', Helvetica, sans-serif",
+                  fontWeight: 700,
                   color: "#1976d2",
+                  fontSize: "1.5rem",
+                  pb: 2,
+                  borderBottom: "1px solid #e0e0e0",
                 }}
               >
                 {modalAction === "add"
                   ? `Add ${modalType}`
                   : `Edit ${modalType}`}
               </DialogTitle>
-              <DialogContent>
+              <DialogContent sx={{ pt: 3 }}>
                 <Snackbar
                   open={!!modalError}
                   autoHideDuration={4000}
@@ -1969,16 +2168,47 @@ const InstrumentsAdmin = () => {
                   <Alert
                     severity="error"
                     onClose={() => setModalError("")}
-                    sx={{ fontFamily: "Helvetica, sans-serif" }}
+                    sx={{
+                      fontFamily: "'Inter', Helvetica, sans-serif",
+                      bgcolor: "#d6393a",
+                      color: "white",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                      "& .MuiAlert-icon": { color: "white" },
+                      "& .MuiAlert-action svg": { color: "white" },
+                      p: 1.5,
+                    }}
                   >
                     {modalError}
                   </Alert>
                 </Snackbar>
                 {renderModalContent()}
               </DialogContent>
-              <DialogActions>
-                <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
-                <CTAButton variant="contained" onClick={handleSave}>
+              <DialogActions sx={{ p: 3, borderTop: "1px solid #e0e0e0" }}>
+                <CancelButton
+                  onClick={handleModalClose}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "0.95rem",
+                    "&:hover": {
+                      bgcolor: "#f8f9fa",
+                      borderRadius: "8px",
+                    },
+                  }}
+                >
+                  Cancel
+                </CancelButton>
+                <CTAButton
+                  variant="contained"
+                  onClick={handleSave}
+                  sx={{
+                    borderRadius: "8px",
+                    px: 4,
+                    py: 1.2,
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
+                  }}
+                >
                   {modalAction === "add" ? "Create" : "Save"}
                 </CTAButton>
               </DialogActions>
@@ -1988,24 +2218,50 @@ const InstrumentsAdmin = () => {
               onClose={handleCloseConfirmDialog}
               maxWidth="xs"
               fullWidth
-              PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+              PaperProps={{
+                sx: {
+                  borderRadius: "12px",
+                  p: { xs: 2, md: 3 },
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                  bgcolor: "#fff",
+                },
+              }}
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
-                  fontWeight: "bold",
-                  color: "#d6393a",
+                  fontFamily: "'Inter', Helvetica, sans-serif",
+                  fontWeight: 700,
+                  color: "#d6393a", // Keep red for deletion emphasis
+                  fontSize: "1.25rem",
+                  pb: 2,
+                  borderBottom: "1px solid #e0e0e0",
                 }}
               >
                 Confirm Deletion
               </DialogTitle>
-              <DialogContent>
-                <Typography sx={{ fontFamily: "Helvetica, sans-serif" }}>
+              <DialogContent sx={{ pt: 3 }}>
+                <Typography
+                  sx={{
+                    fontFamily: "'Inter', Helvetica, sans-serif",
+                    color: "#333",
+                    fontSize: "1rem",
+                  }}
+                >
                   {confirmMessage}
                 </Typography>
               </DialogContent>
-              <DialogActions>
-                <CancelButton onClick={handleCloseConfirmDialog}>
+              <DialogActions sx={{ p: 3, borderTop: "1px solid #e0e0e0" }}>
+                <CancelButton
+                  onClick={handleCloseConfirmDialog}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "0.95rem",
+                    "&:hover": {
+                      bgcolor: "#f8f9fa",
+                      borderRadius: "8px",
+                    },
+                  }}
+                >
                   Cancel
                 </CancelButton>
                 <CTAButton
@@ -2014,6 +2270,11 @@ const InstrumentsAdmin = () => {
                   sx={{
                     bgcolor: "#d6393a",
                     "&:hover": { bgcolor: "#b71c1c" },
+                    borderRadius: "8px",
+                    px: 4,
+                    py: 1.2,
+                    fontSize: "0.95rem",
+                    fontWeight: 600,
                   }}
                 >
                   Delete
