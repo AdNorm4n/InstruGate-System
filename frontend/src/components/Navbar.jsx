@@ -167,9 +167,11 @@ export default function Navbar() {
     <AppBar
       position="fixed"
       sx={{
-        boxShadow: 0,
-        transition: "all 0.3s ease",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         backgroundColor: "transparent",
+        width: "100%", // Full width
+        maxWidth: "100vw", // Prevent overflow
+        boxSizing: "border-box",
       }}
     >
       <Toolbar
@@ -184,6 +186,10 @@ export default function Navbar() {
           overflow: "hidden",
           transition: "max-height 0.3s ease, opacity 0.3s ease",
           backgroundColor: "#ffffff",
+          px: { xs: 2, sm: 3 }, // Consistent padding
+          width: "100%", // Ensure full width
+          maxWidth: "100%", // Prevent overflow
+          boxSizing: "border-box",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -221,6 +227,7 @@ export default function Navbar() {
               fontWeight: "bold",
               bgcolor: "#ffffff",
               "&:hover": { bgcolor: "#e0e0e0" },
+              fontFamily: "'Inter', Helvetica, sans-serif",
             }}
           >
             Profile
@@ -234,6 +241,7 @@ export default function Navbar() {
               fontWeight: "bold",
               bgcolor: "#ffffff",
               "&:hover": { bgcolor: "#e0e0e0" },
+              fontFamily: "'Inter', Helvetica, sans-serif",
             }}
           >
             Logout
@@ -249,6 +257,10 @@ export default function Navbar() {
           transform: hideTopToolbar ? "translateY(-64px)" : "translateY(0)",
           transition: "transform 0.3s ease",
           zIndex: 1100,
+          px: { xs: 2, sm: 3 }, // Consistent padding
+          width: "100%",
+          maxWidth: "100%", // Prevent overflow
+          boxSizing: "border-box",
         }}
       >
         <Box sx={{ display: "flex", gap: 3 }}>
@@ -264,6 +276,7 @@ export default function Navbar() {
                 textTransform: "none",
                 fontWeight: 500,
                 "&:hover": { bgcolor: "#b32b2e" },
+                fontFamily: "'Inter', Helvetica, sans-serif",
               }}
             >
               {item.text}
