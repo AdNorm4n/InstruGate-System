@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -20,6 +20,15 @@ import { UserContext } from "../contexts/UserContext";
 export default function Navbar() {
   const { userRole, loading } = useContext(UserContext);
   const navigate = useNavigate();
+
+  // Preload images to prevent rendering delays
+  useEffect(() => {
+    const images = [logo, headerBanner, centerLogo];
+    images.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
 
   const handleAdminPanel = () => {
     navigate("/admin-panel");
@@ -84,8 +93,6 @@ export default function Navbar() {
       <AppBar
         position="relative"
         sx={{
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          backgroundColor: "transparent",
           width: "100%",
           maxWidth: "100vw",
           boxSizing: "border-box",
@@ -94,14 +101,13 @@ export default function Navbar() {
       >
         <Toolbar
           sx={{
-            minHeight: 80,
+            height: 80,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             backgroundColor: "#e0f7fa",
             px: { xs: 1.5, sm: 2 },
             width: "100%",
-            maxWidth: "100%",
             boxSizing: "border-box",
           }}
         >
@@ -119,15 +125,7 @@ export default function Navbar() {
               />
             </Box>
           </Box>
-          <Box
-            sx={{
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <img
               src={centerLogo}
               alt="Center Logo"
@@ -146,8 +144,6 @@ export default function Navbar() {
     <AppBar
       position="relative"
       sx={{
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        backgroundColor: "transparent",
         width: "100%",
         maxWidth: "100vw",
         boxSizing: "border-box",
@@ -156,14 +152,13 @@ export default function Navbar() {
     >
       <Toolbar
         sx={{
-          minHeight: 80,
+          height: 80,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           backgroundColor: "#1e1e1e",
           px: { xs: 1.5, sm: 2 },
           width: "100%",
-          maxWidth: "100%",
           boxSizing: "border-box",
         }}
       >
@@ -181,15 +176,7 @@ export default function Navbar() {
             />
           </Box>
         </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+        <Box sx={{ display: "flex", alignItems: "center" }}>
           <img src={centerLogo} alt="Center Logo" style={{ height: "32px" }} />
         </Box>
         <Box sx={{ display: "flex", gap: 1.5 }}>
@@ -202,7 +189,7 @@ export default function Navbar() {
               fontWeight: "bold",
               fontSize: "0.85rem",
               bgcolor: "transparent",
-              "&:hover": { bgcolor: "#333333" },
+              "&:hover": { bgcolor: "#ffffff" },
               fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1,
             }}
@@ -218,7 +205,7 @@ export default function Navbar() {
               fontWeight: "bold",
               fontSize: "0.85rem",
               bgcolor: "transparent",
-              "&:hover": { bgcolor: "#333333" },
+              "&:hover": { bgcolor: "#ffffff" },
               fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1,
             }}
@@ -229,13 +216,12 @@ export default function Navbar() {
       </Toolbar>
       <Toolbar
         sx={{
-          minHeight: 56,
+          height: 56,
           display: "flex",
           justifyContent: "center",
           backgroundColor: "#d6393a",
           px: { xs: 1.5, sm: 2 },
           width: "100%",
-          maxWidth: "100%",
           boxSizing: "border-box",
         }}
       >
