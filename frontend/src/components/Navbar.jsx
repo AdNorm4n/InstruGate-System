@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useContext } from "react";
+import { useContext } from "react";
 import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -19,26 +19,7 @@ import { UserContext } from "../contexts/UserContext";
 
 export default function Navbar() {
   const { userRole, loading } = useContext(UserContext);
-  const [hideTopToolbar, setHideTopToolbar] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setHideTopToolbar(true);
-      } else {
-        setHideTopToolbar(false);
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
 
   const handleAdminPanel = () => {
     navigate("/admin-panel");
@@ -108,7 +89,6 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100vw",
           boxSizing: "border-box",
-          zIndex: 1100,
         }}
       >
         <Toolbar
@@ -170,16 +150,12 @@ export default function Navbar() {
         width: "100%",
         maxWidth: "100vw",
         boxSizing: "border-box",
-        zIndex: 1100,
+        zIndex: 1100, // Above content, below dialogs
       }}
     >
       <Toolbar
         sx={{
-          minHeight: hideTopToolbar ? 0 : 100,
-          maxHeight: hideTopToolbar ? 0 : 100,
-          opacity: hideTopToolbar ? 0 : 1,
-          overflow: "hidden",
-          transition: "all 0.3s ease",
+          minHeight: 100,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -188,7 +164,6 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
-          willChange: "max-height, opacity", // Optimize transition
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
