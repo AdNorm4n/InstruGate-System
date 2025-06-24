@@ -1998,7 +1998,6 @@ const InstrumentsAdmin = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          minHeight: "calc(100vh - 164px)", // Adjust for navbar height (100px top + 64px bottom)
           bgcolor: "#000000",
           width: "100%",
           margin: 0,
@@ -2010,7 +2009,14 @@ const InstrumentsAdmin = () => {
       >
         <Box sx={{ height: "164px" }} />{" "}
         {/* Spacer for fixed navbar (100px + 64px) */}
-        <main style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+        <main
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            minHeight: "calc(100vh - 164px)", // Ensure main fills remaining space
+          }}
+        >
           <ErrorBoundary>
             <Container
               maxWidth="lg" // Use 'lg' for better table width control
