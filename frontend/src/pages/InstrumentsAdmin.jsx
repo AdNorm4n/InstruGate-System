@@ -1751,7 +1751,7 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#e3e3e3", // Light teal solid color
+          bgcolor: "f5f5f5",
           width: "100vw", // Full-page width
           overflowX: "hidden", // Prevent horizontal scroll
         }}
@@ -1788,7 +1788,7 @@ const InstrumentsAdmin = () => {
                   },
                 }}
               >
-                INSTRUMENTS MANAGEMENT
+                Instruments Management
               </Typography>
               <Snackbar
                 open={!!success}
