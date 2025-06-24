@@ -2018,7 +2018,7 @@ const InstrumentsAdmin = () => {
             <Container
               maxWidth="lg" // Use 'lg' for better table width control
               sx={{
-                py: 4, // Add vertical padding
+                py: 8, // Add vertical padding
                 px: { xs: 2, sm: 3 }, // Responsive horizontal padding
                 width: "100%",
                 display: "flex",
