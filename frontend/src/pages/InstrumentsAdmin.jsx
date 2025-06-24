@@ -1999,33 +1999,61 @@ const InstrumentsAdmin = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#000000", // Black background
-          width: "100vw", // Ensure full width
-          height: "100%", // Ensure full height
-          margin: 0, // Remove default margins
-          padding: 0, // Remove default padding
-          boxSizing: "border-box", // Ensure padding doesn’t add to width/height
-          overflow: "hidden", // Prevent overflow causing gaps
+          bgcolor: "#000000",
+          width: "100vw",
+          height: "100%",
+          margin: 0,
+          padding: 0,
+          boxSizing: "border-box",
+          overflow: "hidden",
         }}
         className="instruments-admin-page"
       >
-        <DrawerHeader />
-        <main style={{ flex: 1 }}>
+        <DrawerHeader>
+          <Typography
+            variant="h6"
+            sx={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 600,
+              color: "#ffffff",
+            }}
+          >
+            Admin Panel
+          </Typography>
+          <CTAButton
+            variant="contained"
+            onClick={openAddModal}
+            disabled={userRole !== "admin"}
+            sx={{ borderRadius: "8px", px: 3, py: 1 }}
+          >
+            Add Item
+          </CTAButton>
+        </DrawerHeader>
+        <main
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <ErrorBoundary>
             <Container
               maxWidth="xl"
               sx={{
-                py: 0, // Remove vertical padding
-                px: 0, // Remove horizontal padding
-                mt: 0, // Remove top margin
-                width: "100%", // Ensure full width
-                maxWidth: "100%", // Override maxWidth to match viewport
+                py: 0,
+                px: 0,
+                mt: 0,
+                width: "100%",
+                maxWidth: "90%", // Adjusted for centering
                 boxSizing: "border-box",
-                margin: 0, // Remove default margins
-                padding: 0, // Remove default padding
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
-              {/* Rest of the content remains unchanged */}
               <Typography
                 variant="h4"
                 align="center"
@@ -2163,6 +2191,8 @@ const InstrumentsAdmin = () => {
                     p: { xs: 2, md: 3 },
                     borderRadius: "12px",
                     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+                    width: "100%",
+                    maxWidth: "1200px", // Limit max width for better centering
                   }}
                 >
                   <Tabs
@@ -2214,7 +2244,7 @@ const InstrumentsAdmin = () => {
                       mb: 3,
                       flexWrap: "wrap",
                       alignItems: "center",
-                      justifyContent: "space-between",
+                      justifyContent: "center",
                     }}
                   >
                     <Box
@@ -2224,6 +2254,7 @@ const InstrumentsAdmin = () => {
                         flexWrap: "wrap",
                         flex: 1,
                         minWidth: "180px",
+                        maxWidth: "600px", // Limit width for better layout
                       }}
                     >
                       <TextField
@@ -2237,7 +2268,6 @@ const InstrumentsAdmin = () => {
                             borderRadius: "8px",
                             fontFamily: "'Inter', sans-serif",
                             bgcolor: "#374151",
-                            color: "#ffffff",
                             "& fieldset": {
                               borderColor: "#4b5563",
                             },
@@ -2252,6 +2282,12 @@ const InstrumentsAdmin = () => {
                         }}
                         variant="outlined"
                         size="small"
+                        InputProps={{
+                          sx: {
+                            color: "#ffffff",
+                            fontFamily: "'Inter', sans-serif",
+                          },
+                        }}
                       />
                       {tabs[activeTab].name === ENTITY_TYPES.INSTRUMENTS && (
                         <FormControl sx={{ minWidth: "180px" }} size="small">
@@ -2273,7 +2309,6 @@ const InstrumentsAdmin = () => {
                               borderRadius: "8px",
                               fontFamily: "'Inter', sans-serif",
                               bgcolor: "#374151",
-                              color: "#ffffff",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "#4b5563",
                               },
@@ -2281,12 +2316,16 @@ const InstrumentsAdmin = () => {
                                 borderColor: "#3b82f6",
                               },
                             }}
+                            InputProps={{
+                              sx: {
+                                color: "#ffffff",
+                                fontFamily: "'Inter', sans-serif",
+                              },
+                            }}
                           >
                             <MenuItem
                               value=""
-                              sx={{
-                                fontFamily: "'Inter', sans-serif",
-                              }}
+                              sx={{ fontFamily: "'Inter', sans-serif" }}
                             >
                               All Categories
                             </MenuItem>
@@ -2294,9 +2333,7 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={category.id}
                                 value={category.id}
-                                sx={{
-                                  fontFamily: "'Inter', sans-serif",
-                                }}
+                                sx={{ fontFamily: "'Inter', sans-serif" }}
                               >
                                 {category.name}
                               </MenuItem>
@@ -2325,7 +2362,6 @@ const InstrumentsAdmin = () => {
                               borderRadius: "8px",
                               fontFamily: "'Inter', sans-serif",
                               bgcolor: "#374151",
-                              color: "#ffffff",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "#4b5563",
                               },
@@ -2333,12 +2369,16 @@ const InstrumentsAdmin = () => {
                                 borderColor: "#3b82f6",
                               },
                             }}
+                            InputProps={{
+                              sx: {
+                                color: "#ffffff",
+                                fontFamily: "'Inter', sans-serif",
+                              },
+                            }}
                           >
                             <MenuItem
                               value=""
-                              sx={{
-                                fontFamily: "'Inter', sans-serif",
-                              }}
+                              sx={{ fontFamily: "'Inter', sans-serif" }}
                             >
                               All Categories
                             </MenuItem>
@@ -2346,9 +2386,7 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={category.id}
                                 value={category.id}
-                                sx={{
-                                  fontFamily: "'Inter', sans-serif",
-                                }}
+                                sx={{ fontFamily: "'Inter', sans-serif" }}
                               >
                                 {category.name}
                               </MenuItem>
@@ -2378,7 +2416,6 @@ const InstrumentsAdmin = () => {
                               borderRadius: "8px",
                               fontFamily: "'Inter', sans-serif",
                               bgcolor: "#374151",
-                              color: "#ffffff",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "#4b5563",
                               },
@@ -2386,12 +2423,16 @@ const InstrumentsAdmin = () => {
                                 borderColor: "#3b82f6",
                               },
                             }}
+                            InputProps={{
+                              sx: {
+                                color: "#ffffff",
+                                fontFamily: "'Inter', sans-serif",
+                              },
+                            }}
                           >
                             <MenuItem
                               value=""
-                              sx={{
-                                fontFamily: "'Inter', sans-serif",
-                              }}
+                              sx={{ fontFamily: "'Inter', sans-serif" }}
                             >
                               All Instruments
                             </MenuItem>
@@ -2399,9 +2440,7 @@ const InstrumentsAdmin = () => {
                               <MenuItem
                                 key={instrument.id}
                                 value={instrument.id}
-                                sx={{
-                                  fontFamily: "'Inter', sans-serif",
-                                }}
+                                sx={{ fontFamily: "'Inter', sans-serif" }}
                               >
                                 {instrument.name}
                               </MenuItem>
@@ -2410,24 +2449,6 @@ const InstrumentsAdmin = () => {
                         </FormControl>
                       )}
                     </Box>
-                    <CTAButton
-                      variant="contained"
-                      startIcon={<Add sx={{ color: "#ffffff" }} />}
-                      onClick={openAddModal}
-                      disabled={userRole !== "admin"}
-                      sx={{
-                        borderRadius: "8px",
-                        px: 3,
-                        py: 1,
-                        fontSize: "0.85rem",
-                        fontWeight: 500,
-                      }}
-                    >
-                      Add{" "}
-                      {tabs[activeTab].name === "Categories"
-                        ? "Category"
-                        : tabs[activeTab].name.slice(0, -1)}
-                    </CTAButton>
                   </Box>
                   {renderTable()}
                 </ToolCard>
