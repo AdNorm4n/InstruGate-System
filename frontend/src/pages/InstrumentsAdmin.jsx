@@ -31,9 +31,6 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import styled from "@emotion/styled";
 import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
-import CTAButton from "../components/CTAButton";
-import CancelButton from "../components/CancelButton";
-import ToolCard from "../components/ToolCard";
 import api from "../api";
 import "./InstrumentsAdmin.css";
 
