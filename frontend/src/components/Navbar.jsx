@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -20,6 +20,8 @@ import { UserContext } from "../contexts/UserContext";
 export default function Navbar() {
   const { userRole, loading } = useContext(UserContext);
   const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const handleAdminPanel = () => {
     navigate("/admin-panel");
@@ -78,6 +80,21 @@ export default function Navbar() {
         ]
       : []),
   ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsScrolled(true);
+      } else if (currentScrollY < lastScrollY) {
+        setIsScrolled(false);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   if (loading) {
     return (
@@ -154,21 +171,23 @@ export default function Navbar() {
         maxWidth: "100vw",
         boxSizing: "border-box",
         zIndex: 1200,
-        transition: "all 0.3s ease-in-out",
+        transform: isScrolled ? "translateY(-64px)" : "translateY(0)",
+        transition: "transform 0.3s ease-in-out",
       }}
     >
       <Toolbar
         sx={{
           minHeight: 64,
-          display: "flex",
+          display: isScrolled ? "none" : "flex",
           justifyContent: "space-between",
           alignItems: "center",
           backgroundColor: "#1e1e1e",
           px: { xs: 2, sm: 3 },
           width: "100%",
-          max8Width: "100%",
+          maxWidth: "100%",
           boxSizing: "border-box",
-          transition: "background-color 0.3s ease",
+          transition: "opacity 0.3s ease",
+          opacity: isScrolled ? 0 : 1,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
