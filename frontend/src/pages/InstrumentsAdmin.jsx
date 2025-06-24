@@ -1834,7 +1834,7 @@ const InstrumentsAdmin = () => {
                     fontWeight: 600,
                     fontFamily: "'Inter', sans-serif",
                     bgcolor: "#2a2a2a",
-                    color: "#3b82f6",
+                    color: "#ffffff", // White for column headers
                     fontSize: "0.9rem",
                     py: 2.5,
                     px: 4,
@@ -1856,13 +1856,13 @@ const InstrumentsAdmin = () => {
                     }
                     onClick={() => handleSort(field)}
                     sx={{
-                      color: "#3b82f6 !important",
+                      color: "#ffffff !important",
                       fontFamily: "'Inter', sans-serif",
                       "& .MuiTableSortLabel-icon": {
                         color: "#93c5fd !important",
                       },
                       "&:hover": {
-                        color: "#2563eb !important",
+                        color: "#e5e7eb !important", // Light gray on hover for contrast
                       },
                     }}
                   >
@@ -1875,7 +1875,7 @@ const InstrumentsAdmin = () => {
                   fontWeight: 600,
                   fontFamily: "'Inter', sans-serif",
                   bgcolor: "#2a2a2a",
-                  color: "#3b82f6",
+                  color: "#ffffff", // White for Actions header
                   fontSize: "0.9rem",
                   py: 2.5,
                   px: 4,
@@ -2068,7 +2068,7 @@ const InstrumentsAdmin = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 700,
-                  color: "#3b82f6",
+                  color: "#ffffff", // White for page title
                   fontFamily: "'Inter', sans-serif",
                   mb: 5,
                   fontSize: { xs: "1.75rem", md: "2.25rem" },
@@ -2250,7 +2250,7 @@ const InstrumentsAdmin = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       sx={{
-                        width: { xs: "100%", sm: "40%" }, // 4/10 ratio
+                        width: { xs: "100%", sm: "40%" },
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
                           fontFamily: "'Inter', sans-serif",
@@ -2331,6 +2331,25 @@ const InstrumentsAdmin = () => {
                             },
                             "& .MuiSelect-select": { color: "#ffffff" },
                           }}
+                          MenuProps={{
+                            PaperProps: {
+                              sx: {
+                                bgcolor: "#000000", // Black background for dropdown
+                                "& .MuiMenuItem-root": {
+                                  fontFamily: "'Inter', sans-serif",
+                                  color: "#ffffff", // White text for dropdown items
+                                  "&:hover": {
+                                    bgcolor: "#3b82f61a",
+                                    color: "#ffffff",
+                                  },
+                                  "&.Mui-selected": {
+                                    bgcolor: "#3b82f61a",
+                                    color: "#ffffff",
+                                  },
+                                },
+                              },
+                            },
+                          }}
                         >
                           <MenuItem
                             value=""
@@ -2383,8 +2402,8 @@ const InstrumentsAdmin = () => {
                           bgcolor: "#4b5563",
                           color: "#9ca3af",
                         },
-                        width: { xs: "100%", sm: "20%" }, // 2/10 ratio
-                        minWidth: { xs: "100%", sm: "180px" }, // Ensure button is wide enough
+                        width: { xs: "100%", sm: "20%" },
+                        minWidth: { xs: "100%", sm: "180px" },
                       }}
                     >
                       Add{" "}
