@@ -82,40 +82,42 @@ export default function Navbar() {
   if (loading) {
     return (
       <AppBar
-        position="relative"
+        position="fixed"
         sx={{
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
           backgroundColor: "transparent",
           width: "100%",
           maxWidth: "100vw",
           boxSizing: "border-box",
-          zIndex: 1100,
+          zIndex: 1200,
+          transition: "all 0.3s ease-in-out",
         }}
       >
         <Toolbar
           sx={{
-            minHeight: 80,
+            minHeight: 64,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             backgroundColor: "#e0f7fa",
-            px: { xs: 1.5, sm: 2 },
+            px: { xs: 2, sm: 3 },
             width: "100%",
             maxWidth: "100%",
             boxSizing: "border-box",
+            transition: "background-color 0.3s ease",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <img
                 src={logo}
                 alt="New Logo"
-                style={{ height: "25px", paddingBottom: "5px" }}
+                style={{ height: "28px", transition: "transform 0.2s ease" }}
               />
               <img
                 src={headerBanner}
                 alt="Header Banner"
-                style={{ height: "40px" }}
+                style={{ height: "42px", transition: "transform 0.2s ease" }}
               />
             </Box>
           </Box>
@@ -131,11 +133,11 @@ export default function Navbar() {
             <img
               src={centerLogo}
               alt="Center Logo"
-              style={{ height: "32px" }}
+              style={{ height: "34px", transition: "transform 0.2s ease" }}
             />
           </Box>
-          <Box sx={{ display: "flex", gap: 1.5 }}>
-            <CircularProgress size={16} sx={{ color: "#d6393a" }} />
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <CircularProgress size={18} sx={{ color: "#d6393a" }} />
           </Box>
         </Toolbar>
       </AppBar>
@@ -144,40 +146,42 @@ export default function Navbar() {
 
   return (
     <AppBar
-      position="relative"
+      position="fixed"
       sx={{
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         backgroundColor: "transparent",
         width: "100%",
         maxWidth: "100vw",
         boxSizing: "border-box",
-        zIndex: 1100,
+        zIndex: 1200,
+        transition: "all 0.3s ease-in-out",
       }}
     >
       <Toolbar
         sx={{
-          minHeight: 80,
+          minHeight: 64,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           backgroundColor: "#1e1e1e",
-          px: { xs: 1.5, sm: 2 },
+          px: { xs: 2, sm: 3 },
           width: "100%",
-          maxWidth: "100%",
+          max8Width: "100%",
           boxSizing: "border-box",
+          transition: "background-color 0.3s ease",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <img
               src={logo}
               alt="New Logo"
-              style={{ height: "25px", paddingBottom: "5px" }}
+              style={{ height: "28px", transition: "transform 0.2s ease" }}
             />
             <img
               src={headerBanner}
               alt="Header Banner"
-              style={{ height: "40px" }}
+              style={{ height: "42px", transition: "transform 0.2s ease" }}
             />
           </Box>
         </Box>
@@ -190,37 +194,57 @@ export default function Navbar() {
             alignItems: "center",
           }}
         >
-          <img src={centerLogo} alt="Center Logo" style={{ height: "40px" }} />
+          <img
+            src={centerLogo}
+            alt="Center Logo"
+            style={{ height: "42px", transition: "transform 0.2s ease" }}
+          />
         </Box>
-        <Box sx={{ display: "flex", gap: 1.5 }}>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <Button
-            startIcon={<PersonIcon sx={{ color: "#d6393a" }} />}
+            startIcon={
+              <PersonIcon sx={{ color: "#d6393a", fontSize: "1.2rem" }} />
+            }
             onClick={() => navigate("/profile")}
             sx={{
               color: "#ffffff",
               textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "0.85rem",
+              fontWeight: 600,
+              fontSize: "0.9rem",
               bgcolor: "transparent",
-              "&:hover": { bgcolor: "#333333" },
+              "&:hover": {
+                bgcolor: "#333333",
+                transform: "scale(1.05)",
+                transition: "all 0.2s ease",
+              },
               fontFamily: "'Inter', Helvetica, sans-serif",
-              px: 1,
+              px: 1.5,
+              py: 0.75,
+              borderRadius: "8px",
             }}
           >
             Profile
           </Button>
           <Button
-            startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
+            startIcon={
+              <ExitToAppIcon sx={{ color: "#d6393a", fontSize: "1.2rem" }} />
+            }
             onClick={handleLogout}
             sx={{
               color: "#ffffff",
               textTransform: "none",
-              fontWeight: "bold",
-              fontSize: "0.85rem",
+              fontWeight: 600,
+              fontSize: "0.9rem",
               bgcolor: "transparent",
-              "&:hover": { bgcolor: "#333333" },
+              "&:hover": {
+                bgcolor: "#333333",
+                transform: "scale(1.05)",
+                transition: "all 0.2s ease",
+              },
               fontFamily: "'Inter', Helvetica, sans-serif",
-              px: 1,
+              px: 1.5,
+              py: 0.75,
+              borderRadius: "8px",
             }}
           >
             Logout
@@ -229,32 +253,46 @@ export default function Navbar() {
       </Toolbar>
       <Toolbar
         sx={{
-          minHeight: 56,
+          minHeight: 48,
           display: "flex",
           justifyContent: "center",
           backgroundColor: "#d6393a",
-          px: { xs: 1.5, sm: 2 },
+          px: { xs: 2, sm: 3 },
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
+          transition: "background-color 0.3s ease",
         }}
       >
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2.5,
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
           {menuItems.map((item) => (
             <Button
               key={item.text}
               startIcon={React.cloneElement(item.icon, {
-                sx: { color: "#ffffff", fontSize: "1.1rem" },
+                sx: { color: "#ffffff", fontSize: "1.2rem" },
               })}
               onClick={item.action || (() => navigate(item.path))}
               sx={{
                 color: "#ffffff",
                 textTransform: "none",
-                fontWeight: 500,
-                fontSize: "0.85rem",
-                "&:hover": { bgcolor: "#b32b2e" },
+                fontWeight: 600,
+                fontSize: "0.9rem",
+                "&:hover": {
+                  bgcolor: "#b32b2e",
+                  transform: "scale(1.05)",
+                  transition: "all 0.2s ease",
+                },
                 fontFamily: "'Inter', Helvetica, sans-serif",
-                px: 1,
+                px: 1.5,
+                py: 0.75,
+                borderRadius: "8px",
               }}
             >
               {item.text}
