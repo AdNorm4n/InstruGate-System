@@ -29,14 +29,14 @@ export default function Navbar() {
 
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
         setHideTopToolbar(true);
-      } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
+      } else {
         setHideTopToolbar(false);
       }
 
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
@@ -170,7 +170,7 @@ export default function Navbar() {
         width: "100%",
         maxWidth: "100vw",
         boxSizing: "border-box",
-        zIndex: 1100, // Above content, below dialogs
+        zIndex: 1100,
       }}
     >
       <Toolbar
@@ -179,7 +179,7 @@ export default function Navbar() {
           maxHeight: hideTopToolbar ? 0 : 100,
           opacity: hideTopToolbar ? 0 : 1,
           overflow: "hidden",
-          transition: "max-height 0.3s ease, opacity 0.3s ease",
+          transition: "all 0.3s ease",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -188,6 +188,7 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
+          willChange: "max-height, opacity", // Optimize transition
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
