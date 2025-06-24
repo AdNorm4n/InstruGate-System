@@ -123,7 +123,7 @@ export default function Navbar() {
             justifyContent: "space-between",
             alignItems: "center",
             position: "relative",
-            backgroundColor: "#ffffff",
+            backgroundColor: "#e0f7fa",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
