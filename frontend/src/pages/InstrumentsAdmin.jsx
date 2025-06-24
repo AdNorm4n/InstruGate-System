@@ -37,20 +37,25 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import "../styles/InstrumentsAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
+  ...(theme?.mixins?.toolbar || {
+    minHeight: 56,
+    "@media (min-width:600px)": {
+      minHeight: 64,
+    },
+  }),
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  padding: theme.spacing(3),
+  backgroundColor: "#1e1e1e",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
   "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', Helvetica, sans-serif",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -61,7 +66,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.85rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', Helvetica, sans-serif",
   "&:hover": {
     backgroundColor: "#2563eb",
     transform: "scale(1.03)",
@@ -77,11 +82,12 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 const CancelButton = styled(Button)(({ theme }) => ({
-  color: "#d6393a",
-  fontFamily: "Helvetica, sans-serif !important",
+  color: "#ef4444",
+  fontFamily: "'Inter', Helvetica, sans-serif",
   textTransform: "none",
   "&:hover": {
-    color: "#b71c1c",
+    color: "#dc2626",
+    backgroundColor: "#1f2937",
   },
 }));
 
@@ -866,14 +872,10 @@ const InstrumentsAdmin = () => {
 
     if (tab.name === ENTITY_TYPES.CATEGORIES) {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
-          <FormControl fullWidth size="small" required>
+        <Box>
+          <FormControl fullWidth margin="normal" size="small" required>
             <InputLabel
-              sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              }}
+              sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
             >
               Category Name
             </InputLabel>
@@ -883,16 +885,15 @@ const InstrumentsAdmin = () => {
                 setModalData({ ...modalData, name: e.target.value })
               }
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               }}
             >
               <MenuItem
                 value=""
                 disabled
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Select a category
               </MenuItem>
@@ -900,7 +901,7 @@ const InstrumentsAdmin = () => {
                 <MenuItem
                   key={option.value}
                   value={option.value}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {option.label}
                 </MenuItem>
@@ -913,14 +914,10 @@ const InstrumentsAdmin = () => {
 
     if (tab.name === ENTITY_TYPES.INSTRUMENT_TYPES) {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
-          <FormControl fullWidth size="small" required>
+        <Box>
+          <FormControl fullWidth margin="normal" size="small" required>
             <InputLabel
-              sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              }}
+              sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
             >
               Instrument Type
             </InputLabel>
@@ -930,16 +927,15 @@ const InstrumentsAdmin = () => {
                 setModalData({ ...modalData, name: e.target.value })
               }
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               }}
             >
               <MenuItem
                 value=""
                 disabled
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Select an instrument type
               </MenuItem>
@@ -947,20 +943,16 @@ const InstrumentsAdmin = () => {
                 <MenuItem
                   key={option.value}
                   value={option.value}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {option.label}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth size="small" required>
+          <FormControl fullWidth margin="normal" size="small" required>
             <InputLabel
-              sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              }}
+              sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
             >
               Category
             </InputLabel>
@@ -973,16 +965,15 @@ const InstrumentsAdmin = () => {
                 })
               }
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               }}
             >
               <MenuItem
                 value=""
                 disabled
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Select a category
               </MenuItem>
@@ -990,7 +981,7 @@ const InstrumentsAdmin = () => {
                 <MenuItem
                   key={category.id}
                   value={category.id}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {category.name}
                 </MenuItem>
@@ -1003,13 +994,14 @@ const InstrumentsAdmin = () => {
 
     if (tab.name === ENTITY_TYPES.INSTRUMENTS) {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+        <Box>
           <Typography
             variant="h6"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
-              fontWeight: "bold",
-              color: "#000000",
+              fontFamily: "'Inter', sans-serif",
+              mb: 2,
+              fontWeight: 600,
+              color: "#ffffff",
             }}
           >
             Basic Info
@@ -1021,22 +1013,18 @@ const InstrumentsAdmin = () => {
               setModalData({ ...modalData, name: e.target.value })
             }
             fullWidth
+            margin="normal"
             variant="outlined"
             size="small"
             required
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               },
             }}
           />
@@ -1047,34 +1035,26 @@ const InstrumentsAdmin = () => {
               setModalData({ ...modalData, base_price: e.target.value })
             }
             fullWidth
+            margin="normal"
             variant="outlined"
             size="small"
             type="number"
             required
             inputProps={{ min: 0, step: "0.01" }}
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               },
             }}
           />
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth margin="normal" size="small">
             <InputLabel
-              sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              }}
+              sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
             >
               Type
             </InputLabel>
@@ -1088,16 +1068,15 @@ const InstrumentsAdmin = () => {
               }
               required
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               }}
             >
               <MenuItem
                 value=""
                 disabled
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Select a type
               </MenuItem>
@@ -1105,20 +1084,16 @@ const InstrumentsAdmin = () => {
                 <MenuItem
                   key={item.id}
                   value={item.id}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif" }}
                 >
                   {item.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth margin="normal" size="small">
             <InputLabel
-              sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              }}
+              sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
             >
               Is Available
             </InputLabel>
@@ -1131,34 +1106,31 @@ const InstrumentsAdmin = () => {
                 })
               }
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               }}
             >
-              <MenuItem
-                value="true"
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-              >
+              <MenuItem value="true" sx={{ fontFamily: "'Inter', sans-serif" }}>
                 Yes
               </MenuItem>
               <MenuItem
                 value="false"
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                sx={{ fontFamily: "'Inter', sans-serif" }}
               >
                 No
               </MenuItem>
             </Select>
           </FormControl>
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
           <Typography
             variant="h6"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
-              fontWeight: "bold",
-              color: "#000000",
+              fontFamily: "'Inter', sans-serif",
+              mb: 2,
+              fontWeight: 600,
+              color: "#ffffff",
             }}
           >
             Instrument Description
@@ -1170,23 +1142,19 @@ const InstrumentsAdmin = () => {
               setModalData({ ...modalData, description: e.target.value })
             }
             fullWidth
+            margin="normal"
             variant="outlined"
             size="small"
             multiline
             rows={4}
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               },
             }}
           />
@@ -1197,34 +1165,31 @@ const InstrumentsAdmin = () => {
               setModalData({ ...modalData, specifications: e.target.value })
             }
             fullWidth
+            margin="normal"
             variant="outlined"
             size="small"
             multiline
             rows={4}
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#374151",
               },
             }}
           />
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
           <Typography
             variant="h6"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
-              fontWeight: "bold",
-              color: "#000000",
+              fontFamily: "'Inter', sans-serif",
+              mb: 2,
+              fontWeight: 600,
+              color: "#ffffff",
             }}
           >
             Media
@@ -1235,8 +1200,8 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontSize: "0.875rem",
                 mb: 1,
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
+                fontFamily: "'Inter', sans-serif",
+                color: "#d1d5db",
               }}
             >
               Image
@@ -1255,7 +1220,7 @@ const InstrumentsAdmin = () => {
                   setImagePreview(null);
                 }
               }}
-              style={{ width: "100%", marginBottom: "8px", color: "#000000" }}
+              style={{ width: "100%", marginBottom: "8px", color: "#ffffff" }}
             />
             {(imagePreview ||
               (modalData.image && typeof modalData.image === "string")) && (
@@ -1277,7 +1242,7 @@ const InstrumentsAdmin = () => {
                 />
                 <Typography
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
                     color: "#9ca3af",
                     display: "none",
                     mt: 1,
@@ -1309,19 +1274,15 @@ const InstrumentsAdmin = () => {
 
     if (tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+        <Box>
           {tab.writableFields.map((field) => {
             if (tab.lookups[field]) {
               const lookupKey = tab.lookups[field];
               const lookupItems = data[lookupKey] || [];
               return (
-                <FormControl fullWidth size="small" key={field}>
+                <FormControl fullWidth margin="normal" size="small" key={field}>
                   <InputLabel
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    }}
+                    sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
                   >
                     {field.replace("_id", "").replace("_", " ").toUpperCase()}
                   </InputLabel>
@@ -1335,15 +1296,14 @@ const InstrumentsAdmin = () => {
                     }
                     required={field === "instrument_id"}
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      bgcolor: "#f5f5f5",
-                      borderRadius: 1,
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                      bgcolor: "#374151",
                     }}
                   >
                     <MenuItem
                       value=""
-                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      sx={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       Select an option
                     </MenuItem>
@@ -1351,7 +1311,7 @@ const InstrumentsAdmin = () => {
                       <MenuItem
                         key={item.id}
                         value={item.id}
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         {item.name || item.id}
                       </MenuItem>
@@ -1369,23 +1329,19 @@ const InstrumentsAdmin = () => {
                   setModalData({ ...modalData, [field]: e.target.value })
                 }
                 fullWidth
+                margin="normal"
                 type={field === "order" ? "number" : "text"}
                 variant="outlined"
                 size="small"
                 required={field === "name"}
                 InputLabelProps={{
-                  sx: {
-                    fontFamily: "Helvetica, sans-serif !important",
-                    color: "#000000",
-                    fontWeight: 500,
-                  },
+                  sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                 }}
                 InputProps={{
                   sx: {
-                    fontFamily: "Helvetica, sans-serif !important",
-                    color: "#000000",
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#374151",
                   },
                 }}
               />
@@ -1393,62 +1349,66 @@ const InstrumentsAdmin = () => {
           })}
           {modalAction === "edit" && (
             <>
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  color: "#000000",
+                  fontFamily: "'Inter', sans-serif",
+                  mb: 2,
+                  fontWeight: 600,
+                  color: "#ffffff",
                 }}
               >
                 Field Options
               </Typography>
               {fieldOptions.length > 0 ? (
-                <Table size="small">
+                <Table
+                  size="small"
+                  sx={{ bgcolor: "#1e1e1e", borderRadius: "8px" }}
+                >
                   <TableHead>
                     <TableRow>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         ID
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Label
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Code
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Price (RM)
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Actions
@@ -1460,28 +1420,32 @@ const InstrumentsAdmin = () => {
                       <TableRow key={option.id}>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {option.id}
                         </TableCell>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {option.label}
                         </TableCell>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {option.code}
                         </TableCell>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {option.price
@@ -1502,7 +1466,7 @@ const InstrumentsAdmin = () => {
                 </Table>
               ) : (
                 <Typography
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
                 >
                   No field options available.
                 </Typography>
@@ -1518,20 +1482,13 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
-                    "& .MuiInputBase-input": { color: "#000000" },
+                    bgcolor: "#374151",
+                    "& .MuiInputBase-input": { color: "#ffffff" },
                   }}
                   InputLabelProps={{
-                    sx: {
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    },
+                    sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "'Inter', sans-serif" } }}
                 />
                 <TextField
                   label="Option Code"
@@ -1543,20 +1500,13 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
-                    "& .MuiInputBase-input": { color: "#000000" },
+                    bgcolor: "#374151",
+                    "& .MuiInputBase-input": { color: "#ffffff" },
                   }}
                   InputLabelProps={{
-                    sx: {
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    },
+                    sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "'Inter', sans-serif" } }}
                 />
                 <TextField
                   label="Price (RM)"
@@ -1568,22 +1518,15 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
-                    "& .MuiInputBase-input": { color: "#000000" },
+                    bgcolor: "#374151",
+                    "& .MuiInputBase-input": { color: "#ffffff" },
                   }}
                   type="number"
                   inputProps={{ min: 0, step: "0.01" }}
                   InputLabelProps={{
-                    sx: {
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    },
+                    sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "'Inter', sans-serif" } }}
                 />
                 <CTAButton variant="contained" onClick={handleAddFieldOption}>
                   Add Option
@@ -1597,18 +1540,14 @@ const InstrumentsAdmin = () => {
 
     if (tab.name === ENTITY_TYPES.ADDON_TYPES) {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+        <Box>
           {tab.writableFields.map((field) => {
             if (field === "instrument_ids") {
               const lookupItems = data.instruments || [];
               return (
-                <FormControl fullWidth size="small" key={field}>
+                <FormControl fullWidth margin="normal" size="small" key={field}>
                   <InputLabel
-                    sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    }}
+                    sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
                   >
                     Instruments
                   </InputLabel>
@@ -1632,17 +1571,16 @@ const InstrumentsAdmin = () => {
                         .join(", ")
                     }
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      bgcolor: "#f5f5f5",
-                      borderRadius: 1,
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                      bgcolor: "#374151",
                     }}
                   >
                     {lookupItems.map((item) => (
                       <MenuItem
                         key={item.id}
                         value={item.id}
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         {item.name || item.id}
                       </MenuItem>
@@ -1663,22 +1601,18 @@ const InstrumentsAdmin = () => {
                   setModalData({ ...modalData, [field]: e.target.value })
                 }
                 fullWidth
+                margin="normal"
                 variant="outlined"
                 size="small"
                 required={field === "name"}
                 InputLabelProps={{
-                  sx: {
-                    fontFamily: "Helvetica, sans-serif !important",
-                    color: "#000000",
-                    fontWeight: 500,
-                  },
+                  sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                 }}
                 InputProps={{
                   sx: {
-                    fontFamily: "Helvetica, sans-serif !important",
-                    color: "#000000",
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#374151",
                   },
                 }}
               />
@@ -1686,62 +1620,66 @@ const InstrumentsAdmin = () => {
           })}
           {modalAction === "edit" && (
             <>
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  color: "#000000",
+                  fontFamily: "'Inter', sans-serif",
+                  mb: 2,
+                  fontWeight: 600,
+                  color: "#ffffff",
                 }}
               >
                 AddOns
               </Typography>
               {addonOptions.length > 0 ? (
-                <Table size="small">
+                <Table
+                  size="small"
+                  sx={{ bgcolor: "#1e1e1e", borderRadius: "8px" }}
+                >
                   <TableHead>
                     <TableRow>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         ID
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Label
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Code
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Price (RM)
                       </TableCell>
                       <TableCell
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
-                          bgcolor: "#f5f5f5",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
+                          bgcolor: "#2a2a2a",
                         }}
                       >
                         Actions
@@ -1753,28 +1691,32 @@ const InstrumentsAdmin = () => {
                       <TableRow key={addon.id}>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {addon.id}
                         </TableCell>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {addon.label}
                         </TableCell>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {addon.code}
                         </TableCell>
                         <TableCell
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
                           {addon.price
@@ -1795,7 +1737,7 @@ const InstrumentsAdmin = () => {
                 </Table>
               ) : (
                 <Typography
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
                 >
                   No addons available.
                 </Typography>
@@ -1811,20 +1753,13 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
-                    "& .MuiInputBase-input": { color: "#000000" },
+                    bgcolor: "#374151",
+                    "& .MuiInputBase-input": { color: "#ffffff" },
                   }}
                   InputLabelProps={{
-                    sx: {
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    },
+                    sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "'Inter', sans-serif" } }}
                 />
                 <TextField
                   label="AddOn Code"
@@ -1836,20 +1771,13 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
-                    "& .MuiInputBase-input": { color: "#000000" },
+                    bgcolor: "#374151",
+                    "& .MuiInputBase-input": { color: "#ffffff" },
                   }}
                   InputLabelProps={{
-                    sx: {
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    },
+                    sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "'Inter', sans-serif" } }}
                 />
                 <TextField
                   label="Price (RM)"
@@ -1861,22 +1789,15 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#f5f5f5",
-                    borderRadius: 1,
-                    "& .MuiInputBase-input": { color: "#000000" },
+                    bgcolor: "#374151",
+                    "& .MuiInputBase-input": { color: "#ffffff" },
                   }}
                   type="number"
                   inputProps={{ min: 0, step: "0.01" }}
                   InputLabelProps={{
-                    sx: {
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
-                      fontWeight: 500,
-                    },
+                    sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
                   }}
-                  InputProps={{
-                    sx: { fontFamily: "Helvetica, sans-serif !important" },
-                  }}
+                  InputProps={{ sx: { fontFamily: "'Inter', sans-serif" } }}
                 />
                 <CTAButton variant="contained" onClick={handleAddAddon}>
                   Add AddOn
@@ -1896,20 +1817,22 @@ const InstrumentsAdmin = () => {
     const items = filteredData[tab.dataKey] || [];
 
     return (
-      <Box sx={{ overflowX: "auto", borderRadius: "8px", bgcolor: "#ffffff" }}>
-        <Table sx={{ minWidth: 650 }}>
+      <Box sx={{ overflowX: "auto", borderRadius: "8px", bgcolor: "#1e1e1e" }}>
+        <Table sx={{ minWidth: 650, bgcolor: "#1e1e1e" }}>
           <TableHead>
             <TableRow>
               {tab.fields.map((field) => (
                 <TableCell
                   key={field}
                   sx={{
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif !important",
-                    bgcolor: "#f5f5f5",
+                    fontWeight: 600,
+                    fontFamily: "'Inter', sans-serif",
+                    bgcolor: "#2a2a2a",
+                    color: "#ffffff",
                     fontSize: "0.85rem",
                     py: 1.5,
                     px: 2,
+                    borderBottom: "1px solid #4b5563",
                   }}
                 >
                   <TableSortLabel
@@ -1919,9 +1842,9 @@ const InstrumentsAdmin = () => {
                     }
                     onClick={() => handleSort(field)}
                     sx={{
-                      color: "#000000 !important",
+                      color: "#ffffff !important",
                       "& .MuiTableSortLabel-icon": {
-                        color: "#1976d2 !important",
+                        color: "#93c5fd !important",
                       },
                     }}
                   >
@@ -1931,12 +1854,14 @@ const InstrumentsAdmin = () => {
               ))}
               <TableCell
                 sx={{
-                  fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif !important",
-                  bgcolor: "#f5f5f5",
+                  fontWeight: 600,
+                  fontFamily: "'Inter', sans-serif",
+                  bgcolor: "#2a2a2a",
+                  color: "#ffffff",
                   fontSize: "0.85rem",
                   py: 1.5,
                   px: 2,
+                  borderBottom: "1px solid #4b5563",
                 }}
               >
                 Actions
@@ -1950,18 +1875,13 @@ const InstrumentsAdmin = () => {
                   colSpan={tab.fields.length + 1}
                   align="center"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
                     color: "#9ca3af",
                     py: 4,
                     fontSize: "0.9rem",
                   }}
                 >
-                  <Typography
-                    sx={{
-                      py: 2,
-                      fontFamily: "Helvetica, sans-serif !important",
-                    }}
-                  >
+                  <Typography sx={{ py: 2 }}>
                     No {tab.name.toLowerCase()} found.
                   </Typography>
                 </TableCell>
@@ -1971,16 +1891,18 @@ const InstrumentsAdmin = () => {
                 <TableRow
                   key={item.id}
                   sx={{
-                    "&:hover": { bgcolor: "#e3f2fd" },
+                    "&:hover": { bgcolor: "#2a2a2a" },
                     transition: "background-color 0.2s",
+                    borderBottom: "1px solid #4b5563",
                   }}
                 >
                   {tab.fields.map((field) => (
                     <TableCell
                       key={field}
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
                         fontSize: "0.85rem",
+                        color: "#ffffff",
                         py: 1,
                         px: 2,
                         ...(field === "is_available" &&
@@ -2010,7 +1932,7 @@ const InstrumentsAdmin = () => {
                             />
                             <Typography
                               sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
+                                fontFamily: "'Inter', sans-serif",
                                 color: "#9ca3af",
                                 display: "none",
                                 fontSize: "0.8rem",
@@ -2022,7 +1944,7 @@ const InstrumentsAdmin = () => {
                         ) : (
                           <Typography
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "'Inter', sans-serif",
                               color: "#9ca3af",
                               fontSize: "0.8rem",
                             }}
@@ -2076,12 +1998,12 @@ const InstrumentsAdmin = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          bgcolor: "#f8f9fa",
+          bgcolor: "#000000",
           width: "100%",
           margin: 0,
           padding: 0,
           boxSizing: "border-box",
-          overflowX: "hidden",
+          overflowX: "hidden", // Prevent horizontal scroll
         }}
         className="instruments-admin-page"
       >
@@ -2089,35 +2011,47 @@ const InstrumentsAdmin = () => {
           style={{
             display: "flex",
             justifyContent: "center",
-            minHeight: "100vh",
+            minHeight: "100vh", // Ensure main fills viewport height
           }}
         >
           <ErrorBoundary>
             <Container
-              maxWidth="xl"
+              maxWidth="lg" // Use 'lg' for better table width control
               sx={{
-                py: 6,
-                px: { xs: 2, sm: 3 },
+                py: 4, // Add vertical padding
+                px: { xs: 2, sm: 3 }, // Responsive horizontal padding
                 width: "100%",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "center", // Center content horizontally
                 boxSizing: "border-box",
               }}
             >
-              <DrawerHeader />
               <Typography
-                variant="h6"
+                variant="h4"
                 align="center"
                 gutterBottom
                 sx={{
-                  fontWeight: "bold",
-                  color: "#000000",
-                  fontFamily: "Helvetica, sans-serif !important",
-                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  fontFamily: "'Inter', sans-serif",
                   mb: 4,
-                  fontSize: { xs: "1.5rem", md: "2rem" },
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                  fontSize: { xs: "1.75rem", md: "2rem" },
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    width: "50px",
+                    height: "3px",
+                    bgcolor: "#1976d2",
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderRadius: "2px",
+                  },
                 }}
               >
                 Instruments Management
@@ -2130,20 +2064,31 @@ const InstrumentsAdmin = () => {
               >
                 <Alert
                   severity="success"
+                  icon={
+                    <svg
+                      className="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="#ffffff"
+                        d="M20 6.293l-8.147 8.147a1 1 0 01-1.414 0L4.586 8.707a1 1 0 011.414-1.414l5.147 5.147L18.586 5a1 1 0 011.414 1.414z"
+                      />
+                    </svg>
+                  }
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
                     width: "100%",
-                    color: "white",
-                    backgroundColor: "#28a745",
-                    "& .MuiAlert-icon": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
-                    "& .MuiAlert-action": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
+                    bgcolor: "#22c55e",
+                    color: "#ffffff",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    "& .MuiAlert-icon": { color: "#ffffff" },
+                    p: 1,
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
                   }}
                 >
                   {success}
@@ -2157,20 +2102,30 @@ const InstrumentsAdmin = () => {
               >
                 <Alert
                   severity="error"
+                  icon={
+                    <svg
+                      className="MuiSvgIcon-root"
+                      focusable="false"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="#ffffff"
+                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                      />
+                    </svg>
+                  }
                   onClose={() => setError("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    width: "100%",
-                    color: "white",
-                    backgroundColor: "#d6393a",
-                    "& .MuiAlert-icon": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
-                    "& .MuiAlert-action": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
+                    fontFamily: "'Inter', sans-serif",
+                    bgcolor: "#ef4444",
+                    color: "#ffffff",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+                    "& .MuiAlert-icon": { color: "#ffffff" },
+                    p: 1,
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
                   }}
                 >
                   {error}
@@ -2194,9 +2149,9 @@ const InstrumentsAdmin = () => {
                     <Typography
                       variant="h6"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
-                        fontWeight: "bold",
-                        color: "#000000",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 600,
+                        color: "#ffffff",
                       }}
                     >
                       Loading data...
@@ -2210,7 +2165,7 @@ const InstrumentsAdmin = () => {
                     borderRadius: "12px",
                     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
                     width: "100%",
-                    maxWidth: "1200px",
+                    maxWidth: "1200px", // Limit card width for centering
                   }}
                 >
                   <Tabs
@@ -2227,7 +2182,7 @@ const InstrumentsAdmin = () => {
                       mb: 3,
                       borderBottom: "1px solid #4b5563",
                       "& .MuiTab-root": {
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
                         textTransform: "none",
                         fontWeight: 500,
                         fontSize: "0.9rem",
@@ -2251,7 +2206,7 @@ const InstrumentsAdmin = () => {
                         label={tab.name}
                         key={tab.name}
                         value={index}
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       />
                     ))}
                   </Tabs>
@@ -2283,9 +2238,9 @@ const InstrumentsAdmin = () => {
                           minWidth: "180px",
                           "& .MuiOutlinedInput-root": {
                             borderRadius: "8px",
-                            fontFamily: "Helvetica, sans-serif !important",
-                            bgcolor: "#f5f5f5",
-                            color: "#000000",
+                            fontFamily: "'Inter', sans-serif",
+                            bgcolor: "#374151",
+                            color: "#ffffff",
                             "& fieldset": {
                               borderColor: "#4b5563",
                             },
@@ -2294,9 +2249,8 @@ const InstrumentsAdmin = () => {
                             },
                           },
                           "& .MuiInputLabel-root": {
-                            fontFamily: "Helvetica, sans-serif !important",
-                            color: "#000000",
-                            fontWeight: 500,
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#d1d5db",
                           },
                         }}
                         variant="outlined"
@@ -2306,9 +2260,8 @@ const InstrumentsAdmin = () => {
                         <FormControl sx={{ minWidth: "180px" }} size="small">
                           <InputLabel
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              color: "#000000",
-                              fontWeight: 500,
+                              fontFamily: "'Inter', sans-serif",
+                              color: "#d1d5db",
                             }}
                           >
                             Filter by Category
@@ -2321,9 +2274,9 @@ const InstrumentsAdmin = () => {
                             label="Filter by Category"
                             sx={{
                               borderRadius: "8px",
-                              fontFamily: "Helvetica, sans-serif !important",
-                              bgcolor: "#f5f5f5",
-                              color: "#000000",
+                              fontFamily: "'Inter', sans-serif",
+                              bgcolor: "#374151",
+                              color: "#ffffff",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "#4b5563",
                               },
@@ -2335,7 +2288,7 @@ const InstrumentsAdmin = () => {
                             <MenuItem
                               value=""
                               sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
+                                fontFamily: "'Inter', sans-serif",
                               }}
                             >
                               All Categories
@@ -2345,8 +2298,7 @@ const InstrumentsAdmin = () => {
                                 key={category.id}
                                 value={category.id}
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif",
                                 }}
                               >
                                 {category.name}
@@ -2360,9 +2312,8 @@ const InstrumentsAdmin = () => {
                         <FormControl sx={{ minWidth: "180px" }} size="small">
                           <InputLabel
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              color: "#000000",
-                              fontWeight: 500,
+                              fontFamily: "'Inter', sans-serif",
+                              color: "#d1d5db",
                             }}
                           >
                             Filter by Category
@@ -2375,9 +2326,9 @@ const InstrumentsAdmin = () => {
                             label="Filter by Category"
                             sx={{
                               borderRadius: "8px",
-                              fontFamily: "Helvetica, sans-serif !important",
-                              bgcolor: "#f5f5f5",
-                              color: "#000000",
+                              fontFamily: "'Inter', sans-serif",
+                              bgcolor: "#374151",
+                              color: "#ffffff",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "#4b5563",
                               },
@@ -2389,7 +2340,7 @@ const InstrumentsAdmin = () => {
                             <MenuItem
                               value=""
                               sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
+                                fontFamily: "'Inter', sans-serif",
                               }}
                             >
                               All Categories
@@ -2399,8 +2350,7 @@ const InstrumentsAdmin = () => {
                                 key={category.id}
                                 value={category.id}
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif",
                                 }}
                               >
                                 {category.name}
@@ -2415,9 +2365,8 @@ const InstrumentsAdmin = () => {
                         <FormControl sx={{ minWidth: "180px" }} size="small">
                           <InputLabel
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              color: "#000000",
-                              fontWeight: 500,
+                              fontFamily: "'Inter', sans-serif",
+                              color: "#d1d5db",
                             }}
                           >
                             Filter by Instrument
@@ -2430,9 +2379,9 @@ const InstrumentsAdmin = () => {
                             label="Filter by Instrument"
                             sx={{
                               borderRadius: "8px",
-                              fontFamily: "Helvetica, sans-serif !important",
-                              bgcolor: "#f5f5f5",
-                              color: "#000000",
+                              fontFamily: "'Inter', sans-serif",
+                              bgcolor: "#374151",
+                              color: "#ffffff",
                               "& .MuiOutlinedInput-notchedOutline": {
                                 borderColor: "#4b5563",
                               },
@@ -2444,7 +2393,7 @@ const InstrumentsAdmin = () => {
                             <MenuItem
                               value=""
                               sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
+                                fontFamily: "'Inter', sans-serif",
                               }}
                             >
                               All Instruments
@@ -2454,8 +2403,7 @@ const InstrumentsAdmin = () => {
                                 key={instrument.id}
                                 value={instrument.id}
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif",
                                 }}
                               >
                                 {instrument.name}
@@ -2467,12 +2415,21 @@ const InstrumentsAdmin = () => {
                     </Box>
                     <CTAButton
                       variant="contained"
+                      startIcon={<Add sx={{ color: "#ffffff" }} />}
                       onClick={openAddModal}
                       disabled={userRole !== "admin"}
-                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      sx={{
+                        borderRadius: "8px",
+                        px: 3,
+                        py: 1,
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                      }}
                     >
-                      <Add sx={{ mr: 1, fontSize: "1.1rem" }} />
-                      Add {tabs[activeTab].name.slice(0, -1)}
+                      Add{" "}
+                      {tabs[activeTab].name === "Categories"
+                        ? "Category"
+                        : tabs[activeTab].name.slice(0, -1)}
                     </CTAButton>
                   </Box>
                   {renderTable()}
@@ -2483,37 +2440,57 @@ const InstrumentsAdmin = () => {
                 onClose={handleModalClose}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{
-                  sx: {
+                sx={{
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
                     borderRadius: "12px",
-                    p: 2,
-                    bgcolor: "#ffffff",
                     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+                    fontFamily: "'Inter', sans-serif",
                   },
                 }}
               >
                 <DialogTitle
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#000000",
-                    fontSize: "1.2rem",
-                    textAlign: "center",
-                    pb: 1,
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    bgcolor: "#2a2a2a",
+                    borderBottom: "1px solid #4b5563",
+                    py: 2,
+                    px: 3,
+                    fontSize: "1.1rem",
                   }}
                 >
-                  {modalAction === "add" ? "Add" : "Edit"}{" "}
-                  {modalType.slice(0, -1)}
+                  {modalAction === "add"
+                    ? `Add ${modalType.slice(0, -1)}`
+                    : `Edit ${modalType.slice(0, -1)}`}
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ py: 3, px: 3, bgcolor: "#1e1e1e" }}>
                   {modalError && (
                     <Alert
                       severity="error"
+                      icon={
+                        <svg
+                          className="MuiSvgIcon-root"
+                          focusable="false"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fill="#ffffff"
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+                          />
+                        </svg>
+                      }
                       sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        bgcolor: "#ef4444",
+                        color: "#ffffff",
+                        borderRadius: "8px",
                         mb: 2,
-                        fontFamily: "Helvetica, sans-serif !important",
-                        color: "#000000",
-                        bgcolor: "#fee2e2",
+                        p: 1,
+                        fontSize: "0.85rem",
+                        "& .MuiAlert-icon": { color: "#ffffff" },
                       }}
                     >
                       {modalError}
@@ -2522,21 +2499,21 @@ const InstrumentsAdmin = () => {
                   {renderModalContent()}
                 </DialogContent>
                 <DialogActions
-                  sx={{ px: 3, pb: 2, justifyContent: "center", gap: 2 }}
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2,
+                    px: 3,
+                    justifyContent: "space-between",
+                  }}
                 >
-                  <CancelButton
-                    onClick={handleModalClose}
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                  >
-                    Cancel
-                  </CancelButton>
+                  <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
                   <CTAButton
-                    variant="contained"
                     onClick={handleSave}
                     disabled={userRole !== "admin"}
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                    sx={{ px: 3 }}
                   >
-                    Save
+                    {modalAction === "add" ? "Add" : "Save"}
                   </CTAButton>
                 </DialogActions>
               </Dialog>
@@ -2545,48 +2522,61 @@ const InstrumentsAdmin = () => {
                 onClose={handleCloseConfirmDialog}
                 maxWidth="xs"
                 fullWidth
-                PaperProps={{
-                  sx: { borderRadius: "12px", p: 2, bgcolor: "#ffffff" },
+                sx={{
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+                    fontFamily: "'Inter', sans-serif",
+                  },
                 }}
               >
                 <DialogTitle
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#000000",
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    bgcolor: "#2a2a2a",
+                    borderBottom: "1px solid #4b5563",
+                    py: 2,
+                    px: 3,
                     fontSize: "1.1rem",
-                    textAlign: "center",
                   }}
                 >
                   Confirm Action
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ py: 3, px: 3, bgcolor: "#1e1e1e" }}>
                   <Typography
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      color: "#000000",
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#d1d5db",
+                      fontSize: "0.9rem",
                     }}
                   >
                     {confirmMessage}
                   </Typography>
                 </DialogContent>
-                <DialogActions sx={{ justifyContent: "center", gap: 2, pb: 2 }}>
-                  <CancelButton
-                    onClick={handleCloseConfirmDialog}
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-                  >
+                <DialogActions
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2,
+                    px: 3,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CancelButton onClick={handleCloseConfirmDialog}>
                     Cancel
                   </CancelButton>
                   <CTAButton
                     variant="contained"
                     onClick={handleConfirmAction}
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      bgcolor: "#ef4444",
-                      "&:hover": { bgcolor: "#dc2626" },
+                      bgcolor: "#d6393a",
+                      "&:hover": { bgcolor: "#b71c1c" },
                     }}
                   >
-                    Confirm
+                    Delete
                   </CTAButton>
                 </DialogActions>
               </Dialog>
@@ -2597,5 +2587,4 @@ const InstrumentsAdmin = () => {
     </Fade>
   );
 };
-
 export default InstrumentsAdmin;
