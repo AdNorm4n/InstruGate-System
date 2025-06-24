@@ -11,10 +11,22 @@ from django.utils.translation import gettext_lazy as _
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ["name"]
+    list_display_links = ["name"]  # Make name clickable
+    list_per_page = 25  # Optimize pagination for Render
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} category: {obj.name}")
 
 @admin.register(InstrumentType)
 class InstrumentTypeAdmin(admin.ModelAdmin):
     list_display = ["name", "category"]
+    list_display_links = ["name"]  # Make name clickable
+    list_per_page = 25
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} instrument type: {obj.name}")
 
 class FieldOptionInline(admin.TabularInline):
     model = FieldOption
@@ -31,16 +43,24 @@ class ConfigurableFieldInline(admin.StackedInline):
 @admin.register(ConfigurableField)
 class ConfigurableFieldAdmin(admin.ModelAdmin):
     list_display = ["name", "instrument", "order", "parent_field", "trigger_value"]
+    list_display_links = ["name"]  # Make name clickable
     ordering = ["instrument", "order"]
     inlines = [FieldOptionInline]
+    list_per_page = 25
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} configurable field: {obj.name}")
 
 @admin.register(Instrument)
 class InstrumentAdmin(admin.ModelAdmin):
     list_display = ["name", "type", "is_available", "base_price", "created_at"]
+    list_display_links = ["name"]  # Make name clickable
     list_filter = ["type", "type__category", "is_available"]
     search_fields = ["name", "type__name", "specifications"]
     readonly_fields = ["created_at"]
     inlines = [ConfigurableFieldInline]
+    list_per_page = 25
 
     fieldsets = (
         ("Basic Info", {
@@ -55,6 +75,10 @@ class InstrumentAdmin(admin.ModelAdmin):
         }),
     )
 
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} instrument: {obj.name}")
+
 class AddOnInline(admin.TabularInline):
     model = AddOn
     extra = 1
@@ -63,15 +87,27 @@ class AddOnInline(admin.TabularInline):
 @admin.register(AddOnType)
 class AddOnTypeAdmin(admin.ModelAdmin):
     list_display = ["name"]
+    list_display_links = ["name"]  # Make name clickable
     search_fields = ["name"]
     filter_horizontal = ["instruments"]
     inlines = [AddOnInline]
+    list_per_page = 25
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} add-on type: {obj.name}")
 
 @admin.register(AddOn)
 class AddOnAdmin(admin.ModelAdmin):
-    list_display = ["label", "code", "addon_type" , "price"]
+    list_display = ["label", "code", "addon_type", "price"]
+    list_display_links = ["label"]  # Make label clickable
     list_filter = ["addon_type"]
     search_fields = ["label", "code"]
+    list_per_page = 25
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} add-on: {obj.label}")
 
 class QuotationItemSelectionInline(admin.TabularInline):
     model = QuotationItemSelection
@@ -103,22 +139,24 @@ class QuotationAdmin(admin.ModelAdmin):
         'submitted_at', 'rejected_at', 'approved_at', 'reviewed_by', 'emailed_at', 'updated_at',
         'total_quotation_price'
     ]
+    list_display_links = ['id', 'company']  # Make id and company clickable
     list_filter = ['status', 'created_by__role', 'reviewed_by']
     search_fields = ['id', 'company', 'created_by__username', 'reviewed_by__username']
     inlines = [QuotationItemInline]
+    list_per_page = 25
 
     fieldsets = (
         (None, {'fields': ('created_by', 'company', 'project_name')}),
         (_('Review'), {'fields': ('status', 'remarks', 'reviewed_by')}),
         (_('Timestamps'), {'fields': ('submitted_at', 'approved_at', 'rejected_at', 'emailed_at')}),
-        (_('Summary'), {'fields': ('total_quotation_price',)}), 
+        (_('Summary'), {'fields': ('total_quotation_price',)}),
     )
 
     readonly_fields = [
         'submitted_at', 'rejected_at', 'approved_at', 'reviewed_by', 'emailed_at', 'updated_at',
-        'total_quotation_price'  
+        'total_quotation_price'
     ]
-    
+
     actions = ['submit_quotation', 'approve_quotation', 'reject_quotation']
 
     def has_view_or_change_permission(self, request, obj=None):
@@ -147,10 +185,17 @@ class QuotationAdmin(admin.ModelAdmin):
         return f"RM {obj.calculate_total_price():,.2f}"
     total_quotation_price.short_description = "Total Quotation Price (RM)"
 
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} quotation: {obj.id}")
+
 @admin.register(QuotationItem)
 class QuotationItemAdmin(admin.ModelAdmin):
     list_display = ['id', 'quotation', 'product_code', 'instrument', 'quantity', 'total_price_display']
+    list_display_links = ['id', 'product_code']  # Make id and product_code clickable
     readonly_fields = ['quotation', 'product_code', 'instrument', 'quantity', 'total_price_display', 'field_options_list', 'addons_list']
+    list_per_page = 25
+
     fieldsets = (
         (None, {
             'fields': ('quotation', 'product_code', 'instrument', 'quantity', 'total_price_display')
@@ -178,3 +223,7 @@ class QuotationItemAdmin(admin.ModelAdmin):
             return "-"
         return "\n".join([f"{addon.addon.label} (RM {addon.addon.price})" for addon in obj.addons.all()])
     addons_list.short_description = "Add-Ons"
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        self.log_change(request, obj, f"{'Updated' if change else 'Created'} quotation item: {obj.id}")

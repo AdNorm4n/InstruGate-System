@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import {
   Container,
   Typography,
@@ -32,6 +31,7 @@ import {
   Legend,
 } from "chart.js";
 import { UserContext } from "../contexts/UserContext";
+import api from "../api"; // Import the shared api module
 
 ChartJS.register(
   CategoryScale,
@@ -62,10 +62,6 @@ const barShadowPlugin = {
 };
 
 ChartJS.register(barShadowPlugin);
-
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-});
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
