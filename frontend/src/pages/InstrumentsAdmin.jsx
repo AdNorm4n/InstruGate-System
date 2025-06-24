@@ -1834,7 +1834,7 @@ const InstrumentsAdmin = () => {
                     fontWeight: 600,
                     fontFamily: "'Inter', sans-serif",
                     bgcolor: "#2a2a2a",
-                    color: "#ffffff", // Blue for headings
+                    color: "#3b82f6",
                     fontSize: "0.9rem",
                     py: 2.5,
                     px: 4,
@@ -1896,14 +1896,14 @@ const InstrumentsAdmin = () => {
                   align="center"
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    color: "#ffffff",
+                    color: "#9ca3af",
                     py: 5,
                     fontSize: "0.95rem",
                     border: "none",
                   }}
                 >
                   <Typography
-                    sx={{ fontFamily: "'Inter', sans-serif", color: "#ffffff" }}
+                    sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
                   >
                     No {tab.name.toLowerCase()} found.
                   </Typography>
@@ -1929,7 +1929,7 @@ const InstrumentsAdmin = () => {
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         fontSize: "0.9rem",
-                        color: "#ffffff", // White text
+                        color: "#ffffff",
                         py: 2.5,
                         px: 4,
                         border: "none",
@@ -2001,7 +2001,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         color: "#3b82f6",
-                        "&:hover": { color: "#2563eb", bgcolor: "#ffffff" },
+                        "&:hover": { color: "#2563eb", bgcolor: "#3b82f61a" },
                         mr: 1,
                       }}
                     >
@@ -2012,7 +2012,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         color: "#ef4444",
-                        "&:hover": { color: "#dc2626", bgcolor: "#d6393a" },
+                        "&:hover": { color: "#dc2626", bgcolor: "#ef44441a" },
                       }}
                     >
                       <Delete sx={{ fontSize: "1.2rem" }} />
@@ -2068,9 +2068,9 @@ const InstrumentsAdmin = () => {
                 gutterBottom
                 sx={{
                   fontWeight: 700,
-                  color: "#ffffff",
+                  color: "#3b82f6",
                   fontFamily: "'Inter', sans-serif",
-                  mb: 6,
+                  mb: 5,
                   fontSize: { xs: "1.75rem", md: "2.25rem" },
                   letterSpacing: "-0.02em",
                   textTransform: "none",
@@ -2250,8 +2250,7 @@ const InstrumentsAdmin = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       sx={{
-                        flex: 1,
-                        minWidth: { xs: "100%", sm: "200px" },
+                        width: { xs: "100%", sm: "40%" }, // 4/10 ratio
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
                           fontFamily: "'Inter', sans-serif",
@@ -2260,7 +2259,7 @@ const InstrumentsAdmin = () => {
                           "& fieldset": { borderColor: "#4b5563" },
                           "&:hover fieldset": { borderColor: "#3b82f6" },
                           "&.Mui-focused fieldset": { borderColor: "#3b82f6" },
-                          "& input": { color: "#ffffff" }, // White text for input
+                          "& input": { color: "#ffffff" },
                         },
                         "& .MuiInputLabel-root": {
                           fontFamily: "'Inter', sans-serif",
@@ -2277,7 +2276,7 @@ const InstrumentsAdmin = () => {
                         ENTITY_TYPES.CONFIGURABLE_FIELDS ||
                       tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
                       <FormControl
-                        sx={{ minWidth: { xs: "100%", sm: "200px" } }}
+                        sx={{ width: { xs: "100%", sm: "40%" } }}
                         size="small"
                       >
                         <InputLabel
@@ -2330,7 +2329,7 @@ const InstrumentsAdmin = () => {
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
                             },
-                            "& .MuiSelect-select": { color: "#ffffff" }, // White text for select
+                            "& .MuiSelect-select": { color: "#ffffff" },
                           }}
                         >
                           <MenuItem
@@ -2373,7 +2372,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         borderRadius: "8px",
-                        px: 4,
+                        px: 5,
                         py: 1.5,
                         fontSize: "0.9rem",
                         fontWeight: 600,
@@ -2384,7 +2383,8 @@ const InstrumentsAdmin = () => {
                           bgcolor: "#4b5563",
                           color: "#9ca3af",
                         },
-                        minWidth: { xs: "100%", sm: "160px" },
+                        width: { xs: "100%", sm: "20%" }, // 2/10 ratio
+                        minWidth: { xs: "100%", sm: "180px" }, // Ensure button is wide enough
                       }}
                     >
                       Add{" "}
