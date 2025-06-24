@@ -1,19 +1,36 @@
+/* Reset default browser styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .instruments-admin-page {
   min-height: 100vh;
-  width: 100%;
+  width: 100vw; /* Ensure full width */
   max-width: 100vw;
   box-sizing: border-box;
   overflow-x: hidden;
-  padding-bottom: 60px; /* Reduced from 80px for compact layout */
+  padding-bottom: 0; /* Remove bottom padding */
   font-family: "Inter", Helvetica, sans-serif !important;
   background: #000000; /* Black background */
+}
+
+/* Ensure body and html also have no margins */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Modernized table styling */
 .instruments-admin-page .MuiTable-root {
   border-radius: 8px;
   overflow: hidden;
-  background-color: #1e1e1e; /* Dark background */
+  background-color: #1e1e1e;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-width: 100%;
@@ -25,16 +42,16 @@
   background-color: #2a2a2a;
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.9rem; /* Smaller font */
-  padding: 10px 12px; /* Reduced padding */
+  font-size: 0.9rem;
+  padding: 10px 12px;
   border-bottom: 1px solid #444;
 }
 
 /* Table body */
 .instruments-admin-page .MuiTableCell-body {
-  font-size: 0.85rem; /* Smaller font */
+  font-size: 0.85rem;
   color: #ffffff;
-  padding: 8px 12px; /* Reduced padding */
+  padding: 8px 12px;
   border-bottom: 1px solid #444;
 }
 
@@ -48,25 +65,25 @@
 .instruments-admin-page .MuiDialog-paper {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   border-radius: 12px;
-  background-color: #1e1e1e; /* Dark dialog background */
+  background-color: #1e1e1e;
   max-width: 100%;
-  width: calc(100% - 24px); /* Slightly smaller */
-  margin: 12px; /* Reduced margin */
+  width: calc(100% - 24px);
+  margin: 0; /* Remove margins */
 }
 
 /* Style alert icons to be white */
 .instruments-admin-page .MuiSnackbar-root .MuiAlert-root .MuiAlert-icon {
-  color: #ffffff !important; /* Ensure white icons */
+  color: #ffffff !important;
 }
 
 /* General alert styling */
 .instruments-admin-page .MuiSnackbar-root .MuiAlert-root {
   border-radius: 8px;
-  padding: 8px 12px; /* Reduced padding */
+  padding: 8px 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-size: 0.9rem; /* Smaller font */
+  font-size: 0.9rem;
   font-weight: 500;
-  background-color: #2a2a2a; /* Darker alert background */
+  background-color: #2a2a2a;
   color: #ffffff;
 }
 
@@ -84,14 +101,14 @@
 .instruments-admin-page .MuiButton-root {
   transition: all 0.2s ease;
   max-width: 100%;
-  font-size: 0.9rem; /* Smaller font */
-  padding: 6px 12px; /* Reduced padding */
+  font-size: 0.9rem;
+  padding: 6px 12px;
 }
 
 /* Ensure icon buttons don’t overflow */
 .instruments-admin-page .MuiIconButton-root {
   transition: color 0.2s ease;
-  padding: 6px; /* Smaller padding */
+  padding: 6px;
 }
 
 /* Ensure tabs don’t overflow */
@@ -103,24 +120,24 @@
 
 /* Divider styling */
 .instruments-admin-page .MuiDivider-root {
-  background-color: #444; /* Darker divider */
+  background-color: #444;
 }
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .instruments-admin-page .MuiContainer-root {
-    padding-left: 8px;
-    padding-right: 8px; /* Reduced padding */
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .instruments-admin-page .MuiTypography-h4 {
-    font-size: 1.5rem; /* Smaller font */
+    font-size: 1.5rem;
   }
 
   .instruments-admin-page .MuiTextField-root,
   .instruments-admin-page .MuiFormControl-root {
     min-width: 100%;
-    margin-bottom: 8px; /* Reduced margin */
+    margin-bottom: 0;
   }
 
   .instruments-admin-page .MuiButton-root {
@@ -131,33 +148,6 @@
 
   .instruments-admin-page .MuiTableCell-root {
     font-size: 0.8rem;
-    padding: 6px 8px; /* Reduced padding */
-    word-break: break-word;
-  }
-
-  .instruments-admin-page .MuiTabs-root {
-    margin-bottom: 12px; /* Reduced margin */
-  }
-
-  .instruments-admin-page .MuiTab-root {
-    font-size: 0.85rem;
-    padding: 6px 10px;
-  }
-}
-
-@media (max-width: 960px) {
-  .instruments-admin-page .MuiContainer-root {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .instruments-admin-page .MuiTypography-h4 {
-    font-size: 1.75rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .instruments-admin-page .MuiContainer-root {
-    max-width: 1200px; /* Slightly smaller max-width */
+    padding: 6px 8px;
   }
 }

@@ -1993,17 +1993,19 @@ const InstrumentsAdmin = () => {
   };
 
   return (
-    <Fade in timeout={600}>
+    <Fade in timeout={800}>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#000000",
-          width: "100%",
-          maxWidth: "100vw",
-          boxSizing: "border-box",
-          fontFamily: "'Inter', sans-serif",
+          bgcolor: "#000000", // Black background
+          width: "100vw", // Ensure full width
+          height: "100%", // Ensure full height
+          margin: 0, // Remove default margins
+          padding: 0, // Remove default padding
+          boxSizing: "border-box", // Ensure padding doesn’t add to width/height
+          overflow: "hidden", // Prevent overflow causing gaps
         }}
         className="instruments-admin-page"
       >
@@ -2011,16 +2013,19 @@ const InstrumentsAdmin = () => {
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
             <Container
-              maxWidth="lg"
+              maxWidth="xl"
               sx={{
-                py: 6,
-                px: { xs: 2, sm: 3, md: 4 },
-                mt: 8,
-                width: "100%",
-                maxWidth: "100%",
+                py: 0, // Remove vertical padding
+                px: 0, // Remove horizontal padding
+                mt: 0, // Remove top margin
+                width: "100%", // Ensure full width
+                maxWidth: "100%", // Override maxWidth to match viewport
                 boxSizing: "border-box",
+                margin: 0, // Remove default margins
+                padding: 0, // Remove default padding
               }}
             >
+              {/* Rest of the content remains unchanged */}
               <Typography
                 variant="h4"
                 align="center"
@@ -2030,8 +2035,8 @@ const InstrumentsAdmin = () => {
                   color: "#ffffff",
                   fontFamily: "'Inter', sans-serif",
                   mb: 4,
-                  fontSize: { xs: "1.8rem", md: "2.2rem" },
-                  letterSpacing: "-0.015em",
+                  fontSize: { xs: "1.75rem", md: "2rem" },
+                  letterSpacing: "-0.02em",
                   textTransform: "none",
                   position: "relative",
                   "&:after": {
@@ -2039,7 +2044,7 @@ const InstrumentsAdmin = () => {
                     display: "block",
                     width: "50px",
                     height: "3px",
-                    bgcolor: "#3b82f6",
+                    bgcolor: "#1976d2",
                     position: "absolute",
                     bottom: "-8px",
                     left: "50%",
