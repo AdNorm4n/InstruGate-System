@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Box, AppBar, Toolbar, Button, CircularProgress } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -19,7 +19,26 @@ import { UserContext } from "../contexts/UserContext";
 
 export default function Navbar() {
   const { userRole, loading } = useContext(UserContext);
+  const [hideTopToolbar, setHideTopToolbar] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setHideTopToolbar(true);
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
+        setHideTopToolbar(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const handleAdminPanel = () => {
     navigate("/admin-panel");
@@ -89,6 +108,7 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100vw",
           boxSizing: "border-box",
+          zIndex: 1100,
         }}
       >
         <Toolbar
@@ -155,7 +175,11 @@ export default function Navbar() {
     >
       <Toolbar
         sx={{
-          minHeight: 100,
+          minHeight: hideTopToolbar ? 0 : 100,
+          maxHeight: hideTopToolbar ? 0 : 100,
+          opacity: hideTopToolbar ? 0 : 1,
+          overflow: "hidden",
+          transition: "max-height 0.3s ease, opacity 0.3s ease",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
