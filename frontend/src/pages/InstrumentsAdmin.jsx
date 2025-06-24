@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useContext } from "react";
-import axios from "axios";
 import {
   Container,
   Typography,
@@ -32,13 +31,10 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete } from "@mui/icons-material";
 import { styled } from "@mui/material/styles"; // Added import for styled
+import api from "../api";
 import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
 import "../styles/InstrumentsAdmin.css";
-
-const api = axios.create({
-  baseURL: "http://127.0.0.1:8000",
-});
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from cloudinary_storage.storage import MediaCloudinaryStorage 
 
 User = get_user_model()
 
@@ -46,7 +47,15 @@ class Instrument(models.Model):
     base_price = models.DecimalField("Base Price (RM/pcs)", max_digits=10, decimal_places=2)
     description = models.TextField(blank=True)
     specifications = models.TextField(blank=True)
-    image = models.ImageField(upload_to='instruments/', blank=True, null=True)
+    
+    image = models.ImageField(
+        upload_to='instrument_images/%Y/%m/%d/',
+        storage=MediaCloudinaryStorage(),  # ✅ Use image-specific Cloudinary storage
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
