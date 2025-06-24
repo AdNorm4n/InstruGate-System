@@ -160,7 +160,7 @@ export default function Navbar() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          backgroundColor: "#1e1e1e",
+          backgroundColor: "#fffffff",
           px: { xs: 1.5, sm: 2 },
           width: "100%",
           maxWidth: "100%",
