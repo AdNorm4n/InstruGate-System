@@ -37,7 +37,11 @@ import api from "../api";
 import "../styles/InstrumentsAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
+  display: "flex",
+  alignItems: "center",
+  padding: theme?.spacing(0, 1) || "0 8px",
+  ...theme?.mixins?.toolbar,
+  justifyContent: "flex-end",
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
