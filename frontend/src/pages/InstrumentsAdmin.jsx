@@ -1083,8 +1083,11 @@ const InstrumentsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff",
+                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
+                "& .MuiInputBase-input": {
+                  color: "#ffffff", // Explicitly set input text color
+                },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
                 },
@@ -1116,8 +1119,11 @@ const InstrumentsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff",
+                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
+                "& .MuiInputBase-input": {
+                  color: "#ffffff", // Explicitly set input text color
+                },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
                 },
@@ -1271,8 +1277,11 @@ const InstrumentsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff",
+                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
+                "& .MuiInputBase-input": {
+                  color: "#ffffff", // Explicitly set input text color
+                },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
                 },
@@ -1303,8 +1312,11 @@ const InstrumentsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff",
+                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
+                "& .MuiInputBase-input": {
+                  color: "#ffffff", // Explicitly set input text color
+                },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
                 },
@@ -1507,8 +1519,11 @@ const InstrumentsAdmin = () => {
                 InputProps={{
                   sx: {
                     fontFamily: "'Inter', sans-serif",
-                    color: "#ffffff",
+                    color: "#ffffff", // Ensure input text is white
                     bgcolor: "#252525",
+                    "& .MuiInputBase-input": {
+                      color: "#ffffff", // Explicitly set input text color
+                    },
                     "& .MuiOutlinedInput-notchedOutline": {
                       borderColor: "#4b5563",
                     },
