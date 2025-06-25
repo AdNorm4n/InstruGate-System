@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -33,32 +33,53 @@ import { Visibility, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { UserContext } from "../contexts/UserContext";
-import api from "../api"; // Import the shared api module
+import api from "../api";
 import "../styles/QuotationsAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
+  ...theme?.mixins?.toolbar,
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  padding: theme.spacing(3),
+  backgroundColor: "#1e1e1e",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
   "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif",
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#3b82f6",
+  color: "#ffffff",
+  padding: theme.spacing(1, 2.5),
+  fontWeight: 500,
+  fontSize: "0.85rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "'Inter', sans-serif",
+  "&:hover": {
+    backgroundColor: "#2563eb",
+    transform: "scale(1.03)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#4b5563",
+    color: "#9ca3af",
+  },
+  transition: "all 0.2s ease",
 }));
 
 const CancelButton = styled(Button)(({ theme }) => ({
-  color: "#d6393a",
-  fontFamily: "Helvetica, sans-serif !important",
+  color: "#ef4444",
+  fontFamily: "'Inter', sans-serif",
   textTransform: "none",
   "&:hover": {
-    color: "#b71c1c",
+    color: "#dc2626",
+    backgroundColor: "#1f2937",
   },
 }));
 
@@ -91,13 +112,6 @@ const QuotationsAdmin = () => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [confirmMessage, setConfirmMessage] = useState("");
-
-  console.log(
-    "QuotationsAdmin: userRole:",
-    userRole,
-    "contextLoading:",
-    contextLoading
-  );
 
   const tabs = [
     {
@@ -133,20 +147,17 @@ const QuotationsAdmin = () => {
     },
   ];
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const access = localStorage.getItem("access");
       if (!access) {
-        setError("Please log in to access the quotations management page.");
-        return;
+        throw new Error(
+          "Please log in to access the quotations management page."
+        );
       }
       const headers = { Authorization: `Bearer ${access}` };
-      console.log(
-        "QuotationsAdmin: Fetching data with token:",
-        access ? "Present" : "Missing"
-      );
       const endpoints = [
         "/api/admin/quotations/",
         "/api/instruments/",
@@ -154,18 +165,10 @@ const QuotationsAdmin = () => {
       ];
       const responses = await Promise.all(
         endpoints.map((endpoint) =>
-          api.get(endpoint, { headers }).catch((err) => {
-            console.error(
-              "QuotationsAdmin: Error fetching",
-              endpoint,
-              ":",
-              err.response?.data || err.message
-            );
-            return {
-              error: err.response?.data?.detail || err.message,
-              data: [],
-            };
-          })
+          api.get(endpoint, { headers }).catch((err) => ({
+            error: err.response?.data?.detail || err.message,
+            data: [],
+          }))
         )
       );
 
@@ -181,55 +184,36 @@ const QuotationsAdmin = () => {
           : [],
       };
 
-      console.log("QuotationsAdmin: Data fetched:", newData);
       setData(newData);
-      setFilteredData({
-        quotations: newData.quotations,
-      });
+      setFilteredData({ quotations: newData.quotations });
 
       if (responses.some((res) => res.error)) {
         setError("Some data could not be loaded. Please try again.");
       }
     } catch (err) {
-      console.error(
-        "QuotationsAdmin: fetchData Error:",
-        err.response?.data || err.message
-      );
-      setError(
-        `Error loading data: ${err.response?.data?.detail || err.message}`
-      );
+      setError(`Error loading data: ${err.message}`);
     } finally {
       setLoading(false);
-      console.log("QuotationsAdmin: Fetch complete, loading:", false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (contextLoading) {
-      console.log("QuotationsAdmin: Waiting for UserContext to finish loading");
-      return;
-    }
+    if (contextLoading) return;
 
-    if (userRole === null || userRole === undefined) {
-      console.log("QuotationsAdmin: No userRole, redirecting to login");
+    if (!userRole) {
       setError("Please log in to access the quotations management page.");
-      setLoading(false);
       navigate("/login");
       return;
     }
 
     if (userRole !== "admin") {
-      console.log("QuotationsAdmin: User is not admin, redirecting to home");
-      setError(
-        "You do not have permission to access the quotations management page."
-      );
-      setLoading(false);
+      setError("You do not have permission to access this page.");
       navigate("/");
       return;
     }
 
     fetchData();
-  }, [contextLoading, userRole, navigate]);
+  }, [contextLoading, userRole, navigate, fetchData]);
 
   useEffect(() => {
     const tab = tabs[0];
@@ -260,309 +244,369 @@ const QuotationsAdmin = () => {
       return multiplier * fieldA.toString().localeCompare(fieldB.toString());
     });
 
-    setFilteredData((prev) => ({
-      ...prev,
-      quotations: filtered,
-    }));
+    setFilteredData({ quotations: filtered });
   }, [searchTerm, statusFilter, data, sortConfig]);
 
-  const getField = (obj, field) => {
-    if (!obj) return "N/A";
-    if (field.includes(".")) {
-      const [key, subKey] = field.split(".");
-      if (key === "created_by" && subKey === "first_name") {
-        const userId =
-          obj.created_by_id || (obj.created_by && obj.created_by.id);
-        if (userId) {
-          const user = data.users.find((u) => u.id === userId);
-          return user?.first_name || "Unknown User";
+  const getField = useCallback(
+    (obj, field) => {
+      if (!obj) return "N/A";
+      if (field.includes(".")) {
+        const [key, subKey] = field.split(".");
+        if (key === "created_by" && subKey === "first_name") {
+          const userId =
+            obj.created_by_id || (obj.created_by && obj.created_by.id);
+          if (userId) {
+            const user = data.users.find((u) => u.id === userId);
+            return user?.first_name || "Unknown User";
+          }
+          return obj.created_by?.first_name || "Unknown User";
         }
-        return obj.created_by?.first_name || "Unknown User";
+        return obj[key]?.[subKey] || "N/A";
       }
-      return obj[key]?.[subKey] || "N/A";
-    }
-    if (
-      field === "submitted_at" ||
-      field === "approved_at" ||
-      field === "rejected_at" ||
-      field === "updated_at" ||
-      field === "emailed_at"
-    ) {
-      return obj[field] ? new Date(obj[field]).toLocaleString() : "N/A";
-    }
-    if (field === "status") {
-      const status = obj[field] || "N/A";
-      return status.charAt(0).toUpperCase() + status.slice(1);
-    }
-    if (field === "total_price") {
-      return typeof obj[field] === "number"
-        ? `RM${obj[field].toLocaleString("en-MY", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}`
-        : "N/A";
-    }
-    return obj[field] || "N/A";
-  };
+      if (
+        [
+          "submitted_at",
+          "approved_at",
+          "rejected_at",
+          "updated_at",
+          "emailed_at",
+        ].includes(field)
+      ) {
+        return obj[field] ? new Date(obj[field]).toLocaleString() : "N/A";
+      }
+      if (field === "status") {
+        const status = obj[field] || "N/A";
+        return status.charAt(0).toUpperCase() + status.slice(1);
+      }
+      if (field === "total_price") {
+        return typeof obj[field] === "number"
+          ? `RM${obj[field].toLocaleString("en-MY", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`
+          : "N/A";
+      }
+      return obj[field] || "N/A";
+    },
+    [data.users]
+  );
 
-  const handleSort = (field) => {
+  const handleSort = useCallback((field) => {
     setSortConfig((prev) => ({
       field,
       direction:
         prev.field === field && prev.direction === "asc" ? "desc" : "asc",
     }));
-  };
+  }, []);
 
-  const openViewModal = async (item) => {
-    if (!tabs[0].permissions.includes(userRole)) {
-      setError("You do not have permission to view quotations.");
-      return;
-    }
-    setModalAction("view");
-    setModalData({ ...item });
-    setQuotationItems([]);
-    try {
-      const access = localStorage.getItem("access");
-      const headers = { Authorization: `Bearer ${access}` };
-      console.log("QuotationsAdmin: Fetching quotation items for ID:", item.id);
-      const quotationItemsResponse = await api.get(
-        "/api/admin/quotation-items/",
-        {
-          headers,
-          params: { quotation_id: item.id },
-        }
-      );
-      const items = Array.isArray(quotationItemsResponse.data)
-        ? quotationItemsResponse.data.filter(
-            (qItem) => qItem.quotation_id === item.id
-          )
-        : [];
-      setQuotationItems(items);
-      console.log("QuotationsAdmin: Quotation items fetched:", items);
-    } catch (err) {
-      console.error(
-        "QuotationsAdmin: Quotation items fetch Error:",
-        err.response?.data || err.message
-      );
-      setError(
-        `Failed to load quotation items: ${
-          err.response?.data?.detail || err.message
-        }`
-      );
-    }
-    setOpenModal(true);
-  };
-
-  const handleModalClose = () => {
-    setOpenModal(false);
-    setModalData({});
-    setQuotationItems([]);
-    setError("");
-  };
-
-  const handleOpenConfirmDialog = (action, message) => {
-    setConfirmAction(() => action);
-    setConfirmMessage(message);
-    setOpenConfirmDialog(true);
-  };
-
-  const handleCloseConfirmDialog = () => {
-    setOpenConfirmDialog(false);
-    setConfirmAction(null);
-    setConfirmMessage("");
-  };
-
-  const handleConfirmAction = async () => {
-    if (confirmAction) {
-      await confirmAction();
-    }
-    handleCloseConfirmDialog();
-  };
-
-  const handleDelete = async (id) => {
-    if (!tabs[0].permissions.includes(userRole)) {
-      setError("You do not have permission to delete quotations.");
-      return;
-    }
-    handleOpenConfirmDialog(async () => {
+  const openViewModal = useCallback(
+    async (item) => {
+      if (!tabs[0].permissions.includes(userRole)) {
+        setError("You do not have permission to view quotations.");
+        return;
+      }
+      setModalAction("view");
+      setModalData({ ...item });
+      setQuotationItems([]);
       try {
         const access = localStorage.getItem("access");
-        console.log("QuotationsAdmin: Deleting quotation ID:", id);
-        await api.delete(`${tabs[0].endpoint}${id}/`, {
-          headers: { Authorization: `Bearer ${access}` },
-        });
-        setSuccess("Quotation deleted successfully!");
-        console.log("QuotationsAdmin: Quotation deleted, ID:", id);
-        fetchData();
-      } catch (err) {
-        console.error(
-          "QuotationsAdmin: Delete Error:",
-          err.response?.data || err.message
+        const headers = { Authorization: `Bearer ${access}` };
+        const quotationItemsResponse = await api.get(
+          "/api/admin/quotation-items/",
+          {
+            headers,
+            params: { quotation_id: item.id },
+          }
         );
+        const items = Array.isArray(quotationItemsResponse.data)
+          ? quotationItemsResponse.data.filter(
+              (qItem) => qItem.quotation_id === item.id
+            )
+          : [];
+        setQuotationItems(items);
+      } catch (err) {
         setError(
-          `Failed to delete quotation: ${
+          `Failed to load quotation items: ${
             err.response?.data?.detail || err.message
           }`
         );
       }
-    }, "Are you sure you want to delete this quotation?");
-  };
+      setOpenModal(true);
+    },
+    [userRole]
+  );
 
-  const handleQuotationAction = async (id, action, remarks = "") => {
-    if (!tabs[0].permissions.includes(userRole)) {
-      setError("You do not have permission to perform this action.");
-      return;
+  const handleModalClose = useCallback(() => {
+    setOpenModal(false);
+    setModalData({});
+    setQuotationItems([]);
+    setModalAction("view");
+    setError("");
+  }, []);
+
+  const handleOpenConfirmDialog = useCallback((action, message) => {
+    setConfirmAction(() => action);
+    setConfirmMessage(message);
+    setOpenConfirmDialog(true);
+  }, []);
+
+  const handleCloseConfirmDialog = useCallback(() => {
+    setOpenConfirmDialog(false);
+    setConfirmAction(null);
+    setConfirmMessage("");
+  }, []);
+
+  const handleConfirmAction = useCallback(async () => {
+    if (confirmAction) {
+      await confirmAction();
     }
-    try {
-      const access = localStorage.getItem("access");
-      const payload = {
-        status: action === "approve" ? "approved" : "rejected",
-      };
-      if (action === "reject") {
-        if (!remarks) {
-          setError("Remarks are required when rejecting a quotation.");
-          return;
-        }
-        payload.remarks = remarks;
+    handleCloseConfirmDialog();
+  }, [confirmAction]);
+
+  const handleDelete = useCallback(
+    (id) => {
+      if (!tabs[0].permissions.includes(userRole)) {
+        setError("You do not have permission to delete quotations.");
+        return;
       }
-      console.log(
-        "QuotationsAdmin: Performing action",
-        action,
-        "on quotation ID:",
-        id,
-        "with payload:",
-        payload
-      );
-      await api.patch(`/api/admin/quotations/${id}/`, payload, {
-        headers: { Authorization: `Bearer ${access}` },
-      });
-      setSuccess(
-        `Quotation ${
-          action === "approve" ? "approved" : "rejected"
-        } successfully!`
-      );
-      console.log(
-        "QuotationsAdmin: Quotation action",
-        action,
-        "successful for ID:",
-        id
-      );
-      fetchData();
-    } catch (err) {
-      console.error(
-        "QuotationsAdmin: Quotation action Error:",
-        err.response?.data || err.message
-      );
-      setError(
-        `Failed to ${action} quotation: ${
-          err.response?.data?.detail || err.message
-        }`
-      );
-    }
-  };
+      handleOpenConfirmDialog(async () => {
+        try {
+          const access = localStorage.getItem("access");
+          await api.delete(`${tabs[0].endpoint}${id}/`, {
+            headers: { Authorization: `Bearer ${access}` },
+          });
+          setSuccess("Quotation deleted successfully!");
+          fetchData();
+        } catch (err) {
+          setError(
+            `Failed to delete quotation: ${
+              err.response?.data?.detail || err.message
+            }`
+          );
+        }
+      }, "Are you sure you want to delete this quotation?");
+    },
+    [userRole, fetchData]
+  );
 
-  const handleOpenRemarksDialog = (remarks) => {
+  const handleQuotationAction = useCallback(
+    async (id, action, remarks = "") => {
+      if (!tabs[0].permissions.includes(userRole)) {
+        setError("You do not have permission to perform this action.");
+        return;
+      }
+      try {
+        const access = localStorage.getItem("access");
+        const payload = {
+          status: action === "approve" ? "approved" : "rejected",
+        };
+        if (action === "reject") {
+          if (!remarks) {
+            setError("Remarks are required when rejecting a quotation.");
+            return;
+          }
+          payload.remarks = remarks;
+        }
+        await api.patch(`/api/admin/quotations/${id}/`, payload, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+        setSuccess(
+          `Quotation ${
+            action === "approve" ? "approved" : "rejected"
+          } successfully!`
+        );
+        fetchData();
+        handleModalClose();
+      } catch (err) {
+        setError(
+          `Failed to ${action} quotation: ${
+            err.response?.data?.detail || err.message
+          }`
+        );
+      }
+    },
+    [userRole, fetchData, handleModalClose]
+  );
+
+  const handleOpenRemarksDialog = useCallback((remarks) => {
     setSelectedRemarks(remarks || "N/A");
     setOpenRemarksDialog(true);
-  };
+  }, []);
 
-  const handleCloseRemarksDialog = () => {
+  const handleCloseRemarksDialog = useCallback(() => {
     setOpenRemarksDialog(false);
     setSelectedRemarks("");
-  };
+  }, []);
 
-  const truncateRemarks = (text, maxLength = 50) => {
+  const truncateRemarks = useCallback((text, maxLength = 50) => {
     if (text === "N/A" || !text) return text;
     if (text.length <= maxLength) return text;
     return `${text.substring(0, maxLength - 3)}...`;
-  };
+  }, []);
 
-  const renderTable = () => {
+  const handleRejectSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (modalData.id && modalData.remarks) {
+        handleQuotationAction(modalData.id, "reject", modalData.remarks);
+      } else {
+        setError("Remarks are required.");
+      }
+    },
+    [modalData, handleQuotationAction]
+  );
+
+  const renderTable = useCallback(() => {
     const tab = tabs[0];
     const items = filteredData.quotations || [];
 
     return (
-      <Table>
-        <TableHead>
-          <TableRow>
-            {tab.fields.map((field) => (
-              <TableCell
-                key={field}
-                sx={{
-                  fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif !important",
-                  bgcolor: "#f5f5f5",
-                  ...(field === "remarks" && { width: "200px" }),
-                }}
-              >
-                <TableSortLabel
-                  active={sortConfig.field === field}
-                  direction={
-                    sortConfig.field === field ? sortConfig.direction : "asc"
-                  }
-                  onClick={() => handleSort(field)}
-                >
-                  {tab.displayFields[field] || field.toUpperCase()}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-            <TableCell
-              sx={{
-                fontWeight: "bold",
-                fontFamily: "Helvetica, sans-serif !important",
-                bgcolor: "#f5f5f5",
-              }}
-            >
-              Actions
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {items.length === 0 ? (
+      <Box sx={{ overflowX: "auto", borderRadius: "12px", p: 3 }}>
+        <Table
+          sx={{
+            minWidth: 650,
+            borderCollapse: "separate",
+            borderSpacing: "0 8px",
+            bgcolor: "#1a1a1a",
+          }}
+        >
+          <TableHead>
             <TableRow>
-              <TableCell
-                colSpan={tab.fields.length + 1}
-                align="center"
-                sx={{ fontFamily: "Helvetica, sans-serif !important" }}
-              >
-                <Typography sx={{ py: 2 }}>No quotations found.</Typography>
-              </TableCell>
-            </TableRow>
-          ) : (
-            items.map((item) => (
-              <TableRow
-                key={item.id}
-                sx={{
-                  "&:hover": { bgcolor: "#e3f2fd" },
-                  transition: "background-color 0.2s",
-                }}
-              >
-                {tab.fields.map((field) => (
-                  <TableCell
-                    key={field}
+              {tab.fields.map((field) => (
+                <TableCell
+                  key={field}
+                  sx={{
+                    fontWeight: 600,
+                    fontFamily: "'Inter', sans-serif",
+                    bgcolor: "#252525",
+                    color: "#ffffff",
+                    fontSize: "0.9rem",
+                    py: 2,
+                    px: 3,
+                    border: "none",
+                    width:
+                      field === "id"
+                        ? "80px"
+                        : field === "remarks"
+                        ? "200px"
+                        : "auto",
+                    textAlign: field === "id" ? "center" : "left",
+                    "&:first-of-type": {
+                      borderTopLeftRadius: "8px",
+                      borderBottomLeftRadius: "8px",
+                    },
+                    "&:last-of-type": {
+                      borderTopRightRadius: "8px",
+                      borderBottomRightRadius: "8px",
+                    },
+                  }}
+                >
+                  <TableSortLabel
+                    active={sortConfig.field === field}
+                    direction={
+                      sortConfig.field === field ? sortConfig.direction : "asc"
+                    }
+                    onClick={() => handleSort(field)}
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
-                      ...(field === "status" && {
-                        color:
-                          getField(item, field) === "Approved"
-                            ? "#388e3c"
-                            : getField(item, field) === "Rejected"
-                            ? "#d32f2f"
-                            : getField(item, field) === "Pending"
-                            ? "#fbc02d"
-                            : getField(item, field) === "Submitted"
-                            ? "#1976d2"
-                            : "inherit",
-                        fontWeight: field === "status" ? "bold" : "normal",
-                      }),
-                      ...(field === "remarks" && {
-                        maxWidth: "200px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }),
+                      color: "#ffffff",
+                      "&:hover": { color: "#3b82f6" },
+                      "&.Mui-active": { color: "#3b82f6" },
+                      "& .MuiTableSortLabel-icon": {
+                        color: "#ffffff !important",
+                      },
                     }}
                   >
-                    {field === "remarks" ? (
+                    {tab.displayFields[field] || field.toUpperCase()}
+                  </TableSortLabel>
+                </TableCell>
+              ))}
+              <TableCell
+                sx={{
+                  fontWeight: 600,
+                  fontFamily: "'Inter', sans-serif",
+                  bgcolor: "#252525",
+                  color: "#ffffff",
+                  fontSize: "0.9rem",
+                  py: 2,
+                  px: 3,
+                  border: "none",
+                  width: "120px",
+                  textAlign: "center",
+                  borderTopRightRadius: "8px",
+                  borderBottomRightRadius: "8px",
+                }}
+              >
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={tab.fields.length + 1}
+                  align="center"
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#9ca3af",
+                    py: 4,
+                    fontSize: "0.95rem",
+                    border: "none",
+                    bgcolor: "#1a1a1a",
+                  }}
+                >
+                  No quotations found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              items.map((item) => (
+                <TableRow
+                  key={item.id}
+                  sx={{
+                    bgcolor: "#2d2d2d",
+                    "&:hover": { bgcolor: "#333333" },
+                    transition: "background-color 0.2s",
+                    borderRadius: "8px",
+                  }}
+                >
+                  {tab.fields.map((field) => (
+                    <TableCell
+                      key={field}
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontSize: "0.9rem",
+                        color: "#ffffff",
+                        py: 2,
+                        px: 3,
+                        border: "none",
+                        width:
+                          field === "id"
+                            ? "80px"
+                            : field === "remarks"
+                            ? "200px"
+                            : "auto",
+                        textAlign: field === "id" ? "center" : "left",
+                        ...(field === "status" && {
+                          color:
+                            getField(item, field) === "Approved"
+                              ? "#388e3c"
+                              : getField(item, field) === "Rejected"
+                              ? "#d32f2f"
+                              : getField(item, field) === "Pending"
+                              ? "#fbc02d"
+                              : getField(item, field) === "Submitted"
+                              ? "#1976d2"
+                              : "#ffffff",
+                          fontWeight: 500,
+                        }),
+                        ...(field === "remarks" && {
+                          maxWidth: "200px",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }),
+                      }}
+                    >
+                      {field === "remarks" &&
                       getField(item, field).length > 50 ? (
                         <span>
                           {truncateRemarks(getField(item, field))}
@@ -573,9 +617,11 @@ const QuotationsAdmin = () => {
                             }
                             sx={{
                               ml: 1,
-                              color: "#1976d2",
+                              color: "#3b82f6",
                               textDecoration: "underline",
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "'Inter', sans-serif",
+                              fontSize: "0.85rem",
+                              "&:hover": { color: "#2563eb" },
                             }}
                           >
                             View More
@@ -583,84 +629,107 @@ const QuotationsAdmin = () => {
                         </span>
                       ) : (
                         getField(item, field)
-                      )
-                    ) : (
-                      getField(item, field)
-                    )}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <Box
-                    sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                      )}
+                    </TableCell>
+                  ))}
+                  <TableCell
+                    sx={{ py: 2, px: 3, border: "none", width: "120px" }}
                   >
-                    <Box sx={{ display: "flex", gap: 0.5 }}>
-                      <IconButton
-                        onClick={() => openViewModal(item)}
-                        disabled={!tab.permissions.includes(userRole)}
-                        sx={{ color: "#1976d2" }}
-                        title="View Quotation"
-                      >
-                        <Visibility sx={{ color: "#1976d2" }} />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(item.id)}
-                        disabled={!tab.permissions.includes(userRole)}
-                        sx={{ color: "#d32f2f" }}
-                        title="Delete Quotation"
-                      >
-                        <Delete sx={{ color: "#d32f2f" }} />
-                      </IconButton>
-                    </Box>
-                    <Box sx={{ display: "flex", gap: 0.5 }}>
-                      {tab.actions.includes("approve") && (
+                    <Box
+                      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                    >
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
                         <IconButton
-                          onClick={() =>
-                            handleQuotationAction(item.id, "approve")
-                          }
-                          disabled={item.status === "approved"}
-                          sx={{ color: "#388e3c" }}
-                          title="Approve Quotation"
+                          onClick={() => openViewModal(item)}
+                          disabled={!tab.permissions.includes(userRole)}
+                          sx={{ "&:hover": { bgcolor: "#3b82f61a" } }}
+                          title="View Quotation"
                         >
-                          <Check sx={{ color: "#388e3c" }} />
+                          <Visibility
+                            sx={{ fontSize: "1.2rem", color: "#2563eb" }}
+                          />
                         </IconButton>
-                      )}
-                      {tab.actions.includes("reject") && (
                         <IconButton
-                          onClick={() => {
-                            setModalData({ id: item.id });
-                            setModalAction("reject");
-                            setOpenModal(true);
-                          }}
-                          disabled={item.status === "rejected"}
-                          sx={{ color: "#d32f2f" }}
-                          title="Reject Quotation"
+                          onClick={() => handleDelete(item.id)}
+                          disabled={!tab.permissions.includes(userRole)}
+                          sx={{ "&:hover": { bgcolor: "#ef44441a" } }}
+                          title="Delete Quotation"
                         >
-                          <Close sx={{ color: "#d32f2f" }} />
+                          <Delete
+                            sx={{ fontSize: "1.2rem", color: "#d6393a" }}
+                          />
                         </IconButton>
-                      )}
+                      </Box>
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                        {tab.actions.includes("approve") && (
+                          <IconButton
+                            onClick={() =>
+                              handleQuotationAction(item.id, "approve")
+                            }
+                            disabled={item.status === "approved"}
+                            sx={{ "&:hover": { bgcolor: "#22c55e1a" } }}
+                            title="Approve Quotation"
+                          >
+                            <Check
+                              sx={{ fontSize: "1.2rem", color: "#388e3c" }}
+                            />
+                          </IconButton>
+                        )}
+                        {tab.actions.includes("reject") && (
+                          <IconButton
+                            onClick={() => {
+                              setModalData({ id: item.id, remarks: "" });
+                              setModalAction("reject");
+                              setOpenModal(true);
+                            }}
+                            disabled={item.status === "rejected"}
+                            sx={{ "&:hover": { bgcolor: "#ef44441a" } }}
+                            title="Reject Quotation"
+                          >
+                            <Close
+                              sx={{ fontSize: "1.2rem", color: "#d32f2f" }}
+                            />
+                          </IconButton>
+                        )}
+                      </Box>
                     </Box>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </Box>
     );
-  };
+  }, [
+    filteredData.quotations,
+    sortConfig,
+    userRole,
+    getField,
+    truncateRemarks,
+    handleSort,
+    openViewModal,
+    handleDelete,
+    handleQuotationAction,
+    handleOpenRemarksDialog,
+  ]);
 
-  const renderModalContent = () => {
+  const renderModalContent = useCallback(() => {
     const tab = tabs[0];
 
     if (modalAction === "reject") {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+        <Box
+          component="form"
+          onSubmit={handleRejectSubmit}
+          sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}
+        >
           <Typography
             variant="subtitle1"
             sx={{
-              fontFamily: "Helvetica, sans-serif !important",
-              fontWeight: "bold",
-              color: "#000000",
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 600,
+              color: "#ffffff",
             }}
           >
             Reject Quotation
@@ -678,18 +747,22 @@ const QuotationsAdmin = () => {
             rows={4}
             required
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
               },
             }}
           />
@@ -702,9 +775,9 @@ const QuotationsAdmin = () => {
         <Typography
           variant="subtitle1"
           sx={{
-            fontFamily: "Helvetica, sans-serif !important",
-            fontWeight: "bold",
-            color: "#000000",
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 600,
+            color: "#ffffff",
           }}
         >
           Quotation Details
@@ -724,18 +797,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
               },
             }}
           />
@@ -747,18 +818,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
               },
             }}
           />
@@ -770,18 +839,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
               },
             }}
           />
@@ -797,18 +864,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
               },
             }}
           />
@@ -824,18 +889,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
               },
             }}
           />
@@ -854,74 +917,77 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                fontWeight: 500,
-              },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
             }}
             InputProps={{
               sx: {
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#000000",
-                bgcolor: "#f5f5f5",
-                borderRadius: 1,
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
               },
             }}
           />
         </Box>
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
         <Typography
           variant="h6"
           sx={{
             mb: 2,
-            fontFamily: "Helvetica, sans-serif !important",
-            fontWeight: "bold",
-            color: "#000000",
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 600,
+            color: "#ffffff",
           }}
         >
           Submitted Instruments
         </Typography>
         {quotationItems.length > 0 ? (
-          <Table size="small">
+          <Table size="small" sx={{ bgcolor: "#2d2d2d", borderRadius: "8px" }}>
             <TableHead>
               <TableRow>
                 <TableCell
                   sx={{
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#252525",
                   }}
                 >
                   ID
                 </TableCell>
                 <TableCell
                   sx={{
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#252525",
                   }}
                 >
                   Product Code
                 </TableCell>
                 <TableCell
                   sx={{
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#252525",
                   }}
                 >
                   Instrument
                 </TableCell>
                 <TableCell
                   sx={{
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#252525",
                   }}
                 >
                   Quantity
                 </TableCell>
                 <TableCell
                   sx={{
-                    fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    bgcolor: "#252525",
                   }}
                 >
                   Price (RM)
@@ -937,35 +1003,40 @@ const QuotationsAdmin = () => {
                   <TableRow key={item.id}>
                     <TableCell
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
                       }}
                     >
                       {item.id}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
                       }}
                     >
                       {item.product_code || "N/A"}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
                       }}
                     >
                       {instrument?.name || "Unknown Instrument"}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
                       }}
                     >
                       {item.quantity || "N/A"}
                     </TableCell>
                     <TableCell
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
                       }}
                     >
                       {typeof item.total_price === "number"
@@ -981,42 +1052,77 @@ const QuotationsAdmin = () => {
             </TableBody>
           </Table>
         ) : (
-          <Typography sx={{ fontFamily: "Helvetica, sans-serif !important" }}>
+          <Typography
+            sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
+          >
             No instruments submitted for this quotation.
           </Typography>
         )}
       </Box>
     );
-  };
+  }, [
+    modalAction,
+    modalData,
+    quotationItems,
+    data.instruments,
+    getField,
+    handleRejectSubmit,
+  ]);
 
   if (contextLoading || loading) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
-          <Container maxWidth="xl">
-            <ToolCard
-              sx={{ maxWidth: 400, mx: "auto", textAlign: "center", mt: 8 }}
+        <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                maxWidth: 400,
+                mx: "auto",
+                textAlign: "center",
+                mt: 8,
+                p: 4,
+                borderRadius: "16px",
+                bgcolor: "#1e1e1e",
+              }}
             >
-              <CircularProgress size={48} sx={{ color: "#d4a028" }} />
-            </ToolCard>
+              <CircularProgress size={48} sx={{ color: "#3b82f6", mb: 2 }} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  color: "#ffffff",
+                }}
+              >
+                Loading data...
+              </Typography>
+            </Box>
           </Container>
         </Box>
       </Fade>
     );
   }
 
-  if (error) {
+  if (error && !success) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
-          <Container maxWidth="xl">
+        <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
+          <Container maxWidth="lg">
             <ToolCard sx={{ maxWidth: 800, mx: "auto", mt: 8 }}>
-              <Alert severity="error" sx={{ borderRadius: 2 }}>
+              <Alert
+                severity="error"
+                sx={{
+                  borderRadius: "8px",
+                  fontFamily: "'Inter', sans-serif",
+                  bgcolor: "#1e1e1e",
+                  color: "#ffffff",
+                }}
+              >
                 <Typography
-                  variant="body1"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
                     fontSize: "0.9rem",
+                    color: "#ffffff",
                   }}
                 >
                   {error}
@@ -1035,27 +1141,51 @@ const QuotationsAdmin = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
+          bgcolor: "#000000",
           minHeight: "100vh",
-          bgcolor: "#f8f9fa",
+          width: "100%",
         }}
         className="quotations-admin-page"
       >
         <DrawerHeader />
-        <main style={{ flex: 1 }}>
+        <main
+          style={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
+        >
           <ErrorBoundary>
-            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+            <Container
+              maxWidth="lg"
+              sx={{
+                py: 8,
+                px: { xs: 2, sm: 4 },
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
               <Typography
-                variant="h6"
+                variant="h4"
                 align="center"
                 gutterBottom
                 sx={{
-                  fontWeight: "bold",
-                  color: "#000000",
-                  fontFamily: "Helvetica, sans-serif !important",
-                  textTransform: "uppercase",
-                  mb: 4,
-                  fontSize: { xs: "1.5rem", md: "2rem" },
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  fontFamily: "'Inter', sans-serif",
+                  mb: 5,
+                  fontSize: { xs: "1.75rem", md: "2.25rem" },
+                  letterSpacing: "-0.02em",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    width: "60px",
+                    height: "4px",
+                    bgcolor: "#3b82f6",
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderRadius: "2px",
+                  },
                 }}
               >
                 Quotations Management
@@ -1070,25 +1200,18 @@ const QuotationsAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    width: "100%",
-                    color: "white",
-                    backgroundColor: "#28a745",
-                    "& .MuiAlert-icon": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
-                    "& .MuiAlert-action": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
-                    },
+                    fontFamily: "'Inter', sans-serif",
+                    bgcolor: "#22c55e",
+                    color: "#ffffff",
+                    "& .MuiAlert-icon": { color: "#ffffff" },
+                    "& .MuiAlert-action svg": { fill: "#ffffff" },
                   }}
                 >
                   {success}
                 </Alert>
               </Snackbar>
               <Snackbar
-                open={!!error}
+                open={!!error && !success}
                 autoHideDuration={6000}
                 onClose={() => setError("")}
                 anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -1096,112 +1219,123 @@ const QuotationsAdmin = () => {
                 <Alert
                   severity="error"
                   onClose={() => setError("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    bgcolor: "#ef4444",
+                    color: "#ffffff",
+                    "& .MuiAlert-icon": { color: "#ffffff" },
+                    "& .MuiAlert-action svg": { fill: "#ffffff" },
+                  }}
                 >
                   {error}
                 </Alert>
               </Snackbar>
-              <ToolCard>
+              <ToolCard sx={{ width: "100%" }}>
                 <Box
                   sx={{
                     display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
                     gap: 2,
                     mb: 4,
-                    flexWrap: "wrap",
-                    alignItems: "center",
+                    alignItems: { xs: "stretch", sm: "center" },
+                    justifyContent: "space-between",
                   }}
                 >
-                  <Box
+                  <TextField
+                    label={`Search by ${tabs[0].searchFields.join(" or ")}`}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{
-                      display: "flex",
-                      gap: 2,
-                      flexWrap: "wrap",
                       flex: 1,
-                      width: "100%",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        fontFamily: "'Inter', sans-serif",
+                        bgcolor: "#252525",
+                        color: "#ffffff",
+                        "& fieldset": { borderColor: "#4b5563" },
+                        "&:hover fieldset": { borderColor: "#3b82f6" },
+                        "&.Mui-focused fieldset": { borderColor: "#3b82f6" },
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                        "&.Mui-focused": { color: "#3b82f6" },
+                      },
                     }}
+                    variant="outlined"
+                    size="small"
+                  />
+                  <FormControl
+                    sx={{ width: { xs: "100%", sm: "200px" } }}
+                    size="small"
                   >
-                    <TextField
-                      label={`Search by ${tabs[0].searchFields
-                        .map((field) => tabs[0].displayFields[field])
-                        .join(" or ")}`}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      sx={{ flex: 2, minWidth: "300px" }}
-                      variant="outlined"
-                      size="small"
-                      InputLabelProps={{
-                        sx: {
-                          fontFamily: "Helvetica, sans-serif !important",
-                        },
+                    <InputLabel
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                        "&.Mui-focused": { color: "#3b82f6" },
                       }}
-                      InputProps={{
-                        sx: {
-                          fontFamily: "Helvetica, sans-serif !important",
-                        },
-                      }}
-                    />
-                    <FormControl
-                      sx={{ flex: 1, minWidth: "200px" }}
-                      size="small"
                     >
-                      <InputLabel
+                      Status
+                    </InputLabel>
+                    <Select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      label="Status"
+                      sx={{
+                        borderRadius: "8px",
+                        fontFamily: "'Inter', sans-serif",
+                        bgcolor: "#252525",
+                        color: "#ffffff",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            bgcolor: "#1a1a1a",
+                            "& .MuiMenuItem-root": {
+                              fontFamily: "'Inter', sans-serif",
+                              color: "#ffffff",
+                              "&:hover": { bgcolor: "#333333" },
+                              "&.Mui-selected": { bgcolor: "#3b82f61a" },
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem
+                        value=""
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#ffffff",
                         }}
                       >
-                        Status
-                      </InputLabel>
-                      <Select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        label="Status"
-                        sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                        }}
-                      >
-                        <MenuItem
-                          value=""
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          All Statuses
-                        </MenuItem>
-                        <MenuItem
-                          value="pending"
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          Pending
-                        </MenuItem>
-                        <MenuItem
-                          value="approved"
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          Approved
-                        </MenuItem>
-                        <MenuItem
-                          value="rejected"
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          Rejected
-                        </MenuItem>
-                        <MenuItem
-                          value="submitted"
-                          sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
-                          }}
-                        >
-                          Submitted
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Box>
+                        All Statuses
+                      </MenuItem>
+                      {["pending", "approved", "rejected", "submitted"].map(
+                        (status) => (
+                          <MenuItem
+                            key={status}
+                            value={status}
+                            sx={{
+                              fontFamily: "'Inter', sans-serif",
+                              color: "#ffffff",
+                            }}
+                          >
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                          </MenuItem>
+                        )
+                      )}
+                    </Select>
+                  </FormControl>
                 </Box>
                 {renderTable()}
               </ToolCard>
@@ -1211,48 +1345,45 @@ const QuotationsAdmin = () => {
               onClose={handleModalClose}
               maxWidth={modalAction === "reject" ? "sm" : "lg"}
               fullWidth
-              PaperProps={{
-                component: "form",
-                onSubmit: (e) => {
-                  e.preventDefault();
-                  if (modalAction === "reject") {
-                    handleQuotationAction(
-                      modalData.id,
-                      "reject",
-                      modalData.remarks
-                    );
-                    handleModalClose();
-                  }
+              sx={{
+                "& .MuiDialog-paper": {
+                  bgcolor: "#1e1e1e",
+                  borderRadius: "16px",
                 },
-                sx: { borderRadius: 2, p: 2 },
               }}
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  color: "#1976d2",
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  color: "#3b82f6",
+                  bgcolor: "#1e1e1e",
+                  py: 2.5,
+                  px: 4,
+                  fontSize: "1.25rem",
+                  borderBottom: "1px solid #4b5563",
                 }}
               >
                 {modalAction === "reject"
                   ? "Reject Quotation"
                   : "View Quotation"}
               </DialogTitle>
-              <DialogContent>{renderModalContent()}</DialogContent>
-              <DialogActions>
+              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
+                {renderModalContent()}
+              </DialogContent>
+              <DialogActions
+                sx={{
+                  bgcolor: "#1e1e1e",
+                  borderTop: "1px solid #4b5563",
+                  py: 2.5,
+                  px: 4,
+                }}
+              >
                 <CancelButton onClick={handleModalClose}>Close</CancelButton>
                 {modalAction === "reject" && (
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    sx={{
-                      bgcolor: "#d6393a",
-                      "&:hover": { bgcolor: "#b71c1c" },
-                      fontFamily: "Helvetica, sans-serif !important",
-                    }}
-                  >
+                  <CTAButton type="submit" form="reject-form">
                     Submit
-                  </Button>
+                  </CTAButton>
                 )}
               </DialogActions>
             </Dialog>
@@ -1261,31 +1392,46 @@ const QuotationsAdmin = () => {
               onClose={handleCloseRemarksDialog}
               maxWidth="sm"
               fullWidth
-              PaperProps={{
-                sx: { borderRadius: 2, p: 2 },
+              sx={{
+                "& .MuiDialog-paper": {
+                  bgcolor: "#1e1e1e",
+                  borderRadius: "16px",
+                },
               }}
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  color: "#1976d2",
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  color: "#3b82f6",
+                  bgcolor: "#1e1e1e",
+                  py: 2.5,
+                  px: 4,
+                  fontSize: "1.25rem",
+                  borderBottom: "1px solid #4b5563",
                 }}
               >
                 Full Remarks
               </DialogTitle>
-              <DialogContent>
+              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
                 <Typography
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
                     whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
                   }}
                 >
                   {selectedRemarks}
                 </Typography>
               </DialogContent>
-              <DialogActions>
+              <DialogActions
+                sx={{
+                  bgcolor: "#1e1e1e",
+                  borderTop: "1px solid #4b5563",
+                  py: 2.5,
+                  px: 4,
+                }}
+              >
                 <CancelButton onClick={handleCloseRemarksDialog}>
                   Close
                 </CancelButton>
@@ -1296,39 +1442,51 @@ const QuotationsAdmin = () => {
               onClose={handleCloseConfirmDialog}
               maxWidth="xs"
               fullWidth
-              PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+              sx={{
+                "& .MuiDialog-paper": {
+                  bgcolor: "#1e1e1e",
+                  borderRadius: "16px",
+                },
+              }}
             >
               <DialogTitle
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  color: "#d6393a",
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  color: "#3b82f6",
+                  bgcolor: "#1e1e1e",
+                  py: 2.5,
+                  px: 4,
+                  fontSize: "1.25rem",
+                  borderBottom: "1px solid #4b5563",
                 }}
               >
                 Confirm Deletion
               </DialogTitle>
-              <DialogContent>
+              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
                 <Typography
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "'Inter', sans-serif", color: "#ffffff" }}
                 >
                   {confirmMessage}
                 </Typography>
               </DialogContent>
-              <DialogActions>
+              <DialogActions
+                sx={{
+                  bgcolor: "#1e1e1e",
+                  borderTop: "1px solid #4b5563",
+                  py: 2.5,
+                  px: 4,
+                }}
+              >
                 <CancelButton onClick={handleCloseConfirmDialog}>
                   Cancel
                 </CancelButton>
-                <Button
-                  variant="contained"
+                <CTAButton
+                  sx={{ bgcolor: "#ef4444", "&:hover": { bgcolor: "#dc2626" } }}
                   onClick={handleConfirmAction}
-                  sx={{
-                    bgcolor: "#d6393a",
-                    "&:hover": { bgcolor: "#b71c1c" },
-                    fontFamily: "Helvetica, sans-serif !important",
-                  }}
                 >
                   Delete
-                </Button>
+                </CTAButton>
               </DialogActions>
             </Dialog>
           </ErrorBoundary>
