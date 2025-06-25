@@ -2638,7 +2638,7 @@ const InstrumentsAdmin = () => {
                         minWidth: { xs: "100%", sm: "180px" },
                       }}
                     >
-                      +Add More
+                      Add New
                     </CTAButton>
                   </Box>
                   Changes Made: Filter Dropdown Width
