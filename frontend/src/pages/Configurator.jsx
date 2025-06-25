@@ -344,7 +344,7 @@ function Configurator({ navigateWithLoading }) {
       >
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="lg" sx={{ py: 6, mt: 6 }}>
+          <Container maxWidth="lg" sx={{ py: 2 }}>
             <Box
               sx={{
                 bgcolor: "#ffffff",
