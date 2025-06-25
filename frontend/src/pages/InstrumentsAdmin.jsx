@@ -2367,17 +2367,15 @@ const InstrumentsAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif",
                     width: "100%",
-                    color: "white",
-                    backgroundColor: "#28a745",
+                    color: "#ffffff",
+                    bgcolor: "#28a745", // Green for success
                     "& .MuiAlert-icon": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
+                      color: "#ffffff",
                     },
                     "& .MuiAlert-action": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
+                      color: "#ffffff",
                     },
                   }}
                 >
@@ -2393,7 +2391,18 @@ const InstrumentsAdmin = () => {
                 <Alert
                   severity="error"
                   onClose={() => setError("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    width: "100%",
+                    color: "#ffffff",
+                    bgcolor: "#d6393a", // Red for error
+                    "& .MuiAlert-icon": {
+                      color: "#ffffff",
+                    },
+                    "& .MuiAlert-action": {
+                      color: "#ffffff",
+                    },
+                  }}
                 >
                   {error}
                 </Alert>
