@@ -1313,7 +1313,17 @@ const UsersAdmin = () => {
                 >
                   Confirm Deletion
                 </DialogTitle>
-                <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
+                <DialogContent
+                  sx={{
+                    py: 4,
+                    px: 4,
+                    bgcolor: "#1e1e1e",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                >
                   <Typography
                     sx={{
                       fontFamily: "'Inter', sans-serif",

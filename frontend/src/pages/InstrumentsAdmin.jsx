@@ -2772,11 +2772,21 @@ const InstrumentsAdmin = () => {
                 >
                   Confirm Action
                 </DialogTitle>
-                <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
+                <DialogContent
+                  sx={{
+                    py: 4,
+                    px: 4,
+                    bgcolor: "#1e1e1e",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                >
                   <Typography
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      color: "#ffffff", // changed to white
+                      color: "#ffffff",
                       fontSize: "1rem",
                       fontWeight: 500,
                       paddingTop: 2,
