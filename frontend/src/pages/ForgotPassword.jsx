@@ -77,7 +77,7 @@ function ForgotPassword() {
               sx={{
                 fontWeight: "bold",
                 color: "#000000",
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 textTransform: "uppercase",
                 letterSpacing: 0,
                 mb: 4,
