@@ -329,6 +329,8 @@ body {
   border-radius: 8px;
   overflow: hidden;
   background-color: #1a1a1a;
+  padding-left: 8px;
+  padding-right: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-width: 100%;
