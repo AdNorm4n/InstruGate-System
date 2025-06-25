@@ -189,9 +189,7 @@ function Home() {
             </div>
           </section>
 
-          <Container maxWidth="lg" sx={{ py: 2 }}>
-            {" "}
-            {/* Reduced padding from 4 */}
+          <Container maxWidth="lg">
             <Section>
               <Typography
                 variant="h5"

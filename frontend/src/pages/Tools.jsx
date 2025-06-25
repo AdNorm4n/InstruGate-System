@@ -565,7 +565,7 @@ function Tools() {
       >
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="lg" sx={{ py: 3 }}>
+          <Container maxWidth="lg" sx={{ py: 2 }}>
             <Typography
               variant="h6"
               align="center"
