@@ -1453,7 +1453,7 @@ const InstrumentsAdmin = () => {
                   <InputLabel
                     sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
                   >
-                    {field.replace("_id", "").replace("_", " ").toUpperCase()}
+                    {toTitleCase(field)}
                   </InputLabel>
                   <Select
                     value={modalData[field] || ""}
@@ -1512,7 +1512,7 @@ const InstrumentsAdmin = () => {
             return (
               <TextField
                 key={field}
-                label={field.replace("_id", "").replace("_", " ").toUpperCase()}
+                label={toTitleCase(field)}
                 value={modalData[field] || ""}
                 onChange={(e) =>
                   setModalData({ ...modalData, [field]: e.target.value })
@@ -1778,6 +1778,7 @@ const InstrumentsAdmin = () => {
                     sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
                   >
                     Instruments
+                    {toTitleCase(field.replace("_ids", "s"))}
                   </InputLabel>
                   <Select
                     multiple
@@ -1840,10 +1841,7 @@ const InstrumentsAdmin = () => {
             return (
               <TextField
                 key={field}
-                label={field
-                  .replace("_ids", "")
-                  .replace("_", " ")
-                  .toUpperCase()}
+                label={toTitleCase(field)}
                 value={modalData[field] || ""}
                 onChange={(e) =>
                   setModalData({ ...modalData, [field]: e.target.value })
