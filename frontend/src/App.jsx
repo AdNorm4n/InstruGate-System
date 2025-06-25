@@ -30,12 +30,17 @@ import ChatComponent from "./components/ChatComponent";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { UserProvider } from "./contexts/UserContext";
+import AppBarTop from "./components/AppBar";
+import ToolbarMenu from "./components/ToolbarMenu";
 
 const Layout = () => {
   return (
     <>
-      <Navbar />
-      <Outlet />
+      <AppBarTop />
+      <ToolbarMenu />
+      <Box sx={{ pt: "112px", px: { xs: 2, sm: 3 } }}>
+        <Outlet />
+      </Box>
       <Footer />
       <ChatComponent />
     </>

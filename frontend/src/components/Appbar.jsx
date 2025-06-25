@@ -1,5 +1,5 @@
 // components/AppBar.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { AppBar, Toolbar, Box, Button, CircularProgress } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
@@ -12,32 +12,44 @@ import api from "../api";
 
 export default function AppBarTop({ loading }) {
   const navigate = useNavigate();
+  const [visible, setVisible] = useState(true);
+  const [lastScroll, setLastScroll] = useState(0);
 
   const handleLogout = async () => {
     try {
       await api.post("/api/users/logout/", {});
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch (e) {
+      console.error("Logout error", e);
     }
-    localStorage.removeItem(ACCESS_TOKEN);
-    localStorage.removeItem(REFRESH_TOKEN);
-    localStorage.removeItem("user");
+    localStorage.clear();
     navigate("/login");
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      setVisible(currentScroll < lastScroll || currentScroll <= 5);
+      setLastScroll(currentScroll);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScroll]);
 
   return (
     <AppBar
       position="fixed"
       sx={{
-        backgroundColor: "transparent",
+        top: visible ? 0 : "-64px", // hide AppBar on scroll down
+        transition: "top 0.3s ease",
+        backgroundColor: "#1e1e1e",
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        zIndex: 1200,
+        zIndex: 1300,
       }}
     >
       <Toolbar
         sx={{
           minHeight: 64,
-          backgroundColor: "#1e1e1e",
           display: "flex",
           justifyContent: "space-between",
           px: 3,
@@ -47,7 +59,6 @@ export default function AppBarTop({ loading }) {
           <img src={logo} alt="Logo" style={{ height: 28 }} />
           <img src={headerBanner} alt="Header" style={{ height: 42 }} />
         </Box>
-
         <Box
           sx={{
             position: "absolute",
@@ -57,7 +68,6 @@ export default function AppBarTop({ loading }) {
         >
           <img src={centerLogo} alt="Center Logo" style={{ height: 42 }} />
         </Box>
-
         <Box sx={{ display: "flex", gap: 2 }}>
           {loading ? (
             <CircularProgress size={18} sx={{ color: "#d6393a" }} />
@@ -65,20 +75,14 @@ export default function AppBarTop({ loading }) {
             <>
               <Button
                 onClick={() => navigate("/profile")}
-                startIcon={
-                  <PersonIcon sx={{ color: "#d6393a", fontSize: "1.2rem" }} />
-                }
+                startIcon={<PersonIcon sx={{ color: "#d6393a" }} />}
                 sx={btnStyle}
               >
                 Profile
               </Button>
               <Button
                 onClick={handleLogout}
-                startIcon={
-                  <ExitToAppIcon
-                    sx={{ color: "#d6393a", fontSize: "1.2rem" }}
-                  />
-                }
+                startIcon={<ExitToAppIcon sx={{ color: "#d6393a" }} />}
                 sx={btnStyle}
               >
                 Logout
@@ -92,18 +96,14 @@ export default function AppBarTop({ loading }) {
 }
 
 const btnStyle = {
-  color: "#ffffff",
+  color: "#fff",
   textTransform: "none",
   fontWeight: 600,
   fontSize: "0.9rem",
-  bgcolor: "transparent",
+  fontFamily: "'Inter', sans-serif",
   "&:hover": {
-    bgcolor: "#333333",
+    bgcolor: "#333",
     transform: "scale(1.05)",
     transition: "all 0.2s ease",
   },
-  fontFamily: "'Inter', Helvetica, sans-serif",
-  px: 1.5,
-  py: 0.75,
-  borderRadius: "8px",
 };

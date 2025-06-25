@@ -1,5 +1,5 @@
 // components/ToolbarMenu.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Toolbar, Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
@@ -11,23 +11,6 @@ import HomeRepairServiceIcon from "@mui/icons-material/HomeRepairService";
 
 export default function ToolbarMenu({ userRole }) {
   const navigate = useNavigate();
-  const [hidden, setHidden] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  const handleScroll = () => {
-    const currentScroll = window.scrollY;
-    if (currentScroll > lastScrollY) {
-      setHidden(true); // scrolling down
-    } else {
-      setHidden(false); // scrolling up
-    }
-    setLastScrollY(currentScroll);
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
 
   const menuItems = [
     { text: "Home", icon: <HomeIcon />, path: "/" },
@@ -57,35 +40,34 @@ export default function ToolbarMenu({ userRole }) {
   return (
     <Toolbar
       sx={{
-        minHeight: 48,
+        position: "sticky", // stays under AppBar
+        top: 0,
         backgroundColor: "#d6393a",
-        position: "relative",
-        top: hidden ? "-48px" : "0px",
+        zIndex: 1200,
         transition: "top 0.3s ease",
+        display: "flex",
         justifyContent: "center",
-        px: 3,
-        zIndex: 1000,
       }}
     >
       <Box sx={{ display: "flex", gap: 2.5, flexWrap: "wrap" }}>
         {menuItems.map((item) => (
           <Button
             key={item.text}
-            onClick={() => navigate(item.path)}
             startIcon={React.cloneElement(item.icon, {
-              sx: { color: "#ffffff", fontSize: "1.2rem" },
+              sx: { color: "#fff", fontSize: "1.2rem" },
             })}
+            onClick={() => navigate(item.path)}
             sx={{
-              color: "#ffffff",
+              color: "#fff",
               textTransform: "none",
               fontWeight: 600,
               fontSize: "0.9rem",
+              fontFamily: "'Inter', sans-serif",
               "&:hover": {
                 bgcolor: "#b32b2e",
                 transform: "scale(1.05)",
                 transition: "all 0.2s ease",
               },
-              fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1.5,
               py: 0.75,
               borderRadius: "8px",
