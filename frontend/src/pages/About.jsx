@@ -31,31 +31,31 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const CTAButton = styled(Button)(({ theme }) => ({
   backgroundColor: "#3b82f6",
-  color: "#ffffff",
+  color: "#ffffff !important",
   padding: theme.spacing(1.5, 4),
   fontWeight: 600,
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "'Inter', sans-serif",
+  fontFamily: "'Inter', sans-serif !important",
   "&:hover": {
     backgroundColor: "#2563eb",
     transform: "scale(1.03)",
   },
   "&.Mui-disabled": {
     backgroundColor: "#4b5563",
-    color: "#9ca3af",
+    color: "#9ca3af !important",
   },
   transition: "all 0.2s ease",
   "& .MuiCircularProgress-root": {
-    color: "#ffffff",
+    color: "#ffffff !important",
   },
 }));
 
 const Section = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(6),
   padding: theme.spacing(4),
-  backgroundColor: "#1e1e1e",
+  backgroundColor: "#333333",
   borderRadius: "16px",
   boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -69,7 +69,6 @@ const Section = styled(Box)(({ theme }) => ({
 const HeaderSection = styled(Box)(({ theme }) => ({
   textAlign: "center",
   padding: theme.spacing(8, 0),
-  marginTop: theme.spacing(2),
   marginBottom: theme.spacing(4),
   fontFamily: "'Inter', sans-serif !important",
 }));
@@ -80,7 +79,7 @@ const ProductCard = styled(Card)(({ theme }) => ({
   maxWidth: "450px",
   display: "flex",
   flexDirection: "column",
-  backgroundColor: "#2d2d2d",
+  backgroundColor: "#333333",
   border: "none",
   borderRadius: "12px",
   boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
@@ -122,6 +121,7 @@ function About() {
           <Container
             maxWidth="lg"
             sx={{
+              py: 8,
               px: { xs: 2, sm: 4 },
               width: "100%",
               display: "flex",
@@ -130,44 +130,59 @@ function About() {
               boxSizing: "border-box",
             }}
           >
-            <Container
-              maxWidth="lg"
-              sx={{
-                pt: 4,
-                pb: 4,
-                px: { xs: 2, sm: 4 },
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                boxSizing: "border-box",
-              }}
-            >
-              <HeaderSection>
-                <Box
-                  component="img"
-                  src={companylogo}
-                  alt="Company Logo"
-                  sx={{
-                    maxWidth: { xs: 300, md: 400 },
-                    mt: 2,
-                    mb: 4,
+            <HeaderSection>
+              <Typography
+                variant="h4"
+                align="center"
+                gutterBottom
+                sx={{
+                  fontWeight: 700,
+                  color: "#ffffff !important",
+                  fontFamily: "'Inter', sans-serif !important",
+                  mb: 5,
+                  fontSize: { xs: "1.75rem", md: "2.25rem" },
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
                     display: "block",
-                    margin: "0 auto",
-                    filter: "brightness(1.1)",
-                  }}
-                />
-              </HeaderSection>
-            </Container>
+                    width: "60px",
+                    height: "4px",
+                    bgcolor: "#3b82f6",
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderRadius: "2px",
+                  },
+                }}
+              >
+                About Rueger Sdn. Bhd.
+              </Typography>
+              <Box
+                component="img"
+                src={companylogo}
+                alt="Company Logo"
+                sx={{
+                  maxWidth: { xs: 300, md: 400 },
+                  mt: 2,
+                  mb: 4,
+                  display: "block",
+                  margin: "0 auto",
+                  filter: "brightness(1.1)",
+                }}
+              />
+            </HeaderSection>
 
             <Section>
               <Typography
                 variant="h5"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  fontWeight: bold,
+                  fontWeight: 600,
                   mb: 3,
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -178,7 +193,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "0.95rem",
                   lineHeight: 1.7,
                 }}
@@ -205,7 +220,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 3,
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -216,7 +231,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "0.95rem",
                   lineHeight: 1.7,
                 }}
@@ -228,10 +243,9 @@ function About() {
                 marking a significant expansion into the region’s growing
                 markets. As an Ashcroft company, we have achieved a 26.54% sales
                 revenue increase in 2023 and a 26.9% growth in total assets,
-                reflecting our strong market presence. Under third-generation
-                family leadership, with Bernard Rüeger as Managing Director and
-                Jean-Marc Rüeger as CEO since 2012, we continue to innovate,
-                producing OEM products like electronic thermostats and
+                reflecting our strong market presence. Under Bernard Rüger as
+                Managing Director and Jean-Marc Rüger as CEO, we continue to
+                innovate, producing OEM products like electronic thermostats and
                 multipoint sensors. Our ISO 9001:2015 certification underscores
                 our commitment to quality and reliability across all operations.
               </Typography>
@@ -244,7 +258,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 4,
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "1.5rem",
                   letterSpacing: "0.02em",
                 }}
@@ -281,7 +295,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           fontWeight: 600,
                           mb: 2,
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
                         }}
@@ -291,16 +305,15 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           lineHeight: 1.6,
-                          fontSize: "0.9rem",
+                          fontSize: "0.95rem",
                         }}
                       >
                         • Pressure Gauges
                         <br />
                         • Digital Gauges
                         <br />
-                        • High-Purity
                         <br />
                         • Differential Gauges
                         <br />
@@ -308,7 +321,7 @@ function About() {
                         <br />
                         • Pressure Sensors
                         <br />
-                        • Diaphragm Seals - Isolators
+                        • Diaphragm Seals
                         <br />
                         • Threaded Seals
                         <br />
@@ -316,7 +329,6 @@ function About() {
                         <br />
                         • Flanged Seals
                         <br />
-                        • In-Line
                         <br />• Accessories
                       </Typography>
                     </CardContent>
@@ -351,7 +363,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           fontWeight: 600,
                           mb: 2,
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
                         }}
@@ -361,16 +373,14 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           lineHeight: 1.6,
-                          fontSize: "0.9rem",
+                          fontSize: "0.95rem",
                         }}
                       >
                         • Thermometers
                         <br />
-                        • Bimetal Thermometers
                         <br />
-                        • Gas Actuated Thermometers
                         <br />• Thermowells
                       </Typography>
                     </CardContent>
@@ -405,7 +415,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           fontWeight: 600,
                           mb: 2,
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
                         }}
@@ -415,15 +425,15 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           lineHeight: 1.6,
-                          fontSize: "0.9rem",
+                          fontSize: "0.95rem",
                         }}
                       >
                         • Test Gauges
                         <br />
-                        • Calibration & Repair
-                        <br />• Technical Support & Training
+                        <br />
+                        <br />• Services
                       </Typography>
                     </CardContent>
                   </ProductCard>
@@ -435,13 +445,13 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   mt: 3,
                   display: "block",
-                  color: "#ffffff",
-                  fontSize: "0.9rem",
+                  color: "#ffffff !important",
+                  fontSize: "0.95rem",
                   lineHeight: 1.6,
                 }}
               >
-                Applications: Chemical, petrochemical, power, shipbuilding,
-                food, HVAC, and more.
+                Applications: Chemical, petrochemical, oil & gas, power,
+                shipbuilding, food, HVAC, and more.
               </Typography>
             </Section>
 
@@ -452,7 +462,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 3,
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -463,7 +473,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  color: "#ffffff",
+                  color: "#ffffff !important",
                   fontSize: "0.95rem",
                   lineHeight: 1.7,
                 }}
@@ -481,8 +491,8 @@ function About() {
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
-                  mb: 4,
-                  color: "#ffffff",
+                  mb: 3,
+                  color: "#ffffff !important",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -494,12 +504,12 @@ function About() {
                   <Box
                     display="flex"
                     alignItems="center"
-                    justifyContent="center"
+                    justifyContent="flex-start"
                     sx={{
-                      backgroundColor: "#2d2d2d",
+                      backgroundColor: "#333333",
                       borderRadius: "12px",
                       p: 2,
-                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
+                      boxShadow: "0 2px 24px rgba(0, 0, 0, 0.15)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-4px)",
@@ -515,8 +525,8 @@ function About() {
                       variant="body1"
                       sx={{
                         fontFamily: "'Inter', sans-serif !important",
-                        color: "#ffffff",
-                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        color: "#ffffff !important",
+                        fontSize: { xs: "0.95rem", sm: "1rem" },
                         textAlign: "left",
                       }}
                     >
@@ -529,12 +539,12 @@ function About() {
                   <Box
                     display="flex"
                     alignItems="center"
-                    justifyContent="center"
+                    justifyContent="flex-start"
                     sx={{
-                      backgroundColor: "#2d2d2d",
+                      backgroundColor: "#333333",
                       borderRadius: "12px",
                       p: 2,
-                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
+                      boxShadow: "0 2px 24px rgba(0, 0, 0, 0.15)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-4px)",
@@ -550,10 +560,10 @@ function About() {
                       href="tel:+60341423808"
                       sx={{
                         fontFamily: "'Inter', sans-serif !important",
-                        color: "#ffffff",
-                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        color: "#ffffff !important",
+                        fontSize: { xs: "0.95rem", sm: "1rem" },
                         textDecoration: "none",
-                        "&:hover": { color: "#3b82f6" },
+                        "&:hover": { color: "#3b82f6 !important" },
                       }}
                       aria-label="Call Rueger Sdn. Bhd."
                     >
@@ -565,12 +575,12 @@ function About() {
                   <Box
                     display="flex"
                     alignItems="center"
-                    justifyContent="center"
+                    justifyContent="flex-start"
                     sx={{
-                      backgroundColor: "#2d2d2d",
+                      backgroundColor: "#333333",
                       borderRadius: "12px",
                       p: 2,
-                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
+                      boxShadow: "0 2px 24px rgba(0, 0, 0, 0.15)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-4px)",
@@ -586,10 +596,10 @@ function About() {
                       href="mailto:my_sales@rueger.com"
                       sx={{
                         fontFamily: "'Inter', sans-serif !important",
-                        color: "#ffffff",
-                        fontSize: { xs: "0.9rem", sm: "1rem" },
+                        color: "#ffffff !important",
+                        fontSize: { xs: "0.95rem", sm: "1rem" },
                         textDecoration: "none",
-                        "&:hover": { color: "#3b82f6" },
+                        "&:hover": { color: "#3b82f6 !important" },
                       }}
                       aria-label="Email Rueger Sdn. Bhd."
                     >
@@ -624,9 +634,9 @@ function About() {
                   aria-label="LinkedIn"
                   sx={{
                     color: "#3b82f6",
-                    backgroundColor: "#2d2d2d",
+                    backgroundColor: "#333333",
                     "&:hover": {
-                      color: "#3b82f6",
+                      color: "#3b82f6 !important",
                       backgroundColor: "#3b82f61a",
                       transform: "scale(1.1)",
                     },
