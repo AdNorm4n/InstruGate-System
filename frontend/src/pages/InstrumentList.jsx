@@ -34,7 +34,7 @@ const CategoryCard = styled(Card)(({ theme, active }) => ({
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
     borderColor: "#d6393a",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
 }));
 
 const ResetButton = styled(Button)(({ theme }) => ({
@@ -44,7 +44,7 @@ const ResetButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
   "&:hover": {
     backgroundColor: "#d0d0d0",
     transform: "scale(1.05)",
@@ -62,7 +62,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
 }));
 
 const InstrumentList = () => {
@@ -136,7 +136,7 @@ const InstrumentList = () => {
             <Alert
               severity="error"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 fontSize: "0.85rem",
               }}
             >
@@ -168,7 +168,7 @@ const InstrumentList = () => {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -183,7 +183,7 @@ const InstrumentList = () => {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -207,7 +207,7 @@ const InstrumentList = () => {
                           <Typography
                             variant="h6"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               fontWeight: "bold",
                               textTransform: "uppercase",
                               color:
@@ -222,7 +222,7 @@ const InstrumentList = () => {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               color: "#666",
                               fontSize: "0.85rem",
                             }}

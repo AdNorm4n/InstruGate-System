@@ -40,7 +40,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -51,7 +51,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor: "#1565c0",
     transform: "scale(1.05)",
@@ -178,7 +178,7 @@ function Review() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
           }}
         >
@@ -208,7 +208,7 @@ function Review() {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -223,7 +223,7 @@ function Review() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -271,7 +271,7 @@ function Review() {
                 align="center"
                 sx={{
                   mb: 2,
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   fontWeight: "bold",
                   color: "#000000",
                   textTransform: "uppercase",
@@ -286,7 +286,7 @@ function Review() {
                 sx={{
                   mb: 4,
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   textTransform: "uppercase",
                   color: "#0a5",
                 }}
@@ -298,7 +298,7 @@ function Review() {
                   variant="subtitle1"
                   sx={{
                     fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     color: "#000000",
                     textTransform: "uppercase",
                   }}
@@ -317,7 +317,7 @@ function Review() {
                     <Typography
                       variant="body2"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color:
                           item.label === "Selected Requirements:" ||
                           item.label === "Selected Add-ons:" ||
@@ -338,7 +338,7 @@ function Review() {
                       <Typography
                         variant="body2"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           fontWeight: "bold",
                           color: "#000000",
                         }}
@@ -354,7 +354,7 @@ function Review() {
                     variant="subtitle1"
                     sx={{
                       fontWeight: "bold",
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       color: "#0a5",
                       textTransform: "uppercase",
                     }}
@@ -365,7 +365,7 @@ function Review() {
                     variant="subtitle1"
                     sx={{
                       fontWeight: "bold",
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       color: "#0a5",
                       textTransform: "uppercase",
                     }}

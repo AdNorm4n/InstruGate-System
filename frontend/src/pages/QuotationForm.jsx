@@ -46,7 +46,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-2px)",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   width: "100%",
   boxSizing: "border-box",
   [theme.breakpoints.down("sm")]: {
@@ -293,7 +293,7 @@ function QuotationForm() {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -311,7 +311,7 @@ function QuotationForm() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
             fontSize: "1.5rem",
           }}
@@ -357,7 +357,7 @@ function QuotationForm() {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -372,7 +372,7 @@ function QuotationForm() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 color: "#333",
                 mb: 4,
                 fontSize: "0.9rem",
@@ -397,7 +397,7 @@ function QuotationForm() {
                 <Typography
                   variant="body1"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     fontWeight: "medium",
                     color: "#333",
                   }}
@@ -407,7 +407,7 @@ function QuotationForm() {
                 <Typography
                   variant="body1"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     fontWeight: "medium",
                     color: "#333",
                   }}
@@ -429,10 +429,10 @@ function QuotationForm() {
                   sx={{
                     width: "200px",
                     "& .MuiInputBase-root": {
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                     },
                     "& .MuiInputLabel-root": {
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                     },
                   }}
                 />
@@ -445,7 +445,7 @@ function QuotationForm() {
                 color="error"
                 sx={{
                   mb: 4,
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   fontWeight: "bold",
                   textAlign: "center",
                   maxWidth: "100%",
@@ -461,7 +461,7 @@ function QuotationForm() {
                   variant="h6"
                   align="center"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     fontWeight: "bold",
                     color: "error",
                   }}
@@ -527,7 +527,7 @@ function QuotationForm() {
                               variant="body2"
                               sx={{
                                 color: "#666",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                               }}
                             >
                               No Image
@@ -539,7 +539,7 @@ function QuotationForm() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#000000",
                               textTransform: "uppercase",
                             }}
@@ -550,7 +550,7 @@ function QuotationForm() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#0a5",
                               textTransform: "uppercase",
                               mt: 1,
@@ -562,7 +562,7 @@ function QuotationForm() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#0a5",
                               textTransform: "uppercase",
                               mt: 1,
@@ -575,7 +575,7 @@ function QuotationForm() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#000000",
                               textTransform: "uppercase",
                               mb: 1,
@@ -596,7 +596,7 @@ function QuotationForm() {
                               <Typography
                                 variant="body2"
                                 sx={{
-                                  fontFamily: "Helvetica, sans-serif",
+                                  fontFamily: "Inter, sans-serif",
                                   color:
                                     pb.label === "Selected Requirements:" ||
                                     pb.label === "Selected Add-ons:" ||
@@ -618,7 +618,7 @@ function QuotationForm() {
                                 <Typography
                                   variant="body2"
                                   sx={{
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     fontWeight: "bold",
                                     color: "#000000",
                                     textAlign: "right",
@@ -642,7 +642,7 @@ function QuotationForm() {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                                 color: "#0a5",
                                 textTransform: "uppercase",
                               }}
@@ -653,7 +653,7 @@ function QuotationForm() {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                                 color: "#0a5",
                                 textTransform: "uppercase",
                                 textAlign: "right",
@@ -674,7 +674,7 @@ function QuotationForm() {
                       variant="subtitle1"
                       sx={{
                         fontWeight: "bold",
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color: "#0a5",
                         textTransform: "uppercase",
                       }}
@@ -701,7 +701,7 @@ function QuotationForm() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#333",
                             }}
                           >
@@ -711,7 +711,7 @@ function QuotationForm() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               fontWeight: "bold",
                               color: "#000000",
                             }}
@@ -729,7 +729,7 @@ function QuotationForm() {
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           color: "#0a5",
                           textTransform: "uppercase",
                         }}
@@ -740,7 +740,7 @@ function QuotationForm() {
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           color: "#0a5",
                           textTransform: "uppercase",
                         }}
@@ -775,7 +775,7 @@ function QuotationForm() {
                   fontSize: "0.9rem",
                   textTransform: "none",
                   borderRadius: "8px",
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   "&:hover": {
                     backgroundColor: "#1565c0",
                     transform: "scale(1.05)",
@@ -848,7 +848,7 @@ function QuotationForm() {
                     color="inherit"
                     size="small"
                     onClick={handleConfirmSubmit}
-                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                    sx={{ color: "white", fontFamily: "Inter, sans-serif" }}
                   >
                     Confirm
                   </Button>
@@ -856,7 +856,7 @@ function QuotationForm() {
                     color="inherit"
                     size="small"
                     onClick={handleCancelSubmit}
-                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                    sx={{ color: "white", fontFamily: "Inter, sans-serif" }}
                   >
                     Cancel
                   </Button>

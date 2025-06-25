@@ -42,7 +42,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-2px)",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(2),
   },
@@ -56,7 +56,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor: "#1565c0",
     transform: "scale(1.05)",
@@ -303,7 +303,7 @@ function Configurator({ navigateWithLoading }) {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -321,7 +321,7 @@ function Configurator({ navigateWithLoading }) {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
           }}
         >
@@ -359,7 +359,7 @@ function Configurator({ navigateWithLoading }) {
                 variant="h5"
                 sx={{
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   color: "#000000",
                   mb: 4,
                   textTransform: "uppercase",
@@ -413,7 +413,7 @@ function Configurator({ navigateWithLoading }) {
               <Typography
                 variant="subtitle1"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   color: "#333",
                   mb: 2,
                   letterSpacing: "0.5px",
@@ -425,7 +425,7 @@ function Configurator({ navigateWithLoading }) {
                 variant="subtitle1"
                 sx={{
                   fontWeight: "bold",
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   color: "#0a5",
                   textTransform: "uppercase",
                 }}
@@ -438,7 +438,7 @@ function Configurator({ navigateWithLoading }) {
                   variant="subtitle1"
                   sx={{
                     fontWeight: "bold",
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     color: "#000000",
                     textTransform: "uppercase",
                   }}
@@ -457,7 +457,7 @@ function Configurator({ navigateWithLoading }) {
                     <Typography
                       variant="body2"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color:
                           item.label === "Selected Requirements:" ||
                           item.label === "Selected Add-ons:" ||
@@ -478,7 +478,7 @@ function Configurator({ navigateWithLoading }) {
                       <Typography
                         variant="body2"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           fontWeight: "bold",
                           color: "#000000",
                         }}
@@ -494,7 +494,7 @@ function Configurator({ navigateWithLoading }) {
                     variant="subtitle1"
                     sx={{
                       fontWeight: "bold",
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       color: "#0a5",
                       textTransform: "uppercase",
                     }}
@@ -505,7 +505,7 @@ function Configurator({ navigateWithLoading }) {
                     variant="subtitle1"
                     sx={{
                       fontWeight: "bold",
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       color: "#0a5",
                       textTransform: "uppercase",
                     }}
@@ -539,7 +539,7 @@ function Configurator({ navigateWithLoading }) {
                     sx={{
                       mb: 3,
                       fontWeight: "bold",
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       textTransform: "uppercase",
                       color: "#000000",
                       position: "relative",
@@ -561,7 +561,7 @@ function Configurator({ navigateWithLoading }) {
                       variant="body1"
                       sx={{
                         mb: 4,
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color: "text.secondary",
                       }}
                     >
@@ -587,7 +587,7 @@ function Configurator({ navigateWithLoading }) {
                               <FormControl fullWidth>
                                 <InputLabel
                                   sx={{
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     fontWeight: "bold",
                                     color: "#2c3e50",
                                     fontSize: "14px",
@@ -614,7 +614,7 @@ function Configurator({ navigateWithLoading }) {
                                   }}
                                   error={showError && !selections[field.id]?.id}
                                   sx={{
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     fontSize: "14px",
                                     bgcolor: "#ffffff",
                                     borderRadius: "8px",
@@ -644,7 +644,7 @@ function Configurator({ navigateWithLoading }) {
                                   <MenuItem
                                     value=""
                                     sx={{
-                                      fontFamily: "Helvetica, sans-serif",
+                                      fontFamily: "Inter, sans-serif",
                                       fontSize: "14px",
                                     }}
                                   >
@@ -655,7 +655,7 @@ function Configurator({ navigateWithLoading }) {
                                       key={opt.id}
                                       value={opt.id}
                                       sx={{
-                                        fontFamily: "Helvetica, sans-serif",
+                                        fontFamily: "Inter, sans-serif",
                                         fontSize: "14px",
                                       }}
                                     >
@@ -693,7 +693,7 @@ function Configurator({ navigateWithLoading }) {
                           variant="body2"
                           sx={{
                             color: "#d32f2f",
-                            fontFamily: "Helvetica, sans-serif",
+                            fontFamily: "Inter, sans-serif",
                             mt: 2,
                             textAlign: "center",
                           }}
@@ -727,7 +727,7 @@ function Configurator({ navigateWithLoading }) {
                     sx={{
                       mb: 4,
                       fontWeight: "bold",
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       textTransform: "uppercase",
                       color: "#000000",
                       position: "relative",
@@ -755,7 +755,7 @@ function Configurator({ navigateWithLoading }) {
                               variant="subtitle2"
                               sx={{
                                 mb: 2,
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                                 fontWeight: "bold",
                                 textTransform: "uppercase",
                                 color: "#000000",
@@ -805,7 +805,7 @@ function Configurator({ navigateWithLoading }) {
                                     <Typography
                                       variant="body2"
                                       sx={{
-                                        fontFamily: "Helvetica, sans-serif",
+                                        fontFamily: "Inter, sans-serif",
                                         fontSize: "14px",
                                       }}
                                     >
@@ -838,7 +838,7 @@ function Configurator({ navigateWithLoading }) {
                       variant="body2"
                       sx={{
                         mb: 3,
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         fontSize: "14px",
                         color: "text.secondary",
                       }}

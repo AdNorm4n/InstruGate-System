@@ -43,7 +43,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-2px)",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   width: "100%",
   boxSizing: "border-box",
   [theme.breakpoints.down("sm")]: {
@@ -59,7 +59,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor: "#1565c0",
     transform: "scale(1.05)",
@@ -82,7 +82,7 @@ const DangerButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor: "#b32d2e",
     transform: "scale(1.05)",
@@ -289,7 +289,7 @@ function SelectedInstruments() {
           variant="h6"
           sx={{
             mt: 2,
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
             color: "#000000",
           }}
@@ -307,7 +307,7 @@ function SelectedInstruments() {
           variant="h6"
           color="error"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             fontWeight: "bold",
           }}
         >
@@ -349,7 +349,7 @@ function SelectedInstruments() {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -364,7 +364,7 @@ function SelectedInstruments() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -381,7 +381,7 @@ function SelectedInstruments() {
                   variant="h6"
                   color="error"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     fontWeight: "bold",
                     mb: 4,
                   }}
@@ -459,7 +459,7 @@ function SelectedInstruments() {
                       variant="subtitle1"
                       sx={{
                         fontWeight: "bold",
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color: "#0a5",
                         textTransform: "uppercase",
                       }}
@@ -486,7 +486,7 @@ function SelectedInstruments() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#333",
                             }}
                           >
@@ -496,7 +496,7 @@ function SelectedInstruments() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               fontWeight: "bold",
                               color: "#000000",
                             }}
@@ -514,7 +514,7 @@ function SelectedInstruments() {
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           color: "#0a5",
                           textTransform: "uppercase",
                         }}
@@ -525,7 +525,7 @@ function SelectedInstruments() {
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           color: "#0a5",
                           textTransform: "uppercase",
                         }}
@@ -594,7 +594,7 @@ function SelectedInstruments() {
                               variant="body2"
                               sx={{
                                 color: "#666",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                               }}
                             >
                               No Image
@@ -606,7 +606,7 @@ function SelectedInstruments() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#000000",
                               textTransform: "uppercase",
                             }}
@@ -617,7 +617,7 @@ function SelectedInstruments() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#0a5",
                               textTransform: "uppercase",
                               mt: 1,
@@ -637,7 +637,7 @@ function SelectedInstruments() {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                                 color: "#0a5",
                                 textTransform: "uppercase",
                               }}
@@ -665,7 +665,7 @@ function SelectedInstruments() {
                                 sx={{
                                   width: "100px",
                                   "& .MuiInputBase-root": {
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     fontSize: "1rem",
                                     borderRadius: "12px",
                                   },
@@ -695,7 +695,7 @@ function SelectedInstruments() {
                             variant="subtitle1"
                             sx={{
                               fontWeight: "bold",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#000000",
                               textTransform: "uppercase",
                               mb: 1,
@@ -716,7 +716,7 @@ function SelectedInstruments() {
                               <Typography
                                 variant="body2"
                                 sx={{
-                                  fontFamily: "Helvetica, sans-serif",
+                                  fontFamily: "Inter, sans-serif",
                                   color:
                                     pb.label === "Selected Requirements:" ||
                                     pb.label === "Selected Add-ons:" ||
@@ -738,7 +738,7 @@ function SelectedInstruments() {
                                 <Typography
                                   variant="body2"
                                   sx={{
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     fontWeight: "bold",
                                     color: "#000000",
                                     textAlign: "right",
@@ -762,7 +762,7 @@ function SelectedInstruments() {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                                 color: "#0a5",
                                 textTransform: "uppercase",
                               }}
@@ -773,7 +773,7 @@ function SelectedInstruments() {
                               variant="subtitle1"
                               sx={{
                                 fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif",
+                                fontFamily: "Inter, sans-serif",
                                 color: "#0a5",
                                 textTransform: "uppercase",
                                 textAlign: "right",
@@ -840,7 +840,7 @@ function SelectedInstruments() {
                       variant="subtitle1"
                       sx={{
                         fontWeight: "bold",
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color: "#0a5",
                         textTransform: "uppercase",
                       }}
@@ -867,7 +867,7 @@ function SelectedInstruments() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#333",
                             }}
                           >
@@ -877,7 +877,7 @@ function SelectedInstruments() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               fontWeight: "bold",
                               color: "#000000",
                             }}
@@ -895,7 +895,7 @@ function SelectedInstruments() {
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           color: "#0a5",
                           textTransform: "uppercase",
                         }}
@@ -906,7 +906,7 @@ function SelectedInstruments() {
                         variant="subtitle1"
                         sx={{
                           fontWeight: "bold",
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           color: "#0a5",
                           textTransform: "uppercase",
                         }}
@@ -970,7 +970,7 @@ function SelectedInstruments() {
                     color="inherit"
                     size="small"
                     onClick={handleConfirmClear}
-                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                    sx={{ color: "white", fontFamily: "Inter, sans-serif" }}
                   >
                     Confirm
                   </Button>
@@ -978,7 +978,7 @@ function SelectedInstruments() {
                     color="inherit"
                     size="small"
                     onClick={handleCancelClear}
-                    sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
+                    sx={{ color: "white", fontFamily: "Inter, sans-serif" }}
                   >
                     Cancel
                   </Button>

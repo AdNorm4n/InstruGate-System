@@ -23,7 +23,7 @@ const Footer = () => {
         sx={{
           color: "#ffffff",
           fontWeight: 500,
-          fontFamily: "'Inter', Helvetica, sans-serif",
+          fontFamily: "'Inter', sans-serif",
           px: { xs: 2, sm: 3 }, // Consistent padding with content
         }}
       >

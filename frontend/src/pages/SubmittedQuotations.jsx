@@ -67,7 +67,7 @@ const QuotationCard = styled(Card)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   width: "100%",
 }));
 
@@ -81,7 +81,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
   },
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   width: "100%",
 }));
 
@@ -90,7 +90,7 @@ const StatusButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   "& .MuiToggleButton-root": {
     textTransform: "none",
     fontWeight: 600,
-    fontFamily: "Helvetica, sans-serif",
+    fontFamily: "Inter, sans-serif",
     padding: theme.spacing(1.5, 4),
     borderRadius: "8px",
     border: "1px solid #e0e0e0",
@@ -120,7 +120,7 @@ const CTAButton = styled(Button)(({ theme, colorType }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor:
       colorType === "approve"
@@ -181,7 +181,7 @@ function SubmittedQuotations() {
         <Typography
           component="span"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             color: "#666",
             fontSize: "0.95rem",
           }}
@@ -219,7 +219,7 @@ function SubmittedQuotations() {
                 <Typography
                   component="span"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     color: "#333",
                     fontSize: "0.95rem",
                     flex: 1,
@@ -231,7 +231,7 @@ function SubmittedQuotations() {
                 <Typography
                   component="span"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     color: "#333",
                     fontSize: "0.95rem",
                     minWidth: "100px",
@@ -255,7 +255,7 @@ function SubmittedQuotations() {
         <Typography
           component="span"
           sx={{
-            fontFamily: "Helvetica, sans-serif",
+            fontFamily: "Inter, sans-serif",
             color: "#666",
             fontSize: "0.95rem",
           }}
@@ -293,7 +293,7 @@ function SubmittedQuotations() {
                 <Typography
                   component="span"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     color: "#333",
                     fontSize: "0.95rem",
                     flex: 1,
@@ -305,7 +305,7 @@ function SubmittedQuotations() {
                 <Typography
                   component="span"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     color: "#333",
                     fontSize: "0.95rem",
                     minWidth: "100px",
@@ -737,7 +737,7 @@ function SubmittedQuotations() {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 fontWeight: "bold",
                 color: "#000000",
                 textTransform: "uppercase",
@@ -752,7 +752,7 @@ function SubmittedQuotations() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif",
+                fontFamily: "Inter, sans-serif",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -778,7 +778,7 @@ function SubmittedQuotations() {
                 variant="h6"
                 align="center"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
+                  fontFamily: "Inter, sans-serif",
                   color: "#dc3545",
                   py: 4,
                   fontSize: "1.2rem",
@@ -794,7 +794,7 @@ function SubmittedQuotations() {
                       <Typography
                         variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif",
+                          fontFamily: "Inter, sans-serif",
                           fontWeight: "bold",
                           mb: 3,
                           textAlign: "center",
@@ -844,7 +844,7 @@ function SubmittedQuotations() {
                       variant="h6"
                       sx={{
                         textAlign: "center",
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         color: "#666",
                         py: 4,
                       }}
@@ -872,7 +872,7 @@ function SubmittedQuotations() {
                                   variant="h6"
                                   fontWeight="bold"
                                   sx={{
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     textTransform: "uppercase",
                                     color: "#333",
                                     fontSize: { xs: "1.2rem", sm: "1.5rem" },
@@ -886,7 +886,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="body2"
                                     sx={{
-                                      fontFamily: "Helvetica, sans-serif",
+                                      fontFamily: "Inter, sans-serif",
                                       fontWeight: "bold",
                                       color: getStatusColor(quotation.status),
                                       textTransform: "uppercase",
@@ -955,7 +955,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="subtitle1"
                                     sx={{
-                                      fontFamily: "Helvetica, sans-serif",
+                                      fontFamily: "Inter, sans-serif",
                                       fontWeight: "bold",
                                       color: "#555",
                                       mb: 2,
@@ -991,8 +991,7 @@ function SubmittedQuotations() {
                                             key={`detail-${index}`}
                                             variant="body1"
                                             sx={{
-                                              fontFamily:
-                                                "Helvetica, sans-serif",
+                                              fontFamily: "Inter, sans-serif",
                                               color: "#333",
                                               fontSize: "1rem",
                                             }}
@@ -1007,8 +1006,7 @@ function SubmittedQuotations() {
                                           <Typography
                                             variant="body1"
                                             sx={{
-                                              fontFamily:
-                                                "Helvetica, sans-serif",
+                                              fontFamily: "Inter, sans-serif",
                                               color: "#dc3545",
                                               fontSize: "1rem",
                                               wordBreak: "break-word",
@@ -1033,7 +1031,7 @@ function SubmittedQuotations() {
                                                     color: "#1976d2",
                                                     textDecoration: "underline",
                                                     fontFamily:
-                                                      "Helvetica, sans-serif",
+                                                      "Inter, sans-serif",
                                                   }}
                                                 >
                                                   View More
@@ -1047,8 +1045,7 @@ function SubmittedQuotations() {
                                           <Typography
                                             variant="body1"
                                             sx={{
-                                              fontFamily:
-                                                "Helvetica, sans-serif",
+                                              fontFamily: "Inter, sans-serif",
                                               color: "#dc3545",
                                               fontWeight: "bold",
                                               fontSize: "1rem",
@@ -1065,7 +1062,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="subtitle1"
                                     sx={{
-                                      fontFamily: "Helvetica, sans-serif",
+                                      fontFamily: "Inter, sans-serif",
                                       fontWeight: "bold",
                                       color: "#555",
                                       mb: 2,
@@ -1166,7 +1163,7 @@ function SubmittedQuotations() {
                                                   color="text.secondary"
                                                   sx={{
                                                     fontFamily:
-                                                      "Helvetica, sans-serif",
+                                                      "Inter, sans-serif",
                                                     fontSize: "0.9rem",
                                                   }}
                                                 >
@@ -1179,7 +1176,7 @@ function SubmittedQuotations() {
                                                 variant="body1"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif",
+                                                    "Inter, sans-serif",
                                                   fontWeight: "600",
                                                   color: "#333",
                                                   mb: 1,
@@ -1194,7 +1191,7 @@ function SubmittedQuotations() {
                                                 variant="body2"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif",
+                                                    "Inter, sans-serif",
                                                   color: "#666",
                                                   fontSize: "0.95rem",
                                                 }}
@@ -1206,7 +1203,7 @@ function SubmittedQuotations() {
                                                 variant="body2"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif",
+                                                    "Inter, sans-serif",
                                                   color: "#666",
                                                   fontSize: "0.95rem",
                                                 }}
@@ -1217,7 +1214,7 @@ function SubmittedQuotations() {
                                                 variant="body2"
                                                 sx={{
                                                   fontFamily:
-                                                    "Helvetica, sans-serif",
+                                                    "Inter, sans-serif",
                                                   color: "#666",
                                                   fontSize: "0.95rem",
                                                 }}
@@ -1233,7 +1230,7 @@ function SubmittedQuotations() {
                                       <Typography
                                         variant="body1"
                                         sx={{
-                                          fontFamily: "Helvetica, sans-serif",
+                                          fontFamily: "Inter, sans-serif",
                                           color: "#666",
                                           fontSize: "1rem",
                                         }}
@@ -1249,7 +1246,7 @@ function SubmittedQuotations() {
                                   <Typography
                                     variant="subtitle1"
                                     sx={{
-                                      fontFamily: "Helvetica, sans-serif",
+                                      fontFamily: "Inter, sans-serif",
                                       fontWeight: "bold",
                                       color: "#555",
                                       mb: 2,
@@ -1273,12 +1270,12 @@ function SubmittedQuotations() {
                                     sx={{
                                       mb: 2,
                                       "& .MuiInputBase-root": {
-                                        fontFamily: "Helvetica, sans-serif",
+                                        fontFamily: "Inter, sans-serif",
                                         borderRadius: "8px",
                                         fontSize: "1rem",
                                       },
                                       "& .MuiInputLabel-root": {
-                                        fontFamily: "Helvetica, sans-serif",
+                                        fontFamily: "Inter, sans-serif",
                                         fontSize: "1rem",
                                       },
                                     }}
@@ -1359,7 +1356,7 @@ function SubmittedQuotations() {
                 >
                   <DialogTitle
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       fontWeight: "bold",
                       color: "#1976d2",
                     }}
@@ -1369,7 +1366,7 @@ function SubmittedQuotations() {
                   <DialogContent>
                     <Typography
                       sx={{
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         whiteSpace: "pre-wrap",
                         wordBreak: "break-word",
                       }}
@@ -1404,7 +1401,7 @@ function SubmittedQuotations() {
                 >
                   <DialogTitle
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
+                      fontFamily: "Inter, sans-serif",
                       fontWeight: "bold",
                       color: "#1976d2",
                     }}
@@ -1422,7 +1419,7 @@ function SubmittedQuotations() {
                       >
                         <Typography
                           sx={{
-                            fontFamily: "Helvetica, sans-serif",
+                            fontFamily: "Inter, sans-serif",
                             color: "#333",
                             fontSize: "1rem",
                           }}
@@ -1434,7 +1431,7 @@ function SubmittedQuotations() {
                         </Typography>
                         <Typography
                           sx={{
-                            fontFamily: "Helvetica, sans-serif",
+                            fontFamily: "Inter, sans-serif",
                             color: "#333",
                             fontSize: "1rem",
                           }}
@@ -1444,7 +1441,7 @@ function SubmittedQuotations() {
                         </Typography>
                         <Typography
                           sx={{
-                            fontFamily: "Helvetica, sans-serif",
+                            fontFamily: "Inter, sans-serif",
                             color: "#333",
                             fontSize: "1rem",
                           }}
@@ -1454,7 +1451,7 @@ function SubmittedQuotations() {
                         </Typography>
                         <Typography
                           sx={{
-                            fontFamily: "Helvetica, sans-serif",
+                            fontFamily: "Inter, sans-serif",
                             color: "#333",
                             fontSize: "1rem",
                           }}
@@ -1467,7 +1464,7 @@ function SubmittedQuotations() {
                             component="div"
                             variant="subtitle1"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#333",
                               fontSize: "1rem",
                               fontWeight: "bold",
@@ -1483,7 +1480,7 @@ function SubmittedQuotations() {
                             component="div"
                             variant="subtitle1"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               color: "#333",
                               fontSize: "1rem",
                               fontWeight: "bold",
@@ -1566,7 +1563,7 @@ function SubmittedQuotations() {
                                     right: -25,
                                     color: "#fff",
                                     fontSize: "1.5rem",
-                                    fontFamily: "Helvetica, sans-serif",
+                                    fontFamily: "Inter, sans-serif",
                                     "&:hover": {
                                       color: "#d6393a",
                                     },
@@ -1627,7 +1624,7 @@ function SubmittedQuotations() {
                             onClick={handleConfirmApprove}
                             sx={{
                               color: "white",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
                             Confirm
@@ -1638,7 +1635,7 @@ function SubmittedQuotations() {
                             onClick={handleCancelApprove}
                             sx={{
                               color: "white",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
                             Cancel
@@ -1673,7 +1670,7 @@ function SubmittedQuotations() {
                             onClick={handleConfirmRejectAction}
                             sx={{
                               color: "white",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
                             Confirm
@@ -1684,7 +1681,7 @@ function SubmittedQuotations() {
                             onClick={handleCancelReject}
                             sx={{
                               color: "white",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
                             Cancel
@@ -1719,7 +1716,7 @@ function SubmittedQuotations() {
                             }
                             sx={{
                               color: "white",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
                             Confirm
@@ -1730,7 +1727,7 @@ function SubmittedQuotations() {
                             onClick={() => setOpenConfirmSubmit(null)}
                             sx={{
                               color: "white",
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
                             Cancel
