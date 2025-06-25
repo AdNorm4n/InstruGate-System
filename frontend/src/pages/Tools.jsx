@@ -24,17 +24,17 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const ToolButton = styled(Button)(({ theme, active }) => ({
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif !important",
   fontWeight: 600,
   textTransform: "uppercase",
   padding: theme.spacing(1, 3),
   margin: theme.spacing(0, 1),
   borderRadius: "8px",
   border: `2px solid ${active ? "#d6393a" : "#e0e0e0"}`,
-  backgroundColor: active ? "#d6393a" : "#ffffff",
-  color: active ? "#ffffff" : "#000000",
+  backgroundColor: active ? "#d6393a" : "#333333",
+  color: active ? "#ffffff" : "#ffffff",
   "&:hover": {
-    backgroundColor: active ? "#b53031" : "#f5f5f5",
+    backgroundColor: active ? "#b53031" : "#4b5563",
     borderColor: active ? "#b53031" : "#d6393a",
     transform: "scale(1.05)",
   },
@@ -49,7 +49,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "'Inter', sans-serif !important",
   "&:hover": {
     backgroundColor: "#1565c0",
     transform: "scale(1.05)",
@@ -71,7 +71,7 @@ const ResetButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif !important",
   "&:hover": {
     backgroundColor: "#d0d0d0",
     transform: "scale(1.05)",
@@ -81,12 +81,12 @@ const ResetButton = styled(Button)(({ theme }) => ({
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
-    fontFamily: "Helvetica, sans-serif !important",
+    fontFamily: "'Inter', sans-serif !important",
     fontSize: "0.9rem",
     height: "48px",
   },
   "& .MuiInputLabel-root": {
-    fontFamily: "Helvetica, sans-serif !important",
+    fontFamily: "'Inter', sans-serif !important",
     fontSize: "0.9rem",
     transform: "translate(14px, 14px) scale(1)",
     "&.MuiInputLabel-shrink": {
@@ -112,7 +112,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 const ToolCard = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
-  backgroundColor: "#ffffff",
+  backgroundColor: "#333333",
   borderRadius: "16px",
   boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -120,7 +120,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif !important",
 }));
 
 function Tools() {
@@ -559,22 +559,22 @@ function Tools() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          backgroundColor: "#f8f9fa",
-          fontFamily: "Helvetica, sans-serif !important",
+          backgroundColor: "#000000",
+          fontFamily: "'Inter', sans-serif !important",
         }}
       >
         <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="lg" sx={{ py: 6, mt: 8 }}>
+          <Container maxWidth="lg" sx={{ py: 4, mt: 2 }}>
             <Typography
               variant="h6"
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "'Inter', sans-serif !important",
                 fontWeight: "bold",
                 textTransform: "uppercase",
-                color: "#000000",
+                color: "#ffffff",
                 mb: 4,
                 fontSize: { xs: "1.5rem", md: "2rem" },
               }}
@@ -585,8 +585,8 @@ function Tools() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
-                color: "#333",
+                fontFamily: "'Inter', sans-serif !important",
+                color: "#ffffff",
                 mb: 6,
                 fontSize: "0.9rem",
               }}
@@ -617,14 +617,14 @@ function Tools() {
 
             <ToolCard>
               {activeTool === "unitConverter" && (
-                <Box className="tool-container">
+                <Box className="tool">
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
-                      color: "#000000",
+                      color: "#ffffff",
                       textTransform: "uppercase",
                       fontSize: "1.25rem",
                     }}
@@ -656,7 +656,7 @@ function Tools() {
                         <MenuItem value="bar">Bar</MenuItem>
                         <MenuItem value="kPa">kPa</MenuItem>
                         <MenuItem value="MPa">MPa</MenuItem>
-                        <MenuItem value="atm">Atm</MenuItem>
+                        <MenuItem value="atm">atm</MenuItem>
                         <MenuItem value="C">°C</MenuItem>
                         <MenuItem value="F">°F</MenuItem>
                         <MenuItem value="K">K</MenuItem>
@@ -678,7 +678,7 @@ function Tools() {
                         <MenuItem value="bar">Bar</MenuItem>
                         <MenuItem value="kPa">kPa</MenuItem>
                         <MenuItem value="MPa">MPa</MenuItem>
-                        <MenuItem value="atm">Atm</MenuItem>
+                        <MenuItem value="atm">atm</MenuItem>
                         <MenuItem value="C">°C</MenuItem>
                         <MenuItem value="F">°F</MenuItem>
                         <MenuItem value="K">K</MenuItem>
@@ -713,9 +713,9 @@ function Tools() {
                     <Typography
                       sx={{
                         mt: 3,
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "'Inter', sans-serif !important",
                         fontWeight: "bold",
-                        color: "#333",
+                        color: "#ffffff",
                         fontSize: "0.9rem",
                       }}
                     >
@@ -728,9 +728,10 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                       fontSize: "0.85rem",
-                      backgroundColor: "#e3f2fd",
+                      backgroundColor: "#1e3a8a",
+                      color: "#ffffff",
                     }}
                   >
                     This guide is for general information only. Consult project
@@ -739,14 +740,14 @@ function Tools() {
                 </Box>
               )}
               {activeTool === "wakeFrequency" && (
-                <Box className="tool-container">
+                <Box className="tool">
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
-                      color: "#000000",
+                      color: "#ffffff",
                       textTransform: "uppercase",
                       fontSize: "1.25rem",
                     }}
@@ -767,7 +768,7 @@ function Tools() {
                           Metric (mm, m/s, kg/m³)
                         </MenuItem>
                         <MenuItem value="imperial">
-                          Imperial (in, ft/s, lb/ft³)
+                          Imperial (cm, ft/s, lb/ft³)
                         </MenuItem>
                       </StyledTextField>
                     </Grid>
@@ -777,7 +778,7 @@ function Tools() {
                         label={
                           wakeUnitSystem === "metric"
                             ? "Pipe Diameter (mm)"
-                            : "Pipe Diameter (in)"
+                            : "Pipe Diameter (cm)"
                         }
                         value={pipeDiameter}
                         onChange={(e) => setPipeDiameter(e.target.value)}
@@ -822,7 +823,7 @@ function Tools() {
                         label={
                           wakeUnitSystem === "metric"
                             ? "Thermowell Diameter (mm)"
-                            : "Thermowell Diameter (in)"
+                            : "Thermowell Diameter (cm)"
                         }
                         value={thermowellDiameter}
                         onChange={(e) => setThermowellDiameter(e.target.value)}
@@ -837,7 +838,7 @@ function Tools() {
                         label={
                           wakeUnitSystem === "metric"
                             ? "Thermowell Length (mm)"
-                            : "Thermowell Length (in)"
+                            : "Thermowell Length (cm)"
                         }
                         value={thermowellLength}
                         onChange={(e) => setThermowellLength(e.target.value)}
@@ -867,7 +868,7 @@ function Tools() {
                       setWakeResult(null);
                     }}
                     sx={{ mt: 3 }}
-                    aria-label="Reset"
+                    aria-label="Adjust"
                   >
                     Reset
                   </ResetButton>
@@ -877,7 +878,8 @@ function Tools() {
                         <Typography
                           color="error"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif !important",
+                            color: "#ffffff",
                             fontSize: "0.9rem",
                           }}
                         >
@@ -886,9 +888,9 @@ function Tools() {
                       ) : (
                         <Typography
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif !important",
                             fontWeight: "bold",
-                            color: "#333",
+                            color: "#ffffff",
                             fontSize: "0.9rem",
                           }}
                         >
@@ -898,10 +900,7 @@ function Tools() {
                           Natural Frequency: {wakeResult.naturalFrequency}{" "}
                           {wakeResult.unit}
                           <br />
-                          Status:{" "}
-                          {wakeResult.isSafe
-                            ? "Safe"
-                            : "Unsafe (frequency too high)"}
+                          Status: {wakeResult.isSafe ? "Safe" : "Unsafe"}
                         </Typography>
                       )}
                     </Box>
@@ -910,25 +909,27 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
+                      backgroundColor: "#1e3a8a",
+                      color: "#ffffff",
                       fontSize: "0.85rem",
-                      backgroundColor: "#e3f2fd",
                     }}
                   >
-                    This guide is for general information only. Consult project
-                    proposal engineers for critical applications.
+                    Alert. This guide is intended for general information only.
+                    Consult with project proposal engineers for critical
+                    applications.
                   </Alert>
                 </Box>
               )}
               {activeTool === "materialSelection" && (
-                <Box className="tool-container">
+                <Box className="tool">
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
-                      color: "#000000",
+                      color: "#ffffff",
                       textTransform: "uppercase",
                       fontSize: "1.25rem",
                     }}
@@ -949,7 +950,7 @@ function Tools() {
                           PaperProps: {
                             sx: {
                               minWidth: "200px !important",
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "'Inter', sans-serif !important",
                             },
                           },
                         }}
@@ -983,7 +984,7 @@ function Tools() {
                           PaperProps: {
                             sx: {
                               minWidth: "200px !important",
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "'Inter', sans-serif !important",
                             },
                           },
                         }}
@@ -1017,30 +1018,31 @@ function Tools() {
                         <Typography
                           color="error"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif !important",
+                            color: "#ffffff",
                             fontSize: "0.9rem",
                           }}
                         >
                           {materialResult.error}
                         </Typography>
                       ) : (
-                        <Table sx={{ border: "1px solid #e0e0e0" }}>
+                        <Table sx={{ border: "1px solid #ffffff" }}>
                           <TableHead>
                             <TableRow>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   fontWeight: "bold",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Material
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   fontWeight: "bold",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Compatibility
@@ -1054,14 +1056,15 @@ function Tools() {
                                   key={material}
                                   sx={{
                                     backgroundColor:
-                                      index % 2 === 0 ? "#f9f9f9" : "#ffffff",
+                                      index % 2 === 0 ? "#4b5563" : "#333333",
                                   }}
                                 >
                                   <TableCell
                                     sx={{
                                       fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                        "'Inter', sans-serif !important",
                                       padding: "12px",
+                                      color: "#ffffff",
                                     }}
                                   >
                                     {material}
@@ -1069,8 +1072,9 @@ function Tools() {
                                   <TableCell
                                     sx={{
                                       fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                        "'Inter', sans-serif !important",
                                       padding: "12px",
+                                      color: "#ffffff",
                                     }}
                                   >
                                     {rating}
@@ -1087,25 +1091,27 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
+                      backgroundColor: "#1e3a8a",
+                      color: "#ffffff",
                       fontSize: "0.85rem",
-                      backgroundColor: "#e3f2fd",
                     }}
                   >
-                    This guide is for general information only. Consult project
-                    proposal engineers for critical applications.
+                    Alert. This guide is intended for general information only.
+                    Consult with project proposal engineers for critical
+                    applications.
                   </Alert>
                 </Box>
               )}
               {activeTool === "pipeSizing" && (
-                <Box className="tool-container">
+                <Box className="tool">
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
-                      color: "#000000",
+                      color: "#ffffff",
                       textTransform: "uppercase",
                       fontSize: "1.25rem",
                     }}
@@ -1150,7 +1156,7 @@ function Tools() {
                         label={
                           pipeUnitSystem === "metric"
                             ? "Flow Rate (m³/h)"
-                            : "Flow Rate (GPM)"
+                            : "Flow Rate (mph)"
                         }
                         value={flowRate}
                         onChange={(e) => setFlowRate(e.target.value)}
@@ -1160,7 +1166,7 @@ function Tools() {
                         inputProps={{ min: 0 }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={6}>
                       <StyledTextField
                         type="number"
                         label={
@@ -1176,13 +1182,13 @@ function Tools() {
                         inputProps={{ min: 0 }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={6}>
                       <StyledTextField
                         type="number"
                         label={
                           pipeUnitSystem === "metric"
-                            ? "Allowable Pressure Drop (bar)"
-                            : "Allowable Pressure Drop (psi)"
+                            ? "Acceptable Pressure Drop (bar)"
+                            : "Acceptable Pressure Drop (psi)"
                         }
                         value={pressureDrop}
                         onChange={(e) => setPressureDrop(e.target.value)}
@@ -1232,30 +1238,31 @@ function Tools() {
                         <Typography
                           color="error"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif !important",
+                            color: "#ffffff",
                             fontSize: "0.9rem",
                           }}
                         >
                           {pipeResult.error}
                         </Typography>
                       ) : (
-                        <Table sx={{ border: "1px solid #e0e0e0" }}>
+                        <Table sx={{ border: "1px solid #ffffff" }}>
                           <TableHead>
                             <TableRow>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   fontWeight: "bold",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Parameter
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   fontWeight: "bold",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Value
@@ -1263,102 +1270,102 @@ function Tools() {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
+                            <TableRow sx={{ backgroundColor: "#4b5563" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Pipe Diameter
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 {pipeResult.diameter} {pipeResult.unit}
                               </TableCell>
                             </TableRow>
-                            <TableRow>
+                            <TableRow sx={{ backgroundColor: "#333333" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Pressure Drop
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 {pipeResult.pressureDrop}{" "}
                                 {pipeUnitSystem === "metric" ? "bar" : "psi"}
                               </TableCell>
                             </TableRow>
-                            <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
+                            <TableRow sx={{ backgroundColor: "#4b5563" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Fluid
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 {pipeResult.fluid}
                               </TableCell>
                             </TableRow>
-                            <TableRow>
+                            <TableRow sx={{ backgroundColor: "#333333" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Recommended Schedule
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 {pipeResult.schedule}
                               </TableCell>
                             </TableRow>
-                            <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
+                            <TableRow sx={{ backgroundColor: "#4b5563" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 Status
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "'Inter', sans-serif !important",
                                   padding: "12px",
+                                  color: "#ffffff",
                                 }}
                               >
                                 {pipeResult.isFeasible
@@ -1375,13 +1382,15 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
+                      backgroundColor: "#1e3a8a",
+                      color: "#ffffff",
                       fontSize: "0.85rem",
-                      backgroundColor: "#e3f2fd",
                     }}
                   >
-                    This guide is for general information only. Consult project
-                    proposal engineers for critical applications.
+                    Alert. This guide is intended for general information only.
+                    Consult with project proposal engineers for critical
+                    applications.
                   </Alert>
                 </Box>
               )}
