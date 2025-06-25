@@ -633,7 +633,7 @@ function About() {
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
                   sx={{
-                    color: "#3b82f6",
+                    color: "#3b82f6 !important",
                     backgroundColor: "#333333",
                     "&:hover": {
                       color: "#3b82f6 !important",
