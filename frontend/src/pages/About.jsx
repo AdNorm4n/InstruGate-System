@@ -68,7 +68,7 @@ const Section = styled(Box)(({ theme }) => ({
 
 const HeaderSection = styled(Box)(({ theme }) => ({
   textAlign: "center",
-  padding: theme.spacing(6, 0),
+  padding: theme.spacing(8, 0),
   marginBottom: theme.spacing(4),
   fontFamily: "'Inter', sans-serif !important",
 }));
@@ -76,7 +76,7 @@ const HeaderSection = styled(Box)(({ theme }) => ({
 const ProductCard = styled(Card)(({ theme }) => ({
   height: "100%",
   width: "100%",
-  maxWidth: "400px",
+  maxWidth: "450px",
   display: "flex",
   flexDirection: "column",
   backgroundColor: "#2d2d2d",
@@ -131,25 +131,15 @@ function About() {
             }}
           >
             <HeaderSection>
-              <Box
-                component="img"
-                src={companylogo}
-                alt="Company Logo"
-                sx={{
-                  maxWidth: { xs: 300, md: 400 },
-                  mb: 4,
-                  display: "block",
-                  margin: "0 auto",
-                  filter: "brightness(1.1)",
-                }}
-              />
               <Typography
                 variant="h4"
                 align="center"
+                gutterBottom
                 sx={{
                   fontWeight: 700,
                   color: "#ffffff",
                   fontFamily: "'Inter', sans-serif",
+                  mb: 5,
                   fontSize: { xs: "1.75rem", md: "2.25rem" },
                   letterSpacing: "-0.02em",
                   textTransform: "none",
@@ -170,6 +160,19 @@ function About() {
               >
                 About Rueger Sdn. Bhd.
               </Typography>
+              <Box
+                component="img"
+                src={companylogo}
+                alt="Company Logo"
+                sx={{
+                  maxWidth: { xs: 300, md: 400 },
+                  mt: 2,
+                  mb: 4,
+                  display: "block",
+                  margin: "0 auto",
+                  filter: "brightness(1.1)",
+                }}
+              />
             </HeaderSection>
 
             <Section>
@@ -179,7 +182,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 3,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -190,7 +193,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  color: "#d1d5db",
+                  color: "#ffffff",
                   fontSize: "0.95rem",
                   lineHeight: 1.7,
                 }}
@@ -217,7 +220,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 3,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -228,7 +231,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  color: "#d1d5db",
+                  color: "#ffffff",
                   fontSize: "0.95rem",
                   lineHeight: 1.7,
                 }}
@@ -256,7 +259,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 4,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   fontSize: "1.5rem",
                   letterSpacing: "0.02em",
                 }}
@@ -271,7 +274,7 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "200px",
+                          height: "250px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
@@ -303,7 +306,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#d1d5db",
+                          color: "#ffffff",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -341,7 +344,7 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "200px",
+                          height: "250px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
@@ -373,7 +376,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#d1d5db",
+                          color: "#ffffff",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -395,7 +398,7 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "200px",
+                          height: "250px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
@@ -427,7 +430,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#d1d5db",
+                          color: "#ffffff",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -447,7 +450,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   mt: 3,
                   display: "block",
-                  color: "#d1d5db",
+                  color: "#ffffff",
                   fontSize: "0.9rem",
                   lineHeight: 1.6,
                 }}
@@ -464,7 +467,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 3,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
@@ -475,7 +478,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
-                  color: "#d1d5db",
+                  color: "#ffffff",
                   fontSize: "0.95rem",
                   lineHeight: 1.7,
                 }}
@@ -494,7 +497,7 @@ function About() {
                   fontFamily: "'Inter', sans-serif !important",
                   fontWeight: 600,
                   mb: 4,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   fontSize: "1.25rem",
                   letterSpacing: "0.02em",
                 }}
