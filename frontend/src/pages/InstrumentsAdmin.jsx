@@ -1822,7 +1822,8 @@ const InstrumentsAdmin = () => {
           sx={{
             minWidth: 650,
             borderCollapse: "separate",
-            borderSpacing: "0 12px",
+            borderSpacing: "0 8px",
+            bgcolor: "#1a1a1a",
           }}
         >
           <TableHead>
@@ -1833,12 +1834,14 @@ const InstrumentsAdmin = () => {
                   sx={{
                     fontWeight: 600,
                     fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#2a2a2a",
-                    color: "#ffffff", // White for column headers
+                    bgcolor: "#252525",
+                    color: "#ffffff",
                     fontSize: "0.9rem",
-                    py: 2.5,
-                    px: 4,
+                    py: 2,
+                    px: 3,
                     border: "none",
+                    width: field === "id" ? "80px" : "1fr",
+                    textAlign: field === "id" ? "center" : "left",
                     "&:first-of-type": {
                       borderTopLeftRadius: "8px",
                       borderBottomLeftRadius: "8px",
@@ -1849,37 +1852,21 @@ const InstrumentsAdmin = () => {
                     },
                   }}
                 >
-                  <TableSortLabel
-                    active={sortConfig.field === field}
-                    direction={
-                      sortConfig.field === field ? sortConfig.direction : "asc"
-                    }
-                    onClick={() => handleSort(field)}
-                    sx={{
-                      color: "#ffffff !important",
-                      fontFamily: "'Inter', sans-serif",
-                      "& .MuiTableSortLabel-icon": {
-                        color: "#93c5fd !important",
-                      },
-                      "&:hover": {
-                        color: "#e5e7eb !important", // Light gray on hover for contrast
-                      },
-                    }}
-                  >
-                    {tab.displayFields[field] || field.toUpperCase()}
-                  </TableSortLabel>
+                  {tab.displayFields[field] || field.toUpperCase()}
                 </TableCell>
               ))}
               <TableCell
                 sx={{
                   fontWeight: 600,
                   fontFamily: "'Inter', sans-serif",
-                  bgcolor: "#2a2a2a",
-                  color: "#ffffff", // White for Actions header
+                  bgcolor: "#252525",
+                  color: "#ffffff",
                   fontSize: "0.9rem",
-                  py: 2.5,
-                  px: 4,
+                  py: 2,
+                  px: 3,
                   border: "none",
+                  width: "120px",
+                  textAlign: "center",
                   borderTopRightRadius: "8px",
                   borderBottomRightRadius: "8px",
                 }}
@@ -1897,9 +1884,10 @@ const InstrumentsAdmin = () => {
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     color: "#9ca3af",
-                    py: 5,
+                    py: 4,
                     fontSize: "0.95rem",
                     border: "none",
+                    bgcolor: "#1a1a1a",
                   }}
                 >
                   <Typography
@@ -1914,12 +1902,11 @@ const InstrumentsAdmin = () => {
                 <TableRow
                   key={item.id}
                   sx={{
-                    bgcolor: "#252525",
+                    bgcolor: "#2d2d2d",
                     "&:hover": {
-                      bgcolor: "#2f2f2f",
-                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                      bgcolor: "#333333",
                     },
-                    transition: "background-color 0.3s, box-shadow 0.3s",
+                    transition: "background-color 0.2s",
                     borderRadius: "8px",
                   }}
                 >
@@ -1930,9 +1917,11 @@ const InstrumentsAdmin = () => {
                         fontFamily: "'Inter', sans-serif",
                         fontSize: "0.9rem",
                         color: "#ffffff",
-                        py: 2.5,
-                        px: 4,
+                        py: 2,
+                        px: 3,
                         border: "none",
+                        width: field === "id" ? "80px" : "1fr",
+                        textAlign: field === "id" ? "center" : "left",
                         ...(field === "is_available" &&
                           tab.name === ENTITY_TYPES.INSTRUMENTS && {
                             color: item[field] ? "#22c55e" : "#ef4444",
@@ -1947,10 +1936,10 @@ const InstrumentsAdmin = () => {
                               src={item[field]}
                               alt={item.name || "Instrument"}
                               style={{
-                                width: "48px",
-                                height: "48px",
+                                width: "40px",
+                                height: "40px",
                                 objectFit: "cover",
-                                borderRadius: "6px",
+                                borderRadius: "4px",
                                 border: "1px solid #4b5563",
                               }}
                               onError={(e) => {
@@ -1995,7 +1984,9 @@ const InstrumentsAdmin = () => {
                       )}
                     </TableCell>
                   ))}
-                  <TableCell sx={{ py: 2.5, px: 4, border: "none" }}>
+                  <TableCell
+                    sx={{ py: 2, px: 3, border: "none", width: "120px" }}
+                  >
                     <IconButton
                       onClick={() => openEditModal(item)}
                       disabled={userRole !== "admin"}
