@@ -25,18 +25,16 @@ import UsersAdmin from "./pages/UsersAdmin";
 import InstrumentsAdmin from "./pages/InstrumentsAdmin";
 import QuotationsAdmin from "./pages/QuotationsAdmin";
 import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
 import ChatComponent from "./components/ChatComponent";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { UserProvider } from "./contexts/UserContext";
-import Menubar from "./components/Menubar";
-import ToolbarMenu from "./components/ToolbarMenu";
 
 const Layout = () => {
   return (
     <>
-      <Menubar /> {/* was <Appbar /> */}
-      <ToolbarMenu />
+      <Navbar />
       <Outlet />
       <Footer />
       <ChatComponent />
