@@ -2,16 +2,14 @@
   font-family: "Helvetica, sans-serif";
   background-color: #f8f9fa;
   box-sizing: border-box;
-  margin-top: 30px;
-  min-height: 100vh; /* ensures it fills the full screen height */
-  overflow-y: auto; /* enables scrolling if content exceeds viewport */
+  margin-top: 75px;
   display: flex;
   flex-direction: column;
 }
 
 .home-hero {
   text-align: center;
-  padding: 80px 24px;
+  padding: 120px;
   background-image: url("../assets/gas.jpg");
   background-size: contain;
   background-position: center;
@@ -74,12 +72,12 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
+.role-card .MuiCardContent-root,
 .product-card .MuiCardContent-root {
-  overflow-y: auto;
   padding-right: 8px;
 }
 
-.about-page .product-image-wrapper {
+.product-image-wrapper {
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
   padding: 16px;
@@ -97,7 +95,8 @@
   object-fit: contain;
 }
 
-.product-card .MuiCardContent-root::-webkit-scrollbar {
+.product-card .MuiCardContent-root::-webkit-scrollbar,
+.role-card .MuiCardContent-root::-webkit-scrollbar {
   width: 6px;
 }
 
