@@ -2482,7 +2482,7 @@ const InstrumentsAdmin = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       sx={{
-                        width: { xs: "100%", sm: "50%" }, // Increased search field width
+                        width: { xs: "100%", sm: "50%" },
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
                           fontFamily: "'Inter', sans-serif",
@@ -2508,7 +2508,7 @@ const InstrumentsAdmin = () => {
                         ENTITY_TYPES.CONFIGURABLE_FIELDS ||
                       tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
                       <FormControl
-                        sx={{ width: { xs: "100%", sm: "24%" } }} // Reduced filter width to match button
+                        sx={{ width: { xs: "100%", sm: "24%" } }}
                         size="small"
                       >
                         <InputLabel
@@ -2634,14 +2634,11 @@ const InstrumentsAdmin = () => {
                           bgcolor: "#4b5563",
                           color: "#9ca3af",
                         },
-                        width: { xs: "100%", sm: "24%" }, // Matched button width to filter
+                        width: { xs: "100%", sm: "24%" },
                         minWidth: { xs: "100%", sm: "180px" },
                       }}
                     >
-                      Add{" "}
-                      {tabs[activeTab].name === "Categories"
-                        ? "Category"
-                        : tabs[activeTab].name.slice(0, -1)}
+                      +Add More
                     </CTAButton>
                   </Box>
                   Changes Made: Filter Dropdown Width
