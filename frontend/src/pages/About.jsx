@@ -294,7 +294,6 @@ function About() {
                         <br />
                         • Digital Gauges
                         <br />
-                        <br />
                         • Differential Gauges
                         <br />
                         • Pressure Switches
@@ -308,7 +307,6 @@ function About() {
                         • Isolation Rings
                         <br />
                         • Flanged Seals
-                        <br />
                         <br />• Accessories
                       </Typography>
                     </CardContent>
@@ -363,7 +361,9 @@ function About() {
                       >
                         • Thermometers
                         <br />
+                        • Bimetal Thermometers
                         <br />
+                        • Gas Actuated Thermometers
                         <br />• Thermowells
                       </Typography>
                     </CardContent>
@@ -418,8 +418,8 @@ function About() {
                       >
                         • Test Gauges
                         <br />
-                        <br />
-                        <br />• Services
+                        • Calibration & Repair
+                        <br />• Technical Support & Training
                       </Typography>
                     </CardContent>
                   </ProductCard>
