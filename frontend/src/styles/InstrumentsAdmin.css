@@ -73,11 +73,6 @@ body {
   margin: 0; /* Remove margins */
 }
 
-/* Style alert icons to be white */
-.instruments-admin-page .MuiSnackbar-root .MuiAlert-root .MuiAlert-icon {
-  color: #ffffff !important;
-}
-
 /* Prevent overflow in TextField and FormControl */
 .instruments-admin-page .MuiTextField-root,
 .instruments-admin-page .MuiFormControl-root {
