@@ -1130,32 +1130,16 @@ const QuotationsAdmin = () => {
   if (contextLoading || loading) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
-          <Container maxWidth="lg">
-            <Box
-              sx={{
-                maxWidth: 400,
-                mx: "auto",
-                textAlign: "center",
-                mt: 8,
-                p: 4,
-                borderRadius: "16px",
-                bgcolor: "#1e1e1e",
-              }}
-            >
-              <CircularProgress size={48} sx={{ color: "#3b82f6", mb: 2 }} />
-              <Typography
-                variant="h6"
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 600,
-                  color: "#ffffff",
-                }}
-              >
-                Loading data...
-              </Typography>
-            </Box>
-          </Container>
+        <Box
+          sx={{
+            minHeight: "100vh",
+            bgcolor: "#0f172a",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress size={48} sx={{ color: "#60a5fa" }} />
         </Box>
       </Fade>
     );
