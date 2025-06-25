@@ -2367,7 +2367,7 @@ const InstrumentsAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "Inter, sans-serif !important",
                     width: "100%",
                     color: "white",
                     backgroundColor: "#28a745",
@@ -2393,7 +2393,7 @@ const InstrumentsAdmin = () => {
                 <Alert
                   severity="error"
                   onClose={() => setError("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{ fontFamily: "Inter, sans-serif !important" }}
                 >
                   {error}
                 </Alert>
