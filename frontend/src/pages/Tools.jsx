@@ -30,9 +30,9 @@ const ToolButton = styled(Button)(({ theme, active }) => ({
   padding: theme.spacing(1, 3),
   margin: theme.spacing(0, 1),
   borderRadius: "8px",
-  border: `2px solid ${active ? "#d6393a" : "#e0e0e0"}`,
+  border: `2px solid ${active ? "#d6393a" : "#ffffff"}`,
   backgroundColor: active ? "#d6393a" : "#333333",
-  color: active ? "#ffffff" : "#ffffff",
+  color: "#ffffff",
   "&:hover": {
     backgroundColor: active ? "#b53031" : "#4b5563",
     borderColor: active ? "#b53031" : "#d6393a",
@@ -55,7 +55,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
     transform: "scale(1.05)",
   },
   "&.Mui-disabled": {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#4b5563",
     color: "#999",
   },
   transition: "all 0.3s ease",
@@ -65,15 +65,15 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 const ResetButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#e0e0e0",
-  color: "#333",
+  backgroundColor: "#4b5563",
+  color: "#ffffff",
   padding: theme.spacing(1.5, 4),
   fontWeight: 600,
   textTransform: "none",
   borderRadius: "8px",
   fontFamily: "'Inter', sans-serif !important",
   "&:hover": {
-    backgroundColor: "#d0d0d0",
+    backgroundColor: "#6b7280",
     transform: "scale(1.05)",
   },
   transition: "all 0.3s ease",
@@ -84,26 +84,46 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     fontFamily: "'Inter', sans-serif !important",
     fontSize: "0.9rem",
     height: "48px",
+    color: "#ffffff",
+    backgroundColor: "#333333",
+  },
+  "& .MuiInputBase-input::placeholder": {
+    color: "#ffffff",
+    opacity: 0.7,
   },
   "& .MuiInputLabel-root": {
     fontFamily: "'Inter', sans-serif !important",
     fontSize: "0.9rem",
+    color: "#ffffff",
     transform: "translate(14px, 14px) scale(1)",
     "&.MuiInputLabel-shrink": {
       transform: "translate(14px, -6px) scale(0.75)",
+      color: "#ffffff",
     },
   },
   "& .MuiOutlinedInput-root": {
     borderRadius: "8px",
+    "& fieldset": {
+      borderColor: "#ffffff",
+    },
     "&:hover fieldset": {
       borderColor: "#d6393a",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#d4a017",
+      borderColor: "#ffffff",
     },
   },
   "& .MuiSelect-select": {
     padding: "12px 14px",
+    color: "#ffffff",
+  },
+  "& .MuiMenuItem-root": {
+    fontFamily: "'Inter', sans-serif !important",
+    color: "#ffffff",
+    backgroundColor: "#333333",
+    "&:hover": {
+      backgroundColor: "#4b5563",
+    },
   },
   "&.material-selection-field": {
     minWidth: "200px",
@@ -732,6 +752,9 @@ function Tools() {
                       fontSize: "0.85rem",
                       backgroundColor: "#1e3a8a",
                       color: "#ffffff",
+                      "& .MuiAlert-icon": {
+                        color: "#ffffff",
+                      },
                     }}
                   >
                     This guide is for general information only. Consult project
@@ -868,7 +891,7 @@ function Tools() {
                       setWakeResult(null);
                     }}
                     sx={{ mt: 3 }}
-                    aria-label="Adjust"
+                    aria-label="Reset"
                   >
                     Reset
                   </ResetButton>
@@ -876,7 +899,6 @@ function Tools() {
                     <Box sx={{ mt: 3 }}>
                       {wakeResult.error ? (
                         <Typography
-                          color="error"
                           sx={{
                             fontFamily: "'Inter', sans-serif !important",
                             color: "#ffffff",
@@ -910,9 +932,12 @@ function Tools() {
                     sx={{
                       mt: 3,
                       fontFamily: "'Inter', sans-serif !important",
+                      fontSize: "0.85rem",
                       backgroundColor: "#1e3a8a",
                       color: "#ffffff",
-                      fontSize: "0.85rem",
+                      "& .MuiAlert-icon": {
+                        color: "#ffffff",
+                      },
                     }}
                   >
                     Alert. This guide is intended for general information only.
@@ -951,6 +976,7 @@ function Tools() {
                             sx: {
                               minWidth: "200px !important",
                               fontFamily: "'Inter', sans-serif !important",
+                              backgroundColor: "#333333",
                             },
                           },
                         }}
@@ -985,6 +1011,7 @@ function Tools() {
                             sx: {
                               minWidth: "200px !important",
                               fontFamily: "'Inter', sans-serif !important",
+                              backgroundColor: "#333333",
                             },
                           },
                         }}
@@ -1016,7 +1043,6 @@ function Tools() {
                     <Box sx={{ mt: 3 }}>
                       {materialResult.error ? (
                         <Typography
-                          color="error"
                           sx={{
                             fontFamily: "'Inter', sans-serif !important",
                             color: "#ffffff",
@@ -1026,9 +1052,14 @@ function Tools() {
                           {materialResult.error}
                         </Typography>
                       ) : (
-                        <Table sx={{ border: "1px solid #ffffff" }}>
+                        <Table
+                          sx={{
+                            border: "1px solid #ffffff",
+                            backgroundColor: "#333333",
+                          }}
+                        >
                           <TableHead>
-                            <TableRow>
+                            <TableRow sx={{ backgroundColor: "#4b5563" }}>
                               <TableCell
                                 sx={{
                                   fontFamily: "'Inter', sans-serif !important",
@@ -1092,9 +1123,12 @@ function Tools() {
                     sx={{
                       mt: 3,
                       fontFamily: "'Inter', sans-serif !important",
+                      fontSize: "0.85rem",
                       backgroundColor: "#1e3a8a",
                       color: "#ffffff",
-                      fontSize: "0.85rem",
+                      "& .MuiAlert-icon": {
+                        color: "#ffffff",
+                      },
                     }}
                   >
                     Alert. This guide is intended for general information only.
@@ -1156,7 +1190,7 @@ function Tools() {
                         label={
                           pipeUnitSystem === "metric"
                             ? "Flow Rate (m³/h)"
-                            : "Flow Rate (mph)"
+                            : "Flow Rate (GPM)"
                         }
                         value={flowRate}
                         onChange={(e) => setFlowRate(e.target.value)}
@@ -1236,7 +1270,6 @@ function Tools() {
                     <Box sx={{ mt: 3 }}>
                       {pipeResult.error ? (
                         <Typography
-                          color="error"
                           sx={{
                             fontFamily: "'Inter', sans-serif !important",
                             color: "#ffffff",
@@ -1246,9 +1279,14 @@ function Tools() {
                           {pipeResult.error}
                         </Typography>
                       ) : (
-                        <Table sx={{ border: "1px solid #ffffff" }}>
+                        <Table
+                          sx={{
+                            border: "1px solid #ffffff",
+                            backgroundColor: "#333333",
+                          }}
+                        >
                           <TableHead>
-                            <TableRow>
+                            <TableRow sx={{ backgroundColor: "#4b5563" }}>
                               <TableCell
                                 sx={{
                                   fontFamily: "'Inter', sans-serif !important",
@@ -1383,9 +1421,12 @@ function Tools() {
                     sx={{
                       mt: 3,
                       fontFamily: "'Inter', sans-serif !important",
+                      fontSize: "0.85rem",
                       backgroundColor: "#1e3a8a",
                       color: "#ffffff",
-                      fontSize: "0.85rem",
+                      "& .MuiAlert-icon": {
+                        color: "#ffffff",
+                      },
                     }}
                   >
                     Alert. This guide is intended for general information only.

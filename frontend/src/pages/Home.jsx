@@ -188,402 +188,219 @@ function Home() {
             </div>
           </section>
 
-          <Container maxWidth="lg" sx={{ py: 4 }}>
-            <Section>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
-                  mb: 2,
-                  color: "#000000",
-                  textTransform: "uppercase",
-                  fontSize: "1.25rem",
-                }}
-              >
-                Dashboard
-              </Typography>
-              <Grid container spacing={2} justifyContent="center">
-                {userRole === "admin" && (
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Fade in timeout={1000}>
-                      <RoleCard className="role-card">
-                        <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
-                          <AdminPanelSettingsIcon
-                            sx={{ fontSize: 32, mb: 1, color: "#1976d2" }}
-                          />
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              fontWeight: "bold",
-                              mb: 1,
-                              color: "#000000",
-                              textTransform: "uppercase",
-                              fontSize: "1.25rem",
-                            }}
-                          >
-                            Admin Panel
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              color: "#333",
-                              mb: 2,
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            Access the admin panel to manage users, instruments,
-                            and settings.
-                          </Typography>
-                          <CTAButton
-                            variant="contained"
-                            onClick={() => handleClick("admin", "/admin-panel")}
-                            disabled={isClicked === "admin"}
-                            aria-label="Go to Admin Panel"
-                          >
-                            {isClicked === "admin" ? (
-                              <CircularProgress
-                                size={20}
-                                sx={{ color: "#ffffff" }}
-                              />
-                            ) : (
-                              "Go to Admin Panel"
-                            )}
-                          </CTAButton>
-                        </CardContent>
-                      </RoleCard>
-                    </Fade>
-                  </Grid>
-                )}
-                {userRole === "proposal_engineer" && (
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Fade in timeout={1000}>
-                      <RoleCard className="role-card">
-                        <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
-                          <ArchiveIcon
-                            sx={{ fontSize: 32, mb: 1, color: "#1976d2" }}
-                          />
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              fontWeight: "bold",
-                              mb: 1,
-                              color: "#000000",
-                              textTransform: "uppercase",
-                              fontSize: "1.25rem",
-                            }}
-                          >
-                            Engineer Tools
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              color: "#333",
-                              mb: 2,
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            Review and approve submitted quotations to proceed
-                            to the Purchase Order (PO) stage.
-                          </Typography>
-                          <CTAButton
-                            variant="contained"
-                            onClick={() =>
-                              handleClick("engineer", "/quotations/submitted")
-                            }
-                            disabled={isClicked === "engineer"}
-                            aria-label="Browse Instruments"
-                          >
-                            {isClicked === "engineer" ? (
-                              <CircularProgress
-                                size={20}
-                                sx={{ color: "#ffffff" }}
-                              />
-                            ) : (
-                              "Browse Instruments"
-                            )}
-                          </CTAButton>
-                        </CardContent>
-                      </RoleCard>
-                    </Fade>
-                  </Grid>
-                )}
-                {userRole === "client" && (
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Fade in timeout={1000}>
-                      <RoleCard className="role-card">
-                        <CardContent sx={{ flexGrow: 1, textAlign: "center" }}>
-                          <StorefrontIcon
-                            sx={{ fontSize: 32, mb: 1, color: "#1976d2" }}
-                          />
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              fontWeight: "bold",
-                              mb: 1,
-                              color: "#000000",
-                              textTransform: "uppercase",
-                              fontSize: "1.25rem",
-                            }}
-                          >
-                            Client Resources
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                              color: "#333",
-                              mb: 2,
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            Browse instruments and submit quotations for your
-                            projects.
-                          </Typography>
-                          <CTAButton
-                            variant="contained"
-                            onClick={() =>
-                              handleClick("client", "/instruments")
-                            }
-                            disabled={isClicked === "client"}
-                            aria-label="Browse Instruments"
-                          >
-                            {isClicked === "client" ? (
-                              <CircularProgress
-                                size={20}
-                                sx={{ color: "#ffffff" }}
-                              />
-                            ) : (
-                              "Browse Instruments"
-                            )}
-                          </CTAButton>
-                        </CardContent>
-                      </RoleCard>
-                    </Fade>
-                  </Grid>
-                )}
+          <Section>
+            <Typography
+              variant="h5"
+              sx={{
+                fontFamily: "'Inter', sans-serif !important",
+                fontWeight: 600,
+                mb: 4,
+                color: "#ffffff !important",
+                fontSize: "2.5rem",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Products and Services
+            </Typography>
+            <Grid container spacing={3} justifyContent="center">
+              <Grid item xs={12} sm={6} md={4}>
+                <ProductCard className="product-card">
+                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <Box
+                      className="product-image-wrapper"
+                      sx={{
+                        width: "100%",
+                        height: "400px",
+                        mb: 2,
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: "1px solid #4b5563",
+                      }}
+                    >
+                      <img
+                        src={pressImage}
+                        alt="Pressure Instruments"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          transition: "transform 0.3s ease",
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontFamily: "'Inter', sans-serif !important",
+                        fontWeight: 600,
+                        mb: 2,
+                        color: "#000000 !important",
+                        fontSize: "2.25rem",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Pressure Instruments
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: "'Inter', sans-serif !important",
+                        color: "#000000 !important",
+                        lineHeight: 1.6,
+                        fontSize: "1.25rem",
+                        textAlign: "justify",
+                      }}
+                    >
+                      • Pressure Gauges
+                      <br />
+                      • Digital Gauges
+                      <br />
+                      • Differential Gauges
+                      <br />
+                      • Pressure Switches
+                      <br />
+                      • Pressure Sensors
+                      <br />
+                      • Diaphragm Seals
+                      <br />
+                      • Threaded Seals
+                      <br />
+                      • Isolation Rings
+                      <br />
+                      • Flanged Seals
+                      <br />• Accessories
+                    </Typography>
+                  </CardContent>
+                </ProductCard>
               </Grid>
-            </Section>
-
-            <Section>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontFamily: "'Inter', sans-serif !important",
-                  fontWeight: 600,
-                  mb: 4,
-                  color: "#ffffff !important",
-                  fontSize: "2.5rem",
-                  letterSpacing: "0.02em",
-                }}
-              >
-                Products and Services
-              </Typography>
-              <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} sm={6} md={4}>
-                  <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Box
-                        className="product-image-wrapper"
-                        sx={{
+              <Grid item xs={12} sm={6} md={4}>
+                <ProductCard className="product-card">
+                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <Box
+                      className="product-image-wrapper"
+                      sx={{
+                        width: "100%",
+                        height: "400px",
+                        mb: 2,
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: "1px solid #4b5563",
+                      }}
+                    >
+                      <img
+                        src={tempImage}
+                        alt="Temperature Instruments"
+                        style={{
                           width: "100%",
-                          height: "400px",
-                          mb: 2,
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          border: "1px solid #4b5563",
+                          height: "100%",
+                          objectFit: "contain",
+                          transition: "transform 0.3s ease",
                         }}
-                      >
-                        <img
-                          src={pressImage}
-                          alt="Pressure Instruments"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            transition: "transform 0.3s ease",
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Inter', sans-serif !important",
-                          fontWeight: 600,
-                          mb: 2,
-                          color: "#000000 !important",
-                          fontSize: "2.25rem",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        Pressure Instruments
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontFamily: "'Inter', sans-serif !important",
-                          color: "#000000 !important",
-                          lineHeight: 1.6,
-                          fontSize: "1.25rem",
-                          textAlign: "justify",
-                        }}
-                      >
-                        • Pressure Gauges
-                        <br />
-                        • Digital Gauges
-                        <br />
-                        • Differential Gauges
-                        <br />
-                        • Pressure Switches
-                        <br />
-                        • Pressure Sensors
-                        <br />
-                        • Diaphragm Seals
-                        <br />
-                        • Threaded Seals
-                        <br />
-                        • Isolation Rings
-                        <br />
-                        • Flanged Seals
-                        <br />• Accessories
-                      </Typography>
-                    </CardContent>
-                  </ProductCard>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Box
-                        className="product-image-wrapper"
-                        sx={{
-                          width: "100%",
-                          height: "400px",
-                          mb: 2,
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          border: "1px solid #4b5563",
-                        }}
-                      >
-                        <img
-                          src={tempImage}
-                          alt="Temperature Instruments"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            transition: "transform 0.3s ease",
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Inter', sans-serif !important",
-                          fontWeight: 600,
-                          mb: 2,
-                          color: "#000000 !important",
-                          fontSize: "2.25rem",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        Temperature Instruments
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontFamily: "'Inter', sans-serif !important",
-                          color: "#000000 !important",
-                          lineHeight: 1.6,
-                          fontSize: "1.25rem",
-                          textAlign: "justify",
-                        }}
-                      >
-                        • Thermometers
-                        <br />
-                        • Bimetal Thermometers
-                        <br />
-                        • Gas Actuated Thermometers
-                        <br />• Thermowells
-                      </Typography>
-                    </CardContent>
-                  </ProductCard>
-                </Grid>
-                <Grid item xs={12} sm={6} md={4}>
-                  <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                      <Box
-                        className="product-image-wrapper"
-                        sx={{
-                          width: "100%",
-                          height: "400px",
-                          mb: 2,
-                          borderRadius: "8px",
-                          overflow: "hidden",
-                          border: "1px solid #4b5563",
-                        }}
-                      >
-                        <img
-                          src={testImage}
-                          alt="Test Instruments"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            transition: "transform 0.3s ease",
-                          }}
-                        />
-                      </Box>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: "'Inter', sans-serif !important",
-                          fontWeight: 600,
-                          mb: 2,
-                          color: "#000000 !important",
-                          fontSize: "2.25rem",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        Test Instruments
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontFamily: "'Inter', sans-serif !important",
-                          color: "#000000 !important",
-                          lineHeight: 1.6,
-                          fontSize: "1.25rem",
-                          textAlign: "justify",
-                        }}
-                      >
-                        • Test Gauges
-                        <br />
-                        • Calibration & Repair
-                        <br />• Technical Support & Training
-                      </Typography>
-                    </CardContent>
-                  </ProductCard>
-                </Grid>
+                      />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontFamily: "'Inter', sans-serif !important",
+                        fontWeight: 600,
+                        mb: 2,
+                        color: "#000000 !important",
+                        fontSize: "2.25rem",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Temperature Instruments
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: "'Inter', sans-serif !important",
+                        color: "#000000 !important",
+                        lineHeight: 1.6,
+                        fontSize: "1.25rem",
+                        textAlign: "justify",
+                      }}
+                    >
+                      • Thermometers
+                      <br />
+                      • Bimetal Thermometers
+                      <br />
+                      • Gas Actuated Thermometers
+                      <br />• Thermowells
+                    </Typography>
+                  </CardContent>
+                </ProductCard>
               </Grid>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: "'Inter', sans-serif !important",
-                  mt: 3,
-                  display: "block",
-                  color: "#ffffff !important",
-                  fontSize: "1.25rem",
-                  lineHeight: 1.6,
-                  textAlign: "justify",
-                }}
-              >
-                Applications: Chemical, petrochemical, oil & gas, power,
-                shipbuilding, food, HVAC, and more.
-              </Typography>
-            </Section>
-          </Container>
+              <Grid item xs={12} sm={6} md={4}>
+                <ProductCard className="product-card">
+                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <Box
+                      className="product-image-wrapper"
+                      sx={{
+                        width: "100%",
+                        height: "400px",
+                        mb: 2,
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        border: "1px solid #4b5563",
+                      }}
+                    >
+                      <img
+                        src={testImage}
+                        alt="Test Instruments"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "contain",
+                          transition: "transform 0.3s ease",
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontFamily: "'Inter', sans-serif !important",
+                        fontWeight: 600,
+                        mb: 2,
+                        color: "#000000 !important",
+                        fontSize: "2.25rem",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Test Instruments
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontFamily: "'Inter', sans-serif !important",
+                        color: "#000000 !important",
+                        lineHeight: 1.6,
+                        fontSize: "1.25rem",
+                        textAlign: "justify",
+                      }}
+                    >
+                      • Test Gauges
+                      <br />
+                      • Calibration & Repair
+                      <br />• Technical Support & Training
+                    </Typography>
+                  </CardContent>
+                </ProductCard>
+              </Grid>
+            </Grid>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: "'Inter', sans-serif !important",
+                mt: 3,
+                display: "block",
+                color: "#ffffff !important",
+                fontSize: "1.25rem",
+                lineHeight: 1.6,
+                textAlign: "justify",
+              }}
+            >
+              Applications: Chemical, petrochemical, oil & gas, power,
+              shipbuilding, food, HVAC, and more.
+            </Typography>
+          </Section>
         </main>
       </Box>
     </Fade>
