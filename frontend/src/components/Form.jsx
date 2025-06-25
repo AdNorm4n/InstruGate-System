@@ -201,7 +201,7 @@ function Form({ route, method }) {
           sx={{
             fontWeight: "bold",
             color: "#000000",
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Helvetica, sans-serif",
             textTransform: "uppercase",
             letterSpacing: 0,
             mb: 4,
@@ -406,7 +406,7 @@ function Form({ route, method }) {
                   color="inherit"
                   size="small"
                   onClick={handleConfirmRegister}
-                  sx={{ color: "white", fontFamily: "Inter, sans-serif" }}
+                  sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
                 >
                   Confirm
                 </Button>
@@ -414,7 +414,7 @@ function Form({ route, method }) {
                   color="inherit"
                   size="small"
                   onClick={handleCancelRegister}
-                  sx={{ color: "white", fontFamily: "Inter, sans-serif" }}
+                  sx={{ color: "white", fontFamily: "Helvetica, sans-serif" }}
                 >
                   Cancel
                 </Button>
