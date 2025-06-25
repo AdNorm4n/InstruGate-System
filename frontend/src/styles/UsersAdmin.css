@@ -39,20 +39,6 @@ body {
   padding: 24px 0;
 }
 
-/* Tool card (table container) */
-.tool-card {
-  padding: 24px;
-  background-color: #1e1e1e;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.tool-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
-}
-
 /* Title */
 .users-admin-title {
   font-size: 2.25rem;
@@ -102,7 +88,7 @@ body {
 }
 
 .search-input .MuiInputBase-input {
-  color: #ffffff;
+  color: #ffffff !important;
   font-family: "Inter", sans-serif;
 }
 
@@ -135,7 +121,7 @@ body {
 }
 
 .role-filter .MuiSelect-select {
-  color: #ffffff;
+  color: #ffffff !important;
   font-family: "Inter", sans-serif;
 }
 
@@ -207,7 +193,7 @@ body {
 /* Table body */
 .users-table td {
   font-size: 0.85rem;
-  color: #ffffff;
+  color: #ffffff !important;
   padding: 8px 12px;
   border-bottom: 1px solid #444;
 }
@@ -301,7 +287,7 @@ body {
 }
 
 .dialog-input .MuiInputBase-input {
-  color: #ffffff;
+  color: #ffffff !important;
   font-family: "Inter", sans-serif;
 }
 
@@ -342,9 +328,7 @@ body {
 .users-admin-page .MuiTable-root {
   border-radius: 8px;
   overflow: hidden;
-  background-color: #1e1e1e;
-  padding-left: 8px;
-  padding-right: 8px;
+  background-color: #1a1a1a;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-width: 100%;
@@ -352,29 +336,29 @@ body {
 }
 
 .users-admin-page .MuiTableCell-head {
-  background-color: #2a2a2a;
+  background-color: #252525;
   color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
   padding: 10px 12px;
-  border-bottom: 1px solid #444;
+  border-bottom: none;
 }
 
 .users-admin-page .MuiTableCell-body {
   font-size: 0.85rem;
-  color: #ffffff;
+  color: #ffffff !important;
   padding: 8px 12px;
-  border-bottom: 1px solid #444;
+  border-bottom: none;
 }
 
 .users-admin-page .MuiTableRow-root:hover {
-  background-color: #2a2a2a;
+  background-color: #333333;
   transition: background-color 0.2s ease;
 }
 
 .users-admin-page .MuiDialog-paper {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  border-radius: 12px;
+  border-radius: 16px;
   background-color: #1e1e1e;
   max-width: 100%;
   width: calc(100% - 24px);
@@ -387,7 +371,14 @@ body {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  background-color: #1e1e1e;
+}
+
+.users-admin-page .MuiTextField-root .MuiInputBase-input {
+  color: #ffffff !important;
+}
+
+.users-admin-page .MuiFormControl-root .MuiSelect-select {
+  color: #ffffff !important;
 }
 
 .users-admin-page .MuiButton-root {
@@ -400,6 +391,33 @@ body {
 .users-admin-page .MuiIconButton-root {
   transition: color 0.2s ease;
   padding: 6px;
+}
+
+/* Ensure table column widths */
+.users-admin-page .MuiTableCell-root[data-field="id"] {
+  width: 80px;
+  text-align: center;
+}
+
+.users-admin-page .MuiTableCell-root[data-field="username"] {
+  width: 15%;
+}
+
+.users-admin-page .MuiTableCell-root[data-field="email"] {
+  width: 25%;
+}
+
+.users-admin-page .MuiTableCell-root[data-field="company"] {
+  width: 20%;
+}
+
+.users-admin-page .MuiTableCell-root[data-field="role"] {
+  width: 15%;
+}
+
+.users-admin-page .MuiTableCell-root[data-field="actions"] {
+  width: 120px;
+  text-align: center;
 }
 
 /* Responsive adjustments */
@@ -428,10 +446,6 @@ body {
   .users-admin-page .MuiTableCell-root {
     font-size: 0.8rem;
     padding: 6px 8px;
-  }
-
-  .tool-card {
-    padding: 16px;
   }
 
   .search-filter-container {

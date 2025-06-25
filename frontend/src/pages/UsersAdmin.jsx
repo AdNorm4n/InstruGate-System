@@ -15,7 +15,6 @@ import {
   TextField,
   CircularProgress,
   Alert,
-  Paper,
   IconButton,
   Box,
   FormControl,
@@ -40,19 +39,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
       minHeight: 64,
     },
   }),
-}));
-
-const ToolCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  backgroundColor: "#1e1e1e",
-  borderRadius: "12px",
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
-  },
-  fontFamily: "'Inter', sans-serif",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -386,7 +372,7 @@ const UsersAdmin = () => {
   };
 
   return (
-    <Fade in timeout={800}>
+    <Fade in timeout={600}>
       <Box
         sx={{
           display: "flex",
@@ -523,7 +509,7 @@ const UsersAdmin = () => {
                   </Box>
                 </Box>
               ) : (
-                <ToolCard>
+                <Box sx={{ width: "100%", mb: 4 }}>
                   <Box
                     sx={{
                       display: "flex",
@@ -549,7 +535,7 @@ const UsersAdmin = () => {
                           "& fieldset": { borderColor: "#4b5563" },
                           "&:hover fieldset": { borderColor: "#3b82f6" },
                           "&.Mui-focused fieldset": { borderColor: "#3b82f6" },
-                          "& input": { color: "#ffffff" },
+                          "& input": { color: "#ffffff !important" },
                         },
                         "& .MuiInputLabel-root": {
                           fontFamily: "'Inter', sans-serif",
@@ -581,7 +567,7 @@ const UsersAdmin = () => {
                           borderRadius: "8px",
                           fontFamily: "'Inter', sans-serif",
                           bgcolor: "#2a2a2a",
-                          color: "#ffffff",
+                          color: "#ffffff !important",
                           "& .MuiOutlinedInput-notchedOutline": {
                             borderColor: "#4b5563",
                           },
@@ -591,7 +577,9 @@ const UsersAdmin = () => {
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                             borderColor: "#3b82f6",
                           },
-                          "& .MuiSelect-select": { color: "#ffffff" },
+                          "& .MuiSelect-select": {
+                            color: "#ffffff !important",
+                          },
                         }}
                         MenuProps={{
                           PaperProps: {
@@ -676,7 +664,7 @@ const UsersAdmin = () => {
                       Add User
                     </CTAButton>
                   </Box>
-                  <Box sx={{ overflowX: "auto", borderRadius: "12px", p: 3 }}>
+                  <Box sx={{ overflowX: "auto", borderRadius: "12px" }}>
                     <Table
                       sx={{
                         minWidth: 650,
@@ -700,7 +688,16 @@ const UsersAdmin = () => {
                                   py: 2,
                                   px: 3,
                                   border: "none",
-                                  width: field === "id" ? "80px" : "1fr",
+                                  width:
+                                    field === "id"
+                                      ? "80px"
+                                      : field === "username"
+                                      ? "15%"
+                                      : field === "email"
+                                      ? "25%"
+                                      : field === "company"
+                                      ? "20%"
+                                      : "15%",
                                   textAlign: field === "id" ? "center" : "left",
                                   "&:first-of-type": {
                                     borderTopLeftRadius: "8px",
@@ -762,7 +759,7 @@ const UsersAdmin = () => {
                               align="center"
                               sx={{
                                 fontFamily: "'Inter', sans-serif",
-                                color: "#9ca3af",
+                                color: "#ffffff",
                                 py: 4,
                                 fontSize: "0.95rem",
                                 border: "none",
@@ -772,7 +769,7 @@ const UsersAdmin = () => {
                               <Typography
                                 sx={{
                                   fontFamily: "'Inter', sans-serif",
-                                  color: "#9ca3af",
+                                  color: "#ffffff",
                                 }}
                               >
                                 No users found.
@@ -804,11 +801,20 @@ const UsersAdmin = () => {
                                   sx={{
                                     fontFamily: "'Inter', sans-serif",
                                     fontSize: "0.9rem",
-                                    color: "#ffffff",
+                                    color: "#ffffff !important",
                                     py: 2,
                                     px: 3,
                                     border: "none",
-                                    width: field === "id" ? "80px" : "1fr",
+                                    width:
+                                      field === "id"
+                                        ? "80px"
+                                        : field === "username"
+                                        ? "15%"
+                                        : field === "email"
+                                        ? "25%"
+                                        : field === "company"
+                                        ? "20%"
+                                        : "15%",
                                     textAlign:
                                       field === "id" ? "center" : "left",
                                   }}
@@ -848,9 +854,9 @@ const UsersAdmin = () => {
                                   onClick={() => handleDelete(user.id)}
                                   disabled={userRole !== "admin"}
                                   sx={{
-                                    color: "#d6393a",
+                                    color: "#ef4444",
                                     "&:hover": {
-                                      color: "#d6393a",
+                                      color: "#ef4444",
                                       bgcolor: "#ef44441a",
                                     },
                                   }}
@@ -858,7 +864,7 @@ const UsersAdmin = () => {
                                   <Delete
                                     sx={{
                                       fontSize: "1.2rem",
-                                      color: "#d6393a",
+                                      color: "#ef4444",
                                     }}
                                   />
                                 </IconButton>
@@ -869,7 +875,7 @@ const UsersAdmin = () => {
                       </TableBody>
                     </Table>
                   </Box>
-                </ToolCard>
+                </Box>
               )}
               <Dialog
                 open={openModal}
@@ -921,7 +927,7 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
@@ -956,7 +962,7 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
@@ -996,7 +1002,7 @@ const UsersAdmin = () => {
                         InputProps={{
                           sx: {
                             fontFamily: "'Inter', sans-serif",
-                            color: "#ffffff",
+                            color: "#ffffff !important",
                             bgcolor: "#252525",
                             "& .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#4b5563",
@@ -1034,7 +1040,7 @@ const UsersAdmin = () => {
                         InputProps={{
                           sx: {
                             fontFamily: "'Inter', sans-serif",
-                            color: "#ffffff",
+                            color: "#ffffff !important",
                             bgcolor: "#252525",
                             "& .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#4b5563",
@@ -1069,7 +1075,7 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
@@ -1102,7 +1108,7 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
@@ -1136,7 +1142,7 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
@@ -1168,7 +1174,7 @@ const UsersAdmin = () => {
                       required
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
@@ -1178,6 +1184,9 @@ const UsersAdmin = () => {
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                        },
+                        "& .MuiSelect-select": {
+                          color: "#ffffff !important",
                         },
                       }}
                       MenuProps={{
