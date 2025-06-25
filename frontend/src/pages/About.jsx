@@ -21,112 +21,167 @@ import testImage from "../assets/test.jpg";
 import "../styles/About.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
+  ...(theme?.mixins?.toolbar || {
+    minHeight: 56,
+    "@media (min-width:600px)": {
+      minHeight: 64,
+    },
+  }),
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#3b82f6",
+  color: "#ffffff",
+  padding: theme.spacing(1.5, 4),
+  fontWeight: 600,
+  fontSize: "0.9rem",
+  textTransform: "none",
+  borderRadius: "8px",
+  fontFamily: "'Inter', sans-serif",
+  "&:hover": {
+    backgroundColor: "#2563eb",
+    transform: "scale(1.03)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "#4b5563",
+    color: "#9ca3af",
+  },
+  transition: "all 0.2s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 const Section = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(6),
   padding: theme.spacing(4),
-  backgroundColor: "#fafafa",
+  backgroundColor: "#1e1e1e",
   borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif !important",
 }));
 
 const HeaderSection = styled(Box)(({ theme }) => ({
   textAlign: "center",
   padding: theme.spacing(6, 0),
   marginBottom: theme.spacing(4),
-  fontFamily: "Helvetica, sans-serif !important",
-}));
-
-const CTAButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#1976d2",
-  color: "#ffffff",
-  padding: theme.spacing(1, 3),
-  fontWeight: 600,
-  fontSize: "0.9rem",
-  textTransform: "none",
-  borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
-  "&:hover": {
-    backgroundColor: "#1565c0",
-    transform: "scale(1.05)",
-  },
-  "&.Mui-disabled": {
-    backgroundColor: "#e0e0e0",
-    color: "#999",
-  },
-  transition: "all 0.3s ease",
-  "& .MuiCircularProgress-root": {
-    color: "#ffffff",
-  },
+  fontFamily: "'Inter', sans-serif !important",
 }));
 
 const ProductCard = styled(Card)(({ theme }) => ({
-  height: "360px",
+  height: "100%",
   width: "100%",
-  maxWidth: "320px",
+  maxWidth: "400px",
   display: "flex",
   flexDirection: "column",
-  backgroundColor: "#ffffff",
+  backgroundColor: "#2d2d2d",
   border: "none",
-  borderRadius: "8px",
-  boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
+  borderRadius: "12px",
+  boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
-    transform: "scale(1.05)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
+    transform: "scale(1.03)",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
   },
   margin: "0 auto",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif !important",
 }));
 
 function About() {
   const { userRole } = useContext(UserContext);
 
   return (
-    <Fade in timeout={800}>
+    <Fade in timeout={600}>
       <Box
         className="about-page"
         sx={{
           minHeight: "100vh",
-          backgroundColor: "#fafafa",
-          fontFamily: "Helvetica, sans-serif !important",
+          backgroundColor: "#000000",
+          fontFamily: "'Inter', sans-serif !important",
+          width: "100%",
+          margin: 0,
+          padding: 0,
+          boxSizing: "border-box",
+          overflowX: "hidden",
         }}
       >
         <DrawerHeader />
-        <main>
-          <Container maxWidth="lg" sx={{ py: 4, mt: 2 }}>
+        <main
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            minHeight: "100vh",
+          }}
+        >
+          <Container
+            maxWidth="lg"
+            sx={{
+              py: 8,
+              px: { xs: 2, sm: 4 },
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              boxSizing: "border-box",
+            }}
+          >
             <HeaderSection>
               <Box
                 component="img"
                 src={companylogo}
                 alt="Company Logo"
                 sx={{
-                  maxWidth: { xs: 400, md: 400 },
+                  maxWidth: { xs: 300, md: 400 },
                   mb: 4,
                   display: "block",
                   margin: "0 auto",
+                  filter: "brightness(1.1)",
                 }}
               />
+              <Typography
+                variant="h4"
+                align="center"
+                sx={{
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: { xs: "1.75rem", md: "2.25rem" },
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    width: "60px",
+                    height: "4px",
+                    bgcolor: "#3b82f6",
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderRadius: "2px",
+                  },
+                }}
+              >
+                About Rueger Sdn. Bhd.
+              </Typography>
             </HeaderSection>
 
             <Section>
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', sans-serif !important",
+                  fontWeight: 600,
                   mb: 3,
-                  color: "#000000",
-                  textTransform: "uppercase",
+                  color: "#3b82f6",
                   fontSize: "1.25rem",
+                  letterSpacing: "0.02em",
                 }}
               >
                 About Us
@@ -134,10 +189,10 @@ function About() {
               <Typography
                 variant="body1"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  color: "#333",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.6,
+                  fontFamily: "'Inter', sans-serif !important",
+                  color: "#d1d5db",
+                  fontSize: "0.95rem",
+                  lineHeight: 1.7,
                 }}
               >
                 Rueger Sdn. Bhd., established in 1997 as a subsidiary of Rueger
@@ -159,12 +214,12 @@ function About() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', sans-serif !important",
+                  fontWeight: 600,
                   mb: 3,
-                  color: "#000000",
-                  textTransform: "uppercase",
+                  color: "#3b82f6",
                   fontSize: "1.25rem",
+                  letterSpacing: "0.02em",
                 }}
               >
                 Our History
@@ -172,10 +227,10 @@ function About() {
               <Typography
                 variant="body1"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  color: "#333",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.6,
+                  fontFamily: "'Inter', sans-serif !important",
+                  color: "#d1d5db",
+                  fontSize: "0.95rem",
+                  lineHeight: 1.7,
                 }}
               >
                 Founded in 1942 in Lausanne, Switzerland, Rueger SA has been a
@@ -198,12 +253,12 @@ function About() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', sans-serif !important",
+                  fontWeight: 600,
                   mb: 4,
-                  color: "#000000",
-                  textTransform: "uppercase",
+                  color: "#3b82f6",
                   fontSize: "1.5rem",
+                  letterSpacing: "0.02em",
                 }}
               >
                 Products and Services
@@ -211,34 +266,44 @@ function About() {
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-                      <Box className="product-image-wrapper">
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box
+                        className="product-image-wrapper"
+                        sx={{
+                          width: "100%",
+                          height: "200px",
+                          mb: 2,
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                        }}
+                      >
                         <img
                           src={pressImage}
                           alt="Pressure Instruments"
-                          className="product-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                       </Box>
                       <Typography
-                        variant="h5"
+                        variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
+                          fontFamily: "'Inter', sans-serif !important",
+                          fontWeight: 600,
                           mb: 2,
-                          color: "#000000",
-                          textTransform: "uppercase",
+                          color: "#ffffff",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
                         }}
                       >
-                        Pressure
-                        <br />
-                        Instruments
+                        Pressure Instruments
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
+                          fontFamily: "'Inter', sans-serif !important",
+                          color: "#d1d5db",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -271,34 +336,44 @@ function About() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-                      <Box className="product-image-wrapper">
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box
+                        className="product-image-wrapper"
+                        sx={{
+                          width: "100%",
+                          height: "200px",
+                          mb: 2,
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                        }}
+                      >
                         <img
                           src={tempImage}
                           alt="Temperature Instruments"
-                          className="product-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                       </Box>
                       <Typography
-                        variant="h5"
+                        variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
+                          fontFamily: "'Inter', sans-serif !important",
+                          fontWeight: 600,
                           mb: 2,
-                          color: "#000000",
-                          textTransform: "uppercase",
+                          color: "#ffffff",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
                         }}
                       >
-                        Temperature
-                        <br />
-                        Instruments
+                        Temperature Instruments
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
+                          fontFamily: "'Inter', sans-serif !important",
+                          color: "#d1d5db",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -315,34 +390,44 @@ function About() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-                      <Box className="product-image-wrapper">
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box
+                        className="product-image-wrapper"
+                        sx={{
+                          width: "100%",
+                          height: "200px",
+                          mb: 2,
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                        }}
+                      >
                         <img
                           src={testImage}
                           alt="Test Instruments"
-                          className="product-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
                         />
                       </Box>
                       <Typography
-                        variant="h5"
+                        variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
+                          fontFamily: "'Inter', sans-serif !important",
+                          fontWeight: 600,
                           mb: 2,
-                          color: "#000000",
-                          textTransform: "uppercase",
+                          color: "#ffffff",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
                         }}
                       >
-                        Test
-                        <br />
-                        Instruments
+                        Test Instruments
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
+                          fontFamily: "'Inter', sans-serif !important",
+                          color: "#d1d5db",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -359,10 +444,10 @@ function About() {
               <Typography
                 variant="body2"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "'Inter', sans-serif !important",
                   mt: 3,
                   display: "block",
-                  color: "#333",
+                  color: "#d1d5db",
                   fontSize: "0.9rem",
                   lineHeight: 1.6,
                 }}
@@ -376,12 +461,12 @@ function About() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', sans-serif !important",
+                  fontWeight: 600,
                   mb: 3,
-                  color: "#000000",
-                  textTransform: "uppercase",
+                  color: "#3b82f6",
                   fontSize: "1.25rem",
+                  letterSpacing: "0.02em",
                 }}
               >
                 Global Presence
@@ -389,10 +474,10 @@ function About() {
               <Typography
                 variant="body1"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  color: "#333",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.6,
+                  fontFamily: "'Inter', sans-serif !important",
+                  color: "#d1d5db",
+                  fontSize: "0.95rem",
+                  lineHeight: 1.7,
                 }}
               >
                 With subsidiaries in Germany, Malaysia, and China, and over 50
@@ -406,12 +491,12 @@ function About() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', sans-serif !important",
+                  fontWeight: 600,
                   mb: 4,
-                  color: "#000000",
-                  textTransform: "uppercase",
+                  color: "#3b82f6",
                   fontSize: "1.25rem",
+                  letterSpacing: "0.02em",
                 }}
               >
                 Contact Us
@@ -423,26 +508,26 @@ function About() {
                     alignItems="center"
                     justifyContent="center"
                     sx={{
-                      backgroundColor: "#fff",
+                      backgroundColor: "#2d2d2d",
                       borderRadius: "12px",
                       p: 2,
-                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
                       },
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                     }}
                   >
                     <LocationOn
-                      sx={{ fontSize: 30, mr: 1.5, color: "#d6393a" }}
+                      sx={{ fontSize: 30, mr: 1.5, color: "#3b82f6" }}
                     />
                     <Typography
                       variant="body1"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
-                        color: "#333",
+                        fontFamily: "'Inter', sans-serif !important",
+                        color: "#ffffff",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textAlign: "left",
                       }}
@@ -458,29 +543,29 @@ function About() {
                     alignItems="center"
                     justifyContent="center"
                     sx={{
-                      backgroundColor: "#fff",
+                      backgroundColor: "#2d2d2d",
                       borderRadius: "12px",
                       p: 2,
-                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
                       },
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                     }}
                   >
-                    <Phone sx={{ fontSize: 30, mr: 1.5, color: "#008000" }} />
+                    <Phone sx={{ fontSize: 30, mr: 1.5, color: "#3b82f6" }} />
                     <Typography
                       variant="body1"
                       component="a"
                       href="tel:+60341423808"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
-                        color: "#333",
+                        fontFamily: "'Inter', sans-serif !important",
+                        color: "#ffffff",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textDecoration: "none",
-                        "&:hover": { color: "#d4a017" },
+                        "&:hover": { color: "#3b82f6" },
                       }}
                       aria-label="Call Rueger Sdn. Bhd."
                     >
@@ -494,29 +579,29 @@ function About() {
                     alignItems="center"
                     justifyContent="center"
                     sx={{
-                      backgroundColor: "#fff",
+                      backgroundColor: "#2d2d2d",
                       borderRadius: "12px",
                       p: 2,
-                      boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                      boxShadow: "0 6px 24px rgba(0, 0, 0, 0.15)",
                       transition: "transform 0.3s ease, box-shadow 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-4px)",
-                        boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
                       },
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif !important",
                     }}
                   >
-                    <Email sx={{ fontSize: 30, mr: 1.5, color: "#d4a017" }} />
+                    <Email sx={{ fontSize: 30, mr: 1.5, color: "#3b82f6" }} />
                     <Typography
                       variant="body1"
                       component="a"
                       href="mailto:my_sales@rueger.com"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif !important",
-                        color: "#333",
+                        fontFamily: "'Inter', sans-serif !important",
+                        color: "#ffffff",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textDecoration: "none",
-                        "&:hover": { color: "#d4a017" },
+                        "&:hover": { color: "#3b82f6" },
                       }}
                       aria-label="Email Rueger Sdn. Bhd."
                     >
@@ -525,14 +610,14 @@ function About() {
                   </Box>
                 </Grid>
               </Grid>
-              <Divider sx={{ my: 4 }} />
+              <Divider sx={{ my: 4, borderColor: "#4b5563" }} />
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "center",
                   gap: 3,
                   flexWrap: "wrap",
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "'Inter', sans-serif !important",
                 }}
               >
                 <CTAButton
@@ -550,15 +635,15 @@ function About() {
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
                   sx={{
-                    color: "#0077b5",
-                    backgroundColor: "#ffffff",
+                    color: "#3b82f6",
+                    backgroundColor: "#2d2d2d",
                     "&:hover": {
-                      color: "#0077b5",
-                      backgroundColor: "#f5f5f5",
+                      color: "#3b82f6",
+                      backgroundColor: "#3b82f61a",
                       transform: "scale(1.1)",
                     },
                     transition: "all 0.3s ease",
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif !important",
                   }}
                 >
                   <LinkedIn fontSize="large" />

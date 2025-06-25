@@ -439,7 +439,7 @@ const QuotationsAdmin = () => {
   }, []);
 
   const truncateRemarks = useCallback((text, maxLength = 50) => {
-    if (text === "N/A" || !text) return text;
+    if (text === "N/A" || !text) return "N/A";
     if (text.length <= maxLength) return text;
     return `${text.substring(0, maxLength - 3)}...`;
   }, []);
@@ -607,8 +607,7 @@ const QuotationsAdmin = () => {
                         }),
                       }}
                     >
-                      {field === "remarks" &&
-                      getField(item, field) !== "N/A" ? (
+                      {field === "remarks" ? (
                         <span>
                           {truncateRemarks(getField(item, field))}
                           <Link
@@ -761,7 +760,10 @@ const QuotationsAdmin = () => {
             rows={4}
             required
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -811,7 +813,10 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -836,7 +841,10 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -861,7 +869,10 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -890,7 +901,10 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -919,7 +933,10 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -951,7 +968,10 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
+              sx: {
+                fontFamily: "'Inter', sans-serif",
+                color: "#ffffff !important",
+              },
             }}
             InputProps={{
               sx: {
@@ -1299,8 +1319,7 @@ const QuotationsAdmin = () => {
                       },
                       "& .MuiInputLabel-root": {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
-                        "&.Mui-focused": { color: "#3b82f6" },
+                        color: "#ffffff !important",
                       },
                     }}
                     variant="outlined"
@@ -1313,8 +1332,7 @@ const QuotationsAdmin = () => {
                     <InputLabel
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff",
-                        "&.Mui-focused": { color: "#3b82f6" },
+                        color: "#ffffff !important",
                       }}
                     >
                       Status
