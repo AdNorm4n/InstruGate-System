@@ -454,20 +454,16 @@ const AdminPanel = () => {
   if (contextLoading || loading) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
-          <Container maxWidth="xl">
-            <ToolCard
-              sx={{
-                p: 3,
-                mx: "auto",
-                maxWidth: "600px",
-                textAlign: "center",
-                mt: 8,
-              }}
-            >
-              <CircularProgress size={48} sx={{ color: "#60a5fa" }} />
-            </ToolCard>
-          </Container>
+        <Box
+          sx={{
+            minHeight: "100vh",
+            bgcolor: "#0f172a",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress size={48} sx={{ color: "#60a5fa" }} />
         </Box>
       </Fade>
     );
