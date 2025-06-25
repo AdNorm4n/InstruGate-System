@@ -23,12 +23,12 @@ import testImage from "../assets/test.jpg";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
-  minHeight: "48px !important", // Reduced height for less top spacing
+  minHeight: "24px !important", // Reduced from 48px to 24px
 }));
 
 const Section = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(3), // Reduced from 4
-  padding: theme.spacing(1.5), // Reduced from 2
+  marginBottom: theme.spacing(3),
+  padding: theme.spacing(1.5),
   backgroundColor: "#ffffff",
   borderRadius: "8px",
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
@@ -48,7 +48,7 @@ const Section = styled(Box)(({ theme }) => ({
 const CTAButton = styled(Button)(({ theme }) => ({
   backgroundColor: "#1976d2",
   color: "#ffffff",
-  padding: theme.spacing(0.8, 2.5), // Slightly reduced padding
+  padding: theme.spacing(0.8, 2.5),
   fontWeight: 600,
   fontSize: "0.9rem",
   textTransform: "none",
@@ -69,7 +69,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 const RoleCard = styled(Card)(({ theme }) => ({
-  height: "220px", // Slightly reduced height
+  height: "220px",
   display: "flex",
   flexDirection: "column",
   backgroundColor: "#fafafa",
@@ -90,7 +90,7 @@ const RoleCard = styled(Card)(({ theme }) => ({
 }));
 
 const ProductCard = styled(Card)(({ theme }) => ({
-  height: "340px", // Slightly reduced height
+  height: "340px",
   width: "100%",
   maxWidth: "320px",
   display: "flex",
@@ -160,7 +160,7 @@ function Home() {
           fontFamily: "Inter, sans-serif !important",
         }}
       >
-        <DrawerHeader />
+        {/* Removed DrawerHeader to eliminate top spacing */}
         <main style={{ flex: 1 }}>
           <section className="home-hero">
             <div className="hero-text">
@@ -196,7 +196,7 @@ function Home() {
                 sx={{
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 1.5, // Reduced from 2
+                  mb: 1.5,
                   color: "#000000",
                   textTransform: "uppercase",
                   fontSize: "1.25rem",
@@ -231,7 +231,7 @@ function Home() {
                             sx={{
                               fontFamily: "Inter, sans-serif !important",
                               color: "#333",
-                              mb: 1.5, // Reduced from 2
+                              mb: 1.5,
                               fontSize: "0.9rem",
                             }}
                           >
@@ -284,7 +284,7 @@ function Home() {
                             sx={{
                               fontFamily: "Inter, sans-serif !important",
                               color: "#333",
-                              mb: 1.5, // Reduced from 2
+                              mb: 1.5,
                               fontSize: "0.9rem",
                             }}
                           >
@@ -339,7 +339,7 @@ function Home() {
                             sx={{
                               fontFamily: "Inter, sans-serif !important",
                               color: "#333",
-                              mb: 1.5, // Reduced from 2
+                              mb: 1.5,
                               fontSize: "0.9rem",
                             }}
                           >
@@ -376,7 +376,7 @@ function Home() {
                 sx={{
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 2, // Reduced from 4
+                  mb: 2,
                   color: "#000000",
                   textTransform: "uppercase",
                   fontSize: "1.5rem",
@@ -385,15 +385,11 @@ function Home() {
                 Our Products
               </Typography>
               <Grid container spacing={2} justifyContent="center">
-                {" "}
-                {/* Reduced spacing from 3 */}
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
                     <CardContent
                       sx={{ flexGrow: 1, overflowY: "auto", p: 2.5 }}
                     >
-                      {" "}
-                      {/* Reduced padding from 3 */}
                       <Box className="product-image-wrapper">
                         <img
                           src={pressImage}
@@ -406,7 +402,7 @@ function Home() {
                         sx={{
                           fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
-                          mb: 1.5, // Reduced from 2
+                          mb: 1.5,
                           color: "#000000",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
@@ -456,8 +452,6 @@ function Home() {
                     <CardContent
                       sx={{ flexGrow: 1, overflowY: "auto", p: 2.5 }}
                     >
-                      {" "}
-                      {/* Reduced padding from 3 */}
                       <Box className="product-image-wrapper">
                         <img
                           src={tempImage}
@@ -470,7 +464,7 @@ function Home() {
                         sx={{
                           fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
-                          mb: 1.5, // Reduced from 2
+                          mb: 1.5,
                           color: "#000000",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
@@ -504,8 +498,6 @@ function Home() {
                     <CardContent
                       sx={{ flexGrow: 1, overflowY: "auto", p: 2.5 }}
                     >
-                      {" "}
-                      {/* Reduced padding from 3 */}
                       <Box className="product-image-wrapper">
                         <img
                           src={testImage}
@@ -518,7 +510,7 @@ function Home() {
                         sx={{
                           fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
-                          mb: 1.5, // Reduced from 2
+                          mb: 1.5,
                           color: "#000000",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
