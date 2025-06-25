@@ -183,7 +183,7 @@ function About() {
                   fontWeight: 600,
                   mb: 3,
                   color: "#ffffff !important",
-                  fontSize: "1.25rem",
+                  fontSize: "2.25rem",
                   letterSpacing: "0.02em",
                 }}
               >
@@ -194,7 +194,7 @@ function About() {
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
                   color: "#ffffff !important",
-                  fontSize: "0.95rem",
+                  fontSize: "1.25rem",
                   lineHeight: 1.7,
                 }}
               >
@@ -221,7 +221,7 @@ function About() {
                   fontWeight: 600,
                   mb: 3,
                   color: "#ffffff !important",
-                  fontSize: "1.25rem",
+                  fontSize: "2.25rem",
                   letterSpacing: "0.02em",
                 }}
               >
@@ -232,7 +232,7 @@ function About() {
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
                   color: "#ffffff !important",
-                  fontSize: "0.95rem",
+                  fontSize: "1.25rem",
                   lineHeight: 1.7,
                 }}
               >
@@ -259,7 +259,7 @@ function About() {
                   fontWeight: 600,
                   mb: 4,
                   color: "#ffffff !important",
-                  fontSize: "1.5rem",
+                  fontSize: "2.5rem",
                   letterSpacing: "0.02em",
                 }}
               >
@@ -296,7 +296,7 @@ function About() {
                           fontWeight: 600,
                           mb: 2,
                           color: "#ffffff !important",
-                          fontSize: "1.25rem",
+                          fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
                       >
@@ -307,7 +307,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           color: "#ffffff !important",
                           lineHeight: 1.6,
-                          fontSize: "0.95rem",
+                          fontSize: "1.25rem",
                         }}
                       >
                         • Pressure Gauges
@@ -364,7 +364,7 @@ function About() {
                           fontWeight: 600,
                           mb: 2,
                           color: "#ffffff !important",
-                          fontSize: "1.25rem",
+                          fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
                       >
@@ -375,7 +375,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           color: "#ffffff !important",
                           lineHeight: 1.6,
-                          fontSize: "0.95rem",
+                          fontSize: "1.25rem",
                         }}
                       >
                         • Thermometers
@@ -416,7 +416,7 @@ function About() {
                           fontWeight: 600,
                           mb: 2,
                           color: "#ffffff !important",
-                          fontSize: "1.25rem",
+                          fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
                       >
@@ -427,7 +427,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           color: "#ffffff !important",
                           lineHeight: 1.6,
-                          fontSize: "0.95rem",
+                          fontSize: "1.25rem",
                         }}
                       >
                         • Test Gauges
@@ -446,7 +446,7 @@ function About() {
                   mt: 3,
                   display: "block",
                   color: "#ffffff !important",
-                  fontSize: "0.95rem",
+                  fontSize: "1.25rem",
                   lineHeight: 1.6,
                 }}
               >
@@ -463,7 +463,7 @@ function About() {
                   fontWeight: 600,
                   mb: 3,
                   color: "#ffffff !important",
-                  fontSize: "1.25rem",
+                  fontSize: "2.25rem",
                   letterSpacing: "0.02em",
                 }}
               >
@@ -474,7 +474,7 @@ function About() {
                 sx={{
                   fontFamily: "'Inter', sans-serif !important",
                   color: "#ffffff !important",
-                  fontSize: "0.95rem",
+                  fontSize: "1.25rem",
                   lineHeight: 1.7,
                 }}
               >
@@ -493,7 +493,7 @@ function About() {
                   fontWeight: 600,
                   mb: 3,
                   color: "#ffffff !important",
-                  fontSize: "1.25rem",
+                  fontSize: "2.25rem",
                   letterSpacing: "0.02em",
                 }}
               >
@@ -526,7 +526,7 @@ function About() {
                       sx={{
                         fontFamily: "'Inter', sans-serif !important",
                         color: "#ffffff !important",
-                        fontSize: { xs: "0.95rem", sm: "1rem" },
+                        fontSize: { xs: "1.25rem", sm: "1rem" },
                         textAlign: "left",
                       }}
                     >
@@ -561,7 +561,7 @@ function About() {
                       sx={{
                         fontFamily: "'Inter', sans-serif !important",
                         color: "#ffffff !important",
-                        fontSize: { xs: "0.95rem", sm: "1rem" },
+                        fontSize: { xs: "1.25rem", sm: "1rem" },
                         textDecoration: "none",
                         "&:hover": { color: "#3b82f6 !important" },
                       }}
@@ -597,7 +597,7 @@ function About() {
                       sx={{
                         fontFamily: "'Inter', sans-serif !important",
                         color: "#ffffff !important",
-                        fontSize: { xs: "0.95rem", sm: "1rem" },
+                        fontSize: { xs: "1.25rem", sm: "1rem" },
                         textDecoration: "none",
                         "&:hover": { color: "#3b82f6 !important" },
                       }}
