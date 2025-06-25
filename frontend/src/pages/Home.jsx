@@ -42,7 +42,7 @@ const Section = styled(Box)(({ theme }) => ({
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
     backgroundPosition: "100% 50%",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -53,7 +53,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor: "#1565c0",
     transform: "scale(1.05)",
@@ -86,7 +86,7 @@ const RoleCard = styled(Card)(({ theme }) => ({
     boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
     backgroundPosition: "100% 50%",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
 }));
 
 const ProductCard = styled(Card)(({ theme }) => ({
@@ -105,7 +105,7 @@ const ProductCard = styled(Card)(({ theme }) => ({
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.25)",
   },
   margin: "0 auto",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
 }));
 
 function Home() {
@@ -157,7 +157,7 @@ function Home() {
           flexDirection: "column",
           minHeight: "100vh",
           bgcolor: "#f5f5f5",
-          fontFamily: "Helvetica, sans-serif !important",
+          fontFamily: "Inter, sans-serif !important",
         }}
       >
         <DrawerHeader />
@@ -167,7 +167,7 @@ function Home() {
               <Typography
                 variant="h4"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   color: "white",
                   textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
@@ -179,7 +179,7 @@ function Home() {
               <Typography
                 variant="h6"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Inter, sans-serif !important",
                   color: "white",
                 }}
               >
@@ -194,7 +194,7 @@ function Home() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 1.5, // Reduced from 2
                   color: "#000000",
@@ -216,7 +216,7 @@ function Home() {
                           <Typography
                             variant="h5"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               fontWeight: "bold",
                               mb: 1,
                               color: "#000000",
@@ -229,7 +229,7 @@ function Home() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               color: "#333",
                               mb: 1.5, // Reduced from 2
                               fontSize: "0.9rem",
@@ -269,7 +269,7 @@ function Home() {
                           <Typography
                             variant="h5"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               fontWeight: "bold",
                               mb: 1,
                               color: "#000000",
@@ -282,7 +282,7 @@ function Home() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               color: "#333",
                               mb: 1.5, // Reduced from 2
                               fontSize: "0.9rem",
@@ -324,7 +324,7 @@ function Home() {
                           <Typography
                             variant="h5"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               fontWeight: "bold",
                               mb: 1,
                               color: "#000000",
@@ -337,7 +337,7 @@ function Home() {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                               color: "#333",
                               mb: 1.5, // Reduced from 2
                               fontSize: "0.9rem",
@@ -374,7 +374,7 @@ function Home() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
+                  fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 2, // Reduced from 4
                   color: "#000000",
@@ -404,7 +404,7 @@ function Home() {
                       <Typography
                         variant="h5"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
                           mb: 1.5, // Reduced from 2
                           color: "#000000",
@@ -419,7 +419,7 @@ function Home() {
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Inter, sans-serif !important",
                           color: "#333",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
@@ -468,7 +468,7 @@ function Home() {
                       <Typography
                         variant="h5"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
                           mb: 1.5, // Reduced from 2
                           color: "#000000",
@@ -483,7 +483,7 @@ function Home() {
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Inter, sans-serif !important",
                           color: "#333",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
@@ -516,7 +516,7 @@ function Home() {
                       <Typography
                         variant="h5"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
                           mb: 1.5, // Reduced from 2
                           color: "#000000",
@@ -531,7 +531,7 @@ function Home() {
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
+                          fontFamily: "Inter, sans-serif !important",
                           color: "#333",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
