@@ -22,7 +22,7 @@ import tempImage from "../assets/temp.jpg";
 import testImage from "../assets/test.jpg";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  minHeight: "16x !important", // Reduced from 48px to 24px
+  minHeight: "24px !important", // Reduced from 48px to 24px
 }));
 
 const Section = styled(Box)(({ theme }) => ({
@@ -159,6 +159,7 @@ function Home() {
           fontFamily: "Inter, sans-serif !important",
         }}
       >
+        {/* Removed DrawerHeader to eliminate top spacing */}
         <main style={{ flex: 1 }}>
           <section className="home-hero">
             <div className="hero-text">
