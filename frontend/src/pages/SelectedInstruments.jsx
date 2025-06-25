@@ -334,8 +334,7 @@ function SelectedInstruments() {
           <Container
             maxWidth="lg"
             sx={{
-              py: 6,
-              mt: 8,
+              py: 2,
               px: { xs: 2, sm: 3, md: 4 },
               mx: "auto",
               display: "flex",
