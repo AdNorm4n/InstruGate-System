@@ -1,6 +1,6 @@
 // components/Navbar.jsx
 import React, { useContext } from "react";
-import AppBarTop from "./AppBar";
+import AppBarTop from "./AppBarTop";
 import ToolbarMenu from "./ToolbarMenu";
 import { UserContext } from "../contexts/UserContext";
 
