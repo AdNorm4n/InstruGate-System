@@ -78,17 +78,6 @@ body {
   color: #ffffff !important;
 }
 
-/* General alert styling */
-.instruments-admin-page .MuiSnackbar-root .MuiAlert-root {
-  border-radius: 8px;
-  padding: 8px 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  font-size: 0.9rem;
-  font-weight: 500;
-  background-color: #2a2a2a;
-  color: #ffffff;
-}
-
 /* Prevent overflow in TextField and FormControl */
 .instruments-admin-page .MuiTextField-root,
 .instruments-admin-page .MuiFormControl-root {
