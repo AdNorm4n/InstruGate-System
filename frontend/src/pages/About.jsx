@@ -22,7 +22,7 @@ import "../styles/About.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...(theme?.mixins?.toolbar || {
-    minHeight: 56,
+    minHeight: 35,
     "@media (min-width:600px)": {
       minHeight: 64,
     },
@@ -70,8 +70,8 @@ const Section = styled(Box)(({ theme }) => ({
 
 const HeaderSection = styled(Box)(({ theme }) => ({
   textAlign: "center",
-  padding: theme.spacing(4, 0),
-  marginBottom: theme.spacing(4),
+  padding: theme.spacing(2, 0),
+  marginBottom: theme.spacing(2),
   fontFamily: "'Inter', sans-serif !important",
   width: "100%",
   maxWidth: "1200px",
@@ -284,7 +284,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#ffffff !important",
+                          color: "#000000 !important",
                           lineHeight: 1.6,
                           fontSize: "1.25rem",
                           textAlign: "justify",
@@ -353,7 +353,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#ffffff !important",
+                          color: "#000000 !important",
                           lineHeight: 1.6,
                           fontSize: "1.25rem",
                           textAlign: "justify",
@@ -410,7 +410,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "'Inter', sans-serif !important",
-                          color: "#ffffff !important",
+                          color: "#000000 !important",
                           lineHeight: 1.6,
                           fontSize: "1.25rem",
                           textAlign: "justify",
