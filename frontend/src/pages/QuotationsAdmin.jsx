@@ -461,10 +461,10 @@ const QuotationsAdmin = () => {
     const items = filteredData.quotations || [];
 
     return (
-      <Box sx={{ overflowX: "auto", borderRadius: "12px", p: 3 }}>
+      <Box sx={{ borderRadius: "12px", p: 3 }}>
         <Table
           sx={{
-            minWidth: 1200, // Increased table width for more columns
+            width: "100%", // Full width to avoid scrolling
             borderCollapse: "separate",
             borderSpacing: "0 8px",
             bgcolor: "#1a1a1a",
@@ -488,8 +488,8 @@ const QuotationsAdmin = () => {
                       field === "id"
                         ? "100px"
                         : field === "remarks"
-                        ? "250px"
-                        : "1fr", // Adjusted widths for clarity
+                        ? "150px"
+                        : "1fr", // Smaller remarks column
                     textAlign: field === "id" ? "center" : "left",
                     "&:first-of-type": {
                       borderTopLeftRadius: "8px",
@@ -530,7 +530,7 @@ const QuotationsAdmin = () => {
                   py: 2,
                   px: 3,
                   border: "none",
-                  width: "150px", // Increased action column width
+                  width: "150px",
                   textAlign: "center",
                   borderTopRightRadius: "8px",
                   borderBottomRightRadius: "8px",
@@ -577,13 +577,13 @@ const QuotationsAdmin = () => {
                         fontSize: "0.9rem",
                         color: "#ffffff",
                         py: 2,
-                        px: 4, // Increased padding for cleaner look
+                        px: 4,
                         border: "none",
                         width:
                           field === "id"
                             ? "100px"
                             : field === "remarks"
-                            ? "250px"
+                            ? "150px"
                             : "1fr",
                         textAlign: field === "id" ? "center" : "left",
                         ...(field === "status" && {
@@ -600,14 +600,15 @@ const QuotationsAdmin = () => {
                           fontWeight: 500,
                         }),
                         ...(field === "remarks" && {
-                          maxWidth: "250px",
+                          maxWidth: "150px",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
                         }),
                       }}
                     >
                       {field === "remarks" &&
-                      getField(item, field).length > 50 ? (
+                      getField(item, field) !== "N/A" ? (
                         <span>
                           {truncateRemarks(getField(item, field))}
                           <Link
@@ -760,16 +761,13 @@ const QuotationsAdmin = () => {
             rows={4}
             required
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff",
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Ensure input text is white
-                },
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
                 },
@@ -813,15 +811,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Explicitly set input text color
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#ffffff !important",
+                  WebkitTextFillColor: "#ffffff !important",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -837,15 +836,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Explicitly set input text color
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#ffffff !important",
+                  WebkitTextFillColor: "#ffffff !important",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -861,15 +861,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Explicitly set input text color
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#ffffff !important",
+                  WebkitTextFillColor: "#ffffff !important",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -889,15 +890,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Explicitly set input text color
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#ffffff !important",
+                  WebkitTextFillColor: "#ffffff !important",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -917,15 +919,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Explicitly set input text color
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#ffffff !important",
+                  WebkitTextFillColor: "#ffffff !important",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -948,15 +951,16 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                color: "#ffffff", // Ensure input text is white
                 bgcolor: "#252525",
-                "& .MuiInputBase-input": {
-                  color: "#ffffff", // Explicitly set input text color
+                "& .MuiInputBase-input": { color: "#ffffff !important" },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  color: "#ffffff !important",
+                  WebkitTextFillColor: "#ffffff !important",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -1281,20 +1285,21 @@ const QuotationsAdmin = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{
-                      width: { xs: "100%", sm: "50%" }, // Balanced width
+                      width: { xs: "100%", sm: "50%" },
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "8px",
                         fontFamily: "'Inter', sans-serif",
                         bgcolor: "#252525",
-                        color: "#ffffff",
+                        "& .MuiInputBase-input": {
+                          color: "#ffffff !important",
+                        },
                         "& fieldset": { borderColor: "#4b5563" },
                         "&:hover fieldset": { borderColor: "#3b82f6" },
                         "&.Mui-focused fieldset": { borderColor: "#3b82f6" },
-                        "& input": { color: "#ffffff" },
                       },
                       "& .MuiInputLabel-root": {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                         "&.Mui-focused": { color: "#3b82f6" },
                       },
                     }}
@@ -1302,15 +1307,13 @@ const QuotationsAdmin = () => {
                     size="small"
                   />
                   <FormControl
-                    sx={
-                      { width: { xs: "100%", sm: "50%" } } // Balanced width
-                    }
+                    sx={{ width: { xs: "100%", sm: "50%" } }}
                     size="small"
                   >
                     <InputLabel
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                         "&.Mui-focused": { color: "#3b82f6" },
                       }}
                     >
@@ -1324,8 +1327,7 @@ const QuotationsAdmin = () => {
                         borderRadius: "8px",
                         fontFamily: "'Inter', sans-serif",
                         bgcolor: "#252525",
-                        color: "#ffffff",
-                        "& .MuiSelect-select": { color: "#ffffff" },
+                        "& .MuiSelect-select": { color: "#ffffff !important" },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
                         },
