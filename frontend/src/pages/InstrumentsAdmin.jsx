@@ -2491,7 +2491,7 @@ const InstrumentsAdmin = () => {
                     sx={{
                       display: "flex",
                       gap: 2,
-                      mb: 2,
+                      mb: 4,
                       alignItems: "center",
                       justifyContent: "space-between",
                       flexWrap: { xs: "wrap", sm: "nowrap" },
@@ -2662,7 +2662,6 @@ const InstrumentsAdmin = () => {
                       Add New
                     </CTAButton>
                   </Box>
-                  Changes Made: Filter Dropdown Width
                   {renderTable()}
                 </>
               )}
