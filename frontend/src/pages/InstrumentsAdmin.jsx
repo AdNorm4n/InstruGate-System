@@ -22,7 +22,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TableSortLabel,
   Snackbar,
   Tabs,
   Tab,
@@ -2366,31 +2365,20 @@ const InstrumentsAdmin = () => {
               >
                 <Alert
                   severity="success"
-                  icon={
-                    <svg
-                      className="MuiSvgIcon-root"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill="#ffffff"
-                        d="M20 6.293l-8.147 8.147a1 1 0 01-1.414 0L4.586 8.707a1 1 0 011.414-1.414l5.147 5.147L18.586 5a1 1 0 011.414 1.414z"
-                      />
-                    </svg>
-                  }
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: "Helvetica, sans-serif !important",
                     width: "100%",
-                    bgcolor: "#28a745",
-                    color: "#ffffff",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiAlert-icon": { color: "#ffffff" },
-                    p: 1.5,
-                    fontSize: "0.95rem",
-                    fontWeight: 500,
+                    color: "white",
+                    backgroundColor: "#28a745",
+                    "& .MuiAlert-icon": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "white !important",
+                      svg: { fill: "white !important" },
+                    },
                   }}
                 >
                   {success}
@@ -2404,31 +2392,8 @@ const InstrumentsAdmin = () => {
               >
                 <Alert
                   severity="error"
-                  icon={
-                    <svg
-                      className="MuiSvgIcon-root"
-                      focusable="false"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fill="#ffffff"
-                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-                      />
-                    </svg>
-                  }
                   onClose={() => setError("")}
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#d6393a",
-                    color: "#ffffff",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-                    "& .MuiAlert-icon": { color: "#ffffff" },
-                    p: 1.5,
-                    fontSize: "0.95rem",
-                    fontWeight: 500,
-                  }}
+                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
                 >
                   {error}
                 </Alert>
