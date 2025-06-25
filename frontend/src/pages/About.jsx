@@ -125,7 +125,7 @@ function About() {
           <Container
             maxWidth="lg"
             sx={{
-              py: 8,
+              py: 2,
               px: { xs: 2, sm: 4 },
               width: "100%",
               display: "flex",
@@ -135,35 +135,6 @@ function About() {
             }}
           >
             <HeaderSection>
-              <Typography
-                variant="h4"
-                align="center"
-                gutterBottom
-                sx={{
-                  fontWeight: 700,
-                  color: "#ffffff !important",
-                  fontFamily: "'Inter', sans-serif !important",
-                  mb: 5,
-                  fontSize: { xs: "1.75rem", md: "2.25rem" },
-                  letterSpacing: "-0.02em",
-                  textTransform: "none",
-                  position: "relative",
-                  "&:after": {
-                    content: '""',
-                    display: "block",
-                    width: "60px",
-                    height: "4px",
-                    bgcolor: "#3b82f6",
-                    position: "absolute",
-                    bottom: "-8px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    borderRadius: "2px",
-                  },
-                }}
-              >
-                About Rueger Sdn. Bhd.
-              </Typography>
               <Box
                 component="img"
                 src={companylogo}
