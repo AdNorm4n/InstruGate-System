@@ -64,7 +64,7 @@ const barShadowPlugin = {
 ChartJS.register(barShadowPlugin);
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  height: "16px", // Reduced height (adjust as needed, e.g., 16px or 0px)
+  height: "8px", // Reduced height (adjust as needed, e.g., 16px or 0px)
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
@@ -454,7 +454,7 @@ const AdminPanel = () => {
   if (contextLoading || loading) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#0f172a" }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
           <Container maxWidth="xl">
             <ToolCard
               sx={{
@@ -476,7 +476,7 @@ const AdminPanel = () => {
   if (error) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#0f172a" }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
           <Container maxWidth="xl">
             <ToolCard sx={{ p: 3, mx: "auto", maxWidth: "800px", mt: 8 }}>
               <Alert
@@ -508,7 +508,7 @@ const AdminPanel = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#0f172a",
+          bgcolor: "#000000",
         }}
         className="admin-panel-page"
       >
