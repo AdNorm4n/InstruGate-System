@@ -30,55 +30,61 @@ import { Add, Edit, Delete } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { UserContext } from "../contexts/UserContext";
 import ErrorBoundary from "../components/ErrorBoundary";
-import api from "../api"; // Import the shared api module
+import api from "../api";
 import "../styles/UsersAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
+  ...(theme?.mixins?.toolbar || {
+    minHeight: 56,
+    "@media (min-width:600px)": {
+      minHeight: 64,
+    },
+  }),
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  padding: theme.spacing(3),
+  backgroundColor: "#1e1e1e",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
   "&:hover": {
-    transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "'Inter', sans-serif",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#1976d2",
+  backgroundColor: "#3b82f6",
   color: "#ffffff",
-  padding: theme.spacing(1, 3),
-  fontWeight: 600,
-  fontSize: "0.9rem",
+  padding: theme.spacing(1, 2.5),
+  fontWeight: 500,
+  fontSize: "0.85rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "'Inter', sans-serif",
   "&:hover": {
-    backgroundColor: "#1565c0",
-    transform: "scale(1.05)",
+    backgroundColor: "#2563eb",
+    transform: "scale(1.03)",
   },
   "&.Mui-disabled": {
-    backgroundColor: "#e0e0e0",
-    color: "#999",
+    backgroundColor: "#4b5563",
+    color: "#9ca3af",
   },
-  transition: "all 0.3s ease",
+  transition: "all 0.2s ease",
   "& .MuiCircularProgress-root": {
     color: "#ffffff",
   },
 }));
 
 const CancelButton = styled(Button)(({ theme }) => ({
-  color: "#d6393a",
-  fontFamily: "Helvetica, sans-serif !important",
+  color: "#ef4444",
+  fontFamily: "'Inter', sans-serif",
   textTransform: "none",
   "&:hover": {
-    color: "#b71c1c",
+    color: "#dc2626",
+    backgroundColor: "#1f2937",
   },
 }));
 
@@ -385,30 +391,65 @@ const UsersAdmin = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
-          bgcolor: "#f8f9fa",
+          bgcolor: "#000000",
+          width: "100%",
+          margin: 0,
+          padding: 0,
+          boxSizing: "border-box",
+          overflowX: "hidden",
         }}
+        className="users-admin-page"
       >
-        <DrawerHeader />
-        <main style={{ flex: 1 }}>
+        <main
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            minHeight: "100vh",
+          }}
+        >
           <ErrorBoundary>
-            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+            <Container
+              maxWidth="lg"
+              sx={{
+                py: 8,
+                px: { xs: 2, sm: 4 },
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                boxSizing: "border-box",
+              }}
+            >
               <Typography
-                variant="h6"
+                variant="h4"
                 align="center"
                 gutterBottom
                 sx={{
-                  fontWeight: "bold",
-                  color: "#000000",
-                  fontFamily: "Helvetica, sans-serif !important",
-                  textTransform: "uppercase",
-                  mb: 4,
-                  fontSize: { xs: "1.5rem", md: "2rem" },
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  fontFamily: "'Inter', sans-serif",
+                  mb: 5,
+                  fontSize: { xs: "1.75rem", md: "2.25rem" },
+                  letterSpacing: "-0.02em",
+                  textTransform: "none",
+                  position: "relative",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    width: "60px",
+                    height: "4px",
+                    bgcolor: "#3b82f6",
+                    position: "absolute",
+                    bottom: "-8px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    borderRadius: "2px",
+                  },
                 }}
               >
                 Users Management
               </Typography>
+              <Box sx={{ mt: 4 }} />
               <Snackbar
                 open={!!success}
                 autoHideDuration={3000}
@@ -419,17 +460,17 @@ const UsersAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
+                    fontFamily: "'Inter', sans-serif !important",
                     width: "100%",
-                    color: "white",
+                    color: "#ffffff",
                     backgroundColor: "#28a745",
                     "& .MuiAlert-icon": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
                     },
                     "& .MuiAlert-action": {
-                      color: "white !important",
-                      svg: { fill: "white !important" },
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
                     },
                   }}
                 >
@@ -445,29 +486,41 @@ const UsersAdmin = () => {
                 <Alert
                   severity="error"
                   onClose={() => setError("")}
-                  sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                  sx={{
+                    fontFamily: "'Inter', sans-serif !important",
+                    color: "#ffffff",
+                    backgroundColor: "#ef4444",
+                    "& .MuiAlert-icon": {
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
+                    },
+                  }}
                 >
                   {error}
                 </Alert>
               </Snackbar>
               {loading ? (
-                <Box sx={{ textAlign: "center", mt: "20vh" }}>
-                  <ToolCard
-                    sx={{ maxWidth: 400, mx: "auto", textAlign: "center" }}
-                  >
-                    <CircularProgress size={48} sx={{ color: "#1976d2" }} />
+                <Box sx={{ textAlign: "center", mt: 8 }}>
+                  <Box sx={{ p: 4, borderRadius: "16px", bgcolor: "#1e1e1e" }}>
+                    <CircularProgress
+                      size={48}
+                      sx={{ color: "#3b82f6", mb: 2 }}
+                    />
                     <Typography
                       variant="h6"
                       sx={{
-                        mt: 2,
-                        fontFamily: "Helvetica, sans-serif !important",
-                        fontWeight: "bold",
-                        color: "#000000",
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 600,
+                        color: "#ffffff",
                       }}
                     >
                       Loading users...
                     </Typography>
-                  </ToolCard>
+                  </Box>
                 </Box>
               ) : (
                 <ToolCard>
@@ -476,199 +529,346 @@ const UsersAdmin = () => {
                       display: "flex",
                       gap: 2,
                       mb: 4,
-                      flexWrap: "wrap",
                       alignItems: "center",
                       justifyContent: "space-between",
+                      flexWrap: { xs: "wrap", sm: "nowrap" },
+                      width: "100%",
                     }}
                   >
-                    <Box
+                    <TextField
+                      label="Search by Username, Email or Company"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       sx={{
-                        display: "flex",
-                        gap: 2,
-                        flexWrap: "wrap",
-                        flex: 1,
-                        minWidth: "200px",
+                        width: { xs: "100%", sm: "50%" },
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          fontFamily: "'Inter', sans-serif",
+                          bgcolor: "#2a2a2a",
+                          color: "#ffffff",
+                          "& fieldset": { borderColor: "#4b5563" },
+                          "&:hover fieldset": { borderColor: "#3b82f6" },
+                          "&.Mui-focused fieldset": { borderColor: "#3b82f6" },
+                          "& input": { color: "#ffffff" },
+                        },
+                        "& .MuiInputLabel-root": {
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#d1d5db",
+                          "&.Mui-focused": { color: "#3b82f6" },
+                        },
                       }}
+                      variant="outlined"
+                      size="small"
+                    />
+                    <FormControl
+                      sx={{ width: { xs: "100%", sm: "24%" } }}
+                      size="small"
                     >
-                      <TextField
-                        label="Search by Username, Email or Company"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        sx={{ flex: 1, minWidth: "200px" }}
-                        variant="outlined"
-                        size="small"
-                        InputLabelProps={{
-                          sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
+                      <InputLabel
+                        sx={{
+                          fontFamily: "'Inter', sans-serif",
+                          color: "#d1d5db",
+                          "&.Mui-focused": { color: "#3b82f6" },
+                        }}
+                      >
+                        Role
+                      </InputLabel>
+                      <Select
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                        label="Role"
+                        sx={{
+                          borderRadius: "8px",
+                          fontFamily: "'Inter', sans-serif",
+                          bgcolor: "#2a2a2a",
+                          color: "#ffffff",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#4b5563",
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#3b82f6",
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#3b82f6",
+                          },
+                          "& .MuiSelect-select": { color: "#ffffff" },
+                        }}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              bgcolor: "#000000",
+                              "& .MuiMenuItem-root": {
+                                fontFamily: "'Inter', sans-serif",
+                                color: "#ffffff",
+                                "&:hover": {
+                                  bgcolor: "#3b82f61a",
+                                  color: "#ffffff",
+                                },
+                                "&.Mui-selected": {
+                                  bgcolor: "#3b82f61a",
+                                  color: "#ffffff",
+                                },
+                              },
+                            },
                           },
                         }}
-                        InputProps={{
-                          sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
-                          },
-                        }}
-                      />
-                      <FormControl sx={{ minWidth: "150px" }} size="small">
-                        <InputLabel
+                      >
+                        <MenuItem
+                          value=""
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
-                          Role
-                        </InputLabel>
-                        <Select
-                          value={roleFilter}
-                          onChange={(e) => setRoleFilter(e.target.value)}
-                          label="Role"
+                          All Roles
+                        </MenuItem>
+                        <MenuItem
+                          value="admin"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
                           }}
                         >
-                          <MenuItem
-                            value=""
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            All Roles
-                          </MenuItem>
-                          <MenuItem
-                            value="admin"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Admin
-                          </MenuItem>
-                          <MenuItem
-                            value="proposal_engineer"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Proposal Engineer
-                          </MenuItem>
-                          <MenuItem
-                            value="client"
-                            sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
-                            }}
-                          >
-                            Client
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Box>
+                          Admin
+                        </MenuItem>
+                        <MenuItem
+                          value="proposal_engineer"
+                          sx={{
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
+                          }}
+                        >
+                          Proposal Engineer
+                        </MenuItem>
+                        <MenuItem
+                          value="client"
+                          sx={{
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
+                          }}
+                        >
+                          Client
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
                     <CTAButton
                       variant="contained"
-                      startIcon={<Add sx={{ color: "white" }} />}
+                      startIcon={<Add sx={{ color: "#ffffff" }} />}
                       onClick={openAddModal}
                       disabled={userRole !== "admin"}
+                      sx={{
+                        borderRadius: "8px",
+                        px: 4,
+                        py: 1.5,
+                        fontSize: "0.9rem",
+                        fontWeight: 600,
+                        fontFamily: "'Inter', sans-serif",
+                        bgcolor: "#3b82f6",
+                        "&:hover": { bgcolor: "#2563eb" },
+                        "&.Mui-disabled": {
+                          bgcolor: "#4b5563",
+                          color: "#9ca3af",
+                        },
+                        width: { xs: "100%", sm: "24%" },
+                        minWidth: { xs: "100%", sm: "180px" },
+                      }}
                     >
                       Add User
                     </CTAButton>
                   </Box>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        {["id", "username", "email", "company", "role"].map(
-                          (field) => (
-                            <TableCell
-                              key={field}
-                              sx={{
-                                fontWeight: "bold",
-                                fontFamily: "Helvetica, sans-serif !important",
-                                bgcolor: "#f5f5f5",
-                              }}
-                            >
-                              <TableSortLabel
-                                active={sortConfig.field === field}
-                                direction={
-                                  sortConfig.field === field
-                                    ? sortConfig.direction
-                                    : "asc"
-                                }
-                                onClick={() => handleSort(field)}
-                              >
-                                {field === "id" ? "ID" : toTitleCase(field)}
-                              </TableSortLabel>
-                            </TableCell>
-                          )
-                        )}
-                        <TableCell
-                          sx={{
-                            fontWeight: "bold",
-                            fontFamily: "Helvetica, sans-serif !important",
-                            bgcolor: "#f5f5f5",
-                          }}
-                        >
-                          Actions
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredUsers.length === 0 ? (
+                  <Box sx={{ overflowX: "auto", borderRadius: "12px", p: 3 }}>
+                    <Table
+                      sx={{
+                        minWidth: 650,
+                        borderCollapse: "separate",
+                        borderSpacing: "0 8px",
+                        bgcolor: "#1a1a1a",
+                      }}
+                    >
+                      <TableHead>
                         <TableRow>
+                          {["id", "username", "email", "company", "role"].map(
+                            (field) => (
+                              <TableCell
+                                key={field}
+                                sx={{
+                                  fontWeight: 600,
+                                  fontFamily: "'Inter', sans-serif",
+                                  bgcolor: "#252525",
+                                  color: "#ffffff",
+                                  fontSize: "0.9rem",
+                                  py: 2,
+                                  px: 3,
+                                  border: "none",
+                                  width: field === "id" ? "80px" : "1fr",
+                                  textAlign: field === "id" ? "center" : "left",
+                                  "&:first-of-type": {
+                                    borderTopLeftRadius: "8px",
+                                    borderBottomLeftRadius: "8px",
+                                  },
+                                  "&:last-of-type": {
+                                    borderTopRightRadius: "8px",
+                                    borderBottomRightRadius: "8px",
+                                  },
+                                }}
+                              >
+                                <TableSortLabel
+                                  active={sortConfig.field === field}
+                                  direction={
+                                    sortConfig.field === field
+                                      ? sortConfig.direction
+                                      : "asc"
+                                  }
+                                  onClick={() => handleSort(field)}
+                                  sx={{
+                                    color: "#ffffff",
+                                    "&.Mui-active": { color: "#3b82f6" },
+                                    "&:hover": { color: "#3b82f6" },
+                                    "& .MuiTableSortLabel-icon": {
+                                      color: "#ffffff !important",
+                                    },
+                                  }}
+                                >
+                                  {field === "id" ? "ID" : toTitleCase(field)}
+                                </TableSortLabel>
+                              </TableCell>
+                            )
+                          )}
                           <TableCell
-                            colSpan={6}
-                            align="center"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontWeight: 600,
+                              fontFamily: "'Inter', sans-serif",
+                              bgcolor: "#252525",
+                              color: "#ffffff",
+                              fontSize: "0.9rem",
+                              py: 2,
+                              px: 3,
+                              border: "none",
+                              width: "120px",
+                              textAlign: "center",
+                              borderTopRightRadius: "8px",
+                              borderBottomRightRadius: "8px",
                             }}
                           >
-                            <Typography
-                              sx={{
-                                fontFamily: "Helvetica, sans-serif !important",
-                                py: 2,
-                              }}
-                            >
-                              No users found.
-                            </Typography>
+                            Actions
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        filteredUsers.map((user) => (
-                          <TableRow
-                            key={user.id}
-                            sx={{
-                              "&:hover": { bgcolor: "#e3f2fd" },
-                              transition: "background-color 0.2s",
-                            }}
-                          >
-                            {["id", "username", "email", "company", "role"].map(
-                              (field) => (
+                      </TableHead>
+                      <TableBody>
+                        {filteredUsers.length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={6}
+                              align="center"
+                              sx={{
+                                fontFamily: "'Inter', sans-serif",
+                                color: "#9ca3af",
+                                py: 4,
+                                fontSize: "0.95rem",
+                                border: "none",
+                                bgcolor: "#1a1a1a",
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontFamily: "'Inter', sans-serif",
+                                  color: "#9ca3af",
+                                }}
+                              >
+                                No users found.
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filteredUsers.map((user) => (
+                            <TableRow
+                              key={user.id}
+                              sx={{
+                                bgcolor: "#2d2d2d",
+                                "&:hover": {
+                                  bgcolor: "#333333",
+                                },
+                                transition: "background-color 0.2s",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              {[
+                                "id",
+                                "username",
+                                "email",
+                                "company",
+                                "role",
+                              ].map((field) => (
                                 <TableCell
                                   key={field}
                                   sx={{
-                                    fontFamily:
-                                      "Helvetica, sans-serif !important",
+                                    fontFamily: "'Inter', sans-serif",
+                                    fontSize: "0.9rem",
+                                    color: "#ffffff",
+                                    py: 2,
+                                    px: 3,
+                                    border: "none",
+                                    width: field === "id" ? "80px" : "1fr",
+                                    textAlign:
+                                      field === "id" ? "center" : "left",
                                   }}
                                 >
                                   {user[field] || "N/A"}
                                 </TableCell>
-                              )
-                            )}
-                            <TableCell>
-                              <IconButton
-                                onClick={() => openEditModal(user)}
-                                disabled={userRole !== "admin"}
-                                sx={{ color: "#1976d2" }}
+                              ))}
+                              <TableCell
+                                sx={{
+                                  py: 2,
+                                  px: 3,
+                                  border: "none",
+                                  width: "120px",
+                                  textAlign: "center",
+                                }}
                               >
-                                <Edit />
-                              </IconButton>
-                              <IconButton
-                                onClick={() => handleDelete(user.id)}
-                                disabled={userRole !== "admin"}
-                                sx={{ color: "#d6393a" }}
-                              >
-                                <Delete sx={{ color: "#d32f2f" }} />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
+                                <IconButton
+                                  onClick={() => openEditModal(user)}
+                                  disabled={userRole !== "admin"}
+                                  sx={{
+                                    color: "#ffffff",
+                                    "&:hover": {
+                                      color: "#ffffff",
+                                      bgcolor: "#3b82f61a",
+                                    },
+                                    mr: 1,
+                                  }}
+                                >
+                                  <Edit
+                                    sx={{
+                                      fontSize: "1.2rem",
+                                      color: "#2563eb",
+                                    }}
+                                  />
+                                </IconButton>
+                                <IconButton
+                                  onClick={() => handleDelete(user.id)}
+                                  disabled={userRole !== "admin"}
+                                  sx={{
+                                    color: "#d6393a",
+                                    "&:hover": {
+                                      color: "#d6393a",
+                                      bgcolor: "#ef44441a",
+                                    },
+                                  }}
+                                >
+                                  <Delete
+                                    sx={{
+                                      fontSize: "1.2rem",
+                                      color: "#d6393a",
+                                    }}
+                                  />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </Box>
                 </ToolCard>
               )}
               <Dialog
@@ -676,25 +876,31 @@ const UsersAdmin = () => {
                 onClose={handleModalClose}
                 maxWidth="sm"
                 fullWidth
-                PaperProps={{
-                  component: "form",
-                  onSubmit: (e) => {
-                    e.preventDefault();
-                    handleSave();
+                sx={{
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
+                    borderRadius: "16px",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
+                    fontFamily: "'Inter', sans-serif",
                   },
-                  sx: { borderRadius: 2, p: 2 },
                 }}
               >
                 <DialogTitle
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#1976d2",
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#3b82f6",
+                    bgcolor: "#1e1e1e",
+                    py: 2.5,
+                    px: 4,
+                    fontSize: "1.25rem",
+                    textAlign: "center",
+                    borderBottom: "1px solid #4b5563",
                   }}
                 >
                   {modalAction === "add" ? "Add New User" : "Edit User"}
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
                   <TextField
                     label="Username"
                     value={modalData.username}
@@ -707,10 +913,26 @@ const UsersAdmin = () => {
                     required
                     size="small"
                     InputLabelProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                      },
                     }}
                     InputProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
+                        bgcolor: "#252525",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      },
                     }}
                   />
                   <TextField
@@ -726,10 +948,26 @@ const UsersAdmin = () => {
                     required
                     size="small"
                     InputLabelProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                      },
                     }}
                     InputProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
+                        bgcolor: "#252525",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      },
                     }}
                   />
                   {modalAction === "add" && (
@@ -751,12 +989,24 @@ const UsersAdmin = () => {
                         size="small"
                         InputLabelProps={{
                           sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#d1d5db",
                           },
                         }}
                         InputProps={{
                           sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
+                            bgcolor: "#252525",
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#4b5563",
+                            },
+                            "&:hover .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#3b82f6",
+                            },
+                            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#3b82f6",
+                            },
                           },
                         }}
                       />
@@ -777,12 +1027,24 @@ const UsersAdmin = () => {
                         size="small"
                         InputLabelProps={{
                           sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#d1d5db",
                           },
                         }}
                         InputProps={{
                           sx: {
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "'Inter', sans-serif",
+                            color: "#ffffff",
+                            bgcolor: "#252525",
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#4b5563",
+                            },
+                            "&:hover .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#3b82f6",
+                            },
+                            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#3b82f6",
+                            },
                           },
                         }}
                       />
@@ -799,10 +1061,26 @@ const UsersAdmin = () => {
                     variant="outlined"
                     size="small"
                     InputLabelProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                      },
                     }}
                     InputProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
+                        bgcolor: "#252525",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      },
                     }}
                   />
                   <TextField
@@ -816,10 +1094,26 @@ const UsersAdmin = () => {
                     variant="outlined"
                     size="small"
                     InputLabelProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                      },
                     }}
                     InputProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
+                        bgcolor: "#252525",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      },
                     }}
                   />
                   <TextField
@@ -834,15 +1128,34 @@ const UsersAdmin = () => {
                     required
                     size="small"
                     InputLabelProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                      },
                     }}
                     InputProps={{
-                      sx: { fontFamily: "Helvetica, sans-serif !important" },
+                      sx: {
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
+                        bgcolor: "#252525",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      },
                     }}
                   />
                   <FormControl fullWidth margin="normal" size="small">
                     <InputLabel
-                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#d1d5db",
+                      }}
                     >
                       Role
                     </InputLabel>
@@ -853,39 +1166,100 @@ const UsersAdmin = () => {
                       }
                       label="Role"
                       required
-                      sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        color: "#ffffff",
+                        bgcolor: "#252525",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#4b5563",
+                        },
+                        "&:hover .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#3b82f6",
+                        },
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            bgcolor: "#1a1a1a",
+                            "& .MuiMenuItem-root": {
+                              color: "#ffffff",
+                              "&:hover": { bgcolor: "#333333" },
+                            },
+                          },
+                        },
+                      }}
                     >
                       <MenuItem
                         value=""
                         disabled
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         Select a role
                       </MenuItem>
                       <MenuItem
                         value="admin"
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         Admin
                       </MenuItem>
                       <MenuItem
                         value="proposal_engineer"
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         Proposal Engineer
                       </MenuItem>
                       <MenuItem
                         value="client"
-                        sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                        sx={{ fontFamily: "'Inter', sans-serif" }}
                       >
                         Client
                       </MenuItem>
                     </Select>
                   </FormControl>
                 </DialogContent>
-                <DialogActions>
-                  <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
-                  <CTAButton type="submit" variant="contained">
+                <DialogActions
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2.5,
+                    px: 4,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CancelButton
+                    onClick={handleModalClose}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ef4444",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      "&:hover": { color: "#dc2626" },
+                    }}
+                  >
+                    Cancel
+                  </CancelButton>
+                  <CTAButton
+                    variant="contained"
+                    onClick={handleSave}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      bgcolor: "#3b82f6",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: "8px",
+                      "&:hover": { bgcolor: "#2563eb" },
+                      "&.Mui-disabled": {
+                        bgcolor: "#4b5563",
+                        color: "#9ca3af",
+                      },
+                    }}
+                  >
                     {modalAction === "add" ? "Create" : "Save"}
                   </CTAButton>
                 </DialogActions>
@@ -895,39 +1269,81 @@ const UsersAdmin = () => {
                 onClose={handleCloseConfirmDialog}
                 maxWidth="xs"
                 fullWidth
-                PaperProps={{ sx: { borderRadius: 2, p: 2 } }}
+                sx={{
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
+                    borderRadius: "16px",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
+                    fontFamily: "'Inter', sans-serif",
+                  },
+                }}
               >
                 <DialogTitle
                   sx={{
-                    fontFamily: "Helvetica, sans-serif !important",
-                    fontWeight: "bold",
-                    color: "#d6393a",
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#3b82f6",
+                    bgcolor: "#1e1e1e",
+                    py: 2.5,
+                    px: 4,
+                    fontSize: "1.25rem",
+                    textAlign: "center",
+                    borderBottom: "1px solid #4b5563",
                   }}
                 >
                   Confirm Deletion
                 </DialogTitle>
-                <DialogContent>
+                <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
                   <Typography
-                    sx={{ fontFamily: "Helvetica, sans-serif !important" }}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                      fontSize: "1rem",
+                      fontWeight: 500,
+                      paddingTop: 2,
+                    }}
                   >
                     {confirmMessage}
                   </Typography>
                 </DialogContent>
-                <DialogActions>
-                  <CancelButton onClick={handleCloseConfirmDialog}>
+                <DialogActions
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2.5,
+                    px: 4,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CancelButton
+                    onClick={handleCloseConfirmDialog}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ef4444",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      "&:hover": { color: "#dc2626" },
+                    }}
+                  >
                     Cancel
                   </CancelButton>
-                  <Button
+                  <CTAButton
                     variant="contained"
                     onClick={handleConfirmAction}
                     sx={{
-                      bgcolor: "#d6393a",
-                      "&:hover": { bgcolor: "#b71c1c" },
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "'Inter', sans-serif",
+                      bgcolor: "#ef4444",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: "8px",
+                      "&:hover": { bgcolor: "#dc2626" },
                     }}
                   >
                     Delete
-                  </Button>
+                  </CTAButton>
                 </DialogActions>
               </Dialog>
             </Container>

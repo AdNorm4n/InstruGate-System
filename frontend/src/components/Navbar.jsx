@@ -11,7 +11,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import HomeRepairServiceIcon from "@mui/icons-material/HomeRepairService";
 import PersonIcon from "@mui/icons-material/Person";
 import api from "../api";
-import headerBanner from "../assets/menu.png";
+import headerBanner from "../assets/companylogo.png";
 import logo from "../assets/ashcroft.png";
 import centerLogo from "../assets/instrugate.png";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
@@ -38,31 +38,36 @@ export default function Navbar() {
   };
 
   const menuItems = [
-    { text: "Home", fontWeight: "bold", icon: <HomeIcon />, path: "/" },
+    {
+      text: "Home",
+      fontWeight: "bold",
+      icon: <HomeIcon sx={{ color: "#333333" }} />,
+      path: "/",
+    },
     ...(userRole !== "admin"
       ? [
           {
             text: "About",
             fontWeight: "bold",
-            icon: <InfoIcon />,
+            icon: <InfoIcon sx={{ color: "#333333" }} />,
             path: "/about",
           },
           {
             text: "Tools",
             fontWeight: "bold",
-            icon: <HomeRepairServiceIcon />,
+            icon: <HomeRepairServiceIcon sx={{ color: "#333333" }} />,
             path: "/tools",
           },
           {
             text: "Products",
             fontWeight: "bold",
-            icon: <StorefrontIcon />,
+            icon: <StorefrontIcon sx={{ color: "#333333" }} />,
             path: "/instruments",
           },
           {
             text: "Quotations",
             fontWeight: "bold",
-            icon: <ArchiveIcon />,
+            icon: <ArchiveIcon sx={{ color: "#333333" }} />,
             path: "/quotations/submitted/",
           },
         ]
@@ -72,7 +77,7 @@ export default function Navbar() {
           {
             text: "Admin Panel",
             fontWeight: "bold",
-            icon: <AdminPanelSettingsIcon />,
+            icon: <AdminPanelSettingsIcon sx={{ color: "#333333" }} />,
             action: handleAdminPanel,
           },
         ]
@@ -90,7 +95,6 @@ export default function Navbar() {
           maxWidth: "100vw",
           boxSizing: "border-box",
           zIndex: 1200,
-          transition: "all 0.3s ease-in-out",
         }}
       >
         <Toolbar
@@ -104,20 +108,15 @@ export default function Navbar() {
             width: "100%",
             maxWidth: "100%",
             boxSizing: "border-box",
-            transition: "background-color 0.3s ease",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <img
-                src={logo}
-                alt="New Logo"
-                style={{ height: "28px", transition: "transform 0.2s ease" }}
-              />
+              <img src={logo} alt="New Logo" style={{ height: "28px" }} />
               <img
                 src={headerBanner}
                 alt="Header Banner"
-                style={{ height: "42px", transition: "transform 0.2s ease" }}
+                style={{ height: "42px" }}
               />
             </Box>
           </Box>
@@ -133,7 +132,7 @@ export default function Navbar() {
             <img
               src={centerLogo}
               alt="Center Logo"
-              style={{ height: "34px", transition: "transform 0.2s ease" }}
+              style={{ height: "34px" }}
             />
           </Box>
           <Box sx={{ display: "flex", gap: 2 }}>
@@ -154,7 +153,6 @@ export default function Navbar() {
         maxWidth: "100vw",
         boxSizing: "border-box",
         zIndex: 1200,
-        transition: "all 0.3s ease-in-out",
       }}
     >
       <Toolbar
@@ -168,20 +166,15 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
-          transition: "background-color 0.3s ease",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <img
-              src={logo}
-              alt="New Logo"
-              style={{ height: "28px", transition: "transform 0.2s ease" }}
-            />
+            <img src={logo} alt="New Logo" style={{ height: "28px" }} />
             <img
               src={headerBanner}
               alt="Header Banner"
-              style={{ height: "42px", transition: "transform 0.2s ease" }}
+              style={{ height: "42px" }}
             />
           </Box>
         </Box>
@@ -194,11 +187,7 @@ export default function Navbar() {
             alignItems: "center",
           }}
         >
-          <img
-            src={centerLogo}
-            alt="Center Logo"
-            style={{ height: "42px", transition: "transform 0.2s ease" }}
-          />
+          <img src={centerLogo} alt="Center Logo" style={{ height: "42px" }} />
         </Box>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button
@@ -214,8 +203,6 @@ export default function Navbar() {
               bgcolor: "transparent",
               "&:hover": {
                 bgcolor: "#333333",
-                transform: "scale(1.05)",
-                transition: "all 0.2s ease",
               },
               fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1.5,
@@ -239,7 +226,6 @@ export default function Navbar() {
               "&:hover": {
                 bgcolor: "#333333",
                 transform: "scale(1.05)",
-                transition: "all 0.2s ease",
               },
               fontFamily: "'Inter', Helvetica, sans-serif",
               px: 1.5,
@@ -261,7 +247,6 @@ export default function Navbar() {
           width: "100%",
           maxWidth: "100%",
           boxSizing: "border-box",
-          transition: "background-color 0.3s ease",
         }}
       >
         <Box
@@ -287,7 +272,6 @@ export default function Navbar() {
                 "&:hover": {
                   bgcolor: "#b32b2e",
                   transform: "scale(1.05)",
-                  transition: "all 0.2s ease",
                 },
                 fontFamily: "'Inter', Helvetica, sans-serif",
                 px: 1.5,
