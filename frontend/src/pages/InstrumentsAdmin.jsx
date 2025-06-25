@@ -2491,7 +2491,7 @@ const InstrumentsAdmin = () => {
                     sx={{
                       display: "flex",
                       gap: 2,
-                      mb: 4,
+                      mb: 2,
                       alignItems: "center",
                       justifyContent: "space-between",
                       flexWrap: { xs: "wrap", sm: "nowrap" },
