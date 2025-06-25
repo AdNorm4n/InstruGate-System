@@ -245,7 +245,9 @@ function About() {
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <CardContent
+                      sx={{ flexGrow: 1, p: 3, backgroundColor: "#000000" }}
+                    >
                       <Box
                         className="product-image-wrapper"
                         sx={{
@@ -316,7 +318,9 @@ function About() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <CardContent
+                      sx={{ flexGrow: 1, p: 3, backgroundColor: "#000000" }}
+                    >
                       <Box
                         className="product-image-wrapper"
                         sx={{
@@ -371,7 +375,9 @@ function About() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                    <CardContent
+                      sx={{ flexGrow: 1, p: 3, backgroundColor: "#000000" }}
+                    >
                       <Box
                         className="product-image-wrapper"
                         sx={{
