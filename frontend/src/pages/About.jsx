@@ -64,6 +64,8 @@ const Section = styled(Box)(({ theme }) => ({
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
   },
   fontFamily: "'Inter', sans-serif !important",
+  width: "100%",
+  maxWidth: "1200px",
 }));
 
 const HeaderSection = styled(Box)(({ theme }) => ({
@@ -71,6 +73,8 @@ const HeaderSection = styled(Box)(({ theme }) => ({
   padding: theme.spacing(8, 0),
   marginBottom: theme.spacing(4),
   fontFamily: "'Inter', sans-serif !important",
+  width: "100%",
+  maxWidth: "1200px",
 }));
 
 const ProductCard = styled(Card)(({ theme }) => ({
@@ -196,6 +200,7 @@ function About() {
                   color: "#ffffff !important",
                   fontSize: "1.25rem",
                   lineHeight: 1.7,
+                  textAlign: "justify",
                 }}
               >
                 Rueger Sdn. Bhd., established in 1997 as a subsidiary of Rueger
@@ -234,6 +239,7 @@ function About() {
                   color: "#ffffff !important",
                   fontSize: "1.25rem",
                   lineHeight: 1.7,
+                  textAlign: "justify",
                 }}
               >
                 Founded in 1942 in Lausanne, Switzerland, Rueger SA has been a
@@ -273,10 +279,11 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "250px",
+                          height: "350px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
+                          border: "1px solid #4b5563",
                         }}
                       >
                         <img
@@ -286,6 +293,10 @@ function About() {
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
+                            transition: "transform 0.3s ease",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                            },
                           }}
                         />
                       </Box>
@@ -308,6 +319,7 @@ function About() {
                           color: "#ffffff !important",
                           lineHeight: 1.6,
                           fontSize: "1.25rem",
+                          textAlign: "justify",
                         }}
                       >
                         • Pressure Gauges
@@ -341,10 +353,11 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "250px",
+                          height: "350px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
+                          border: "1px solid #4b5563",
                         }}
                       >
                         <img
@@ -354,6 +367,10 @@ function About() {
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
+                            transition: "transform 0.3s ease",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                            },
                           }}
                         />
                       </Box>
@@ -376,6 +393,7 @@ function About() {
                           color: "#ffffff !important",
                           lineHeight: 1.6,
                           fontSize: "1.25rem",
+                          textAlign: "justify",
                         }}
                       >
                         • Thermometers
@@ -393,10 +411,11 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "250px",
+                          height: "350px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
+                          border: "1px solid #4b5563",
                         }}
                       >
                         <img
@@ -406,6 +425,10 @@ function About() {
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
+                            transition: "transform 0.3s ease",
+                            "&:hover": {
+                              transform: "scale(1.05)",
+                            },
                           }}
                         />
                       </Box>
@@ -428,6 +451,7 @@ function About() {
                           color: "#ffffff !important",
                           lineHeight: 1.6,
                           fontSize: "1.25rem",
+                          textAlign: "justify",
                         }}
                       >
                         • Test Gauges
@@ -448,6 +472,7 @@ function About() {
                   color: "#ffffff !important",
                   fontSize: "1.25rem",
                   lineHeight: 1.6,
+                  textAlign: "justify",
                 }}
               >
                 Applications: Chemical, petrochemical, oil & gas, power,
@@ -476,6 +501,7 @@ function About() {
                   color: "#ffffff !important",
                   fontSize: "1.25rem",
                   lineHeight: 1.7,
+                  textAlign: "justify",
                 }}
               >
                 With subsidiaries in Germany, Malaysia, and China, and over 50
@@ -644,7 +670,10 @@ function About() {
                     fontFamily: "'Inter', sans-serif !important",
                   }}
                 >
-                  <LinkedIn fontSize="large" />
+                  <LinkedIn
+                    sx={{ color: "#3b82f6 !important" }}
+                    fontSize="large"
+                  />
                 </IconButton>
               </Box>
             </Section>
