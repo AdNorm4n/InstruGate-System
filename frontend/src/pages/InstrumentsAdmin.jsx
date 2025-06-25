@@ -1333,13 +1333,7 @@ const InstrumentsAdmin = () => {
           <Box
             sx={{ mb: 2, display: "flex", alignItems: "flex-start", gap: 2 }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
-            >
+            <Box>
               <input
                 type="file"
                 accept="image/jpeg,image/png"
@@ -1358,15 +1352,7 @@ const InstrumentsAdmin = () => {
               />
               {(imagePreview ||
                 (modalData.image && typeof modalData.image === "string")) && (
-                <Box
-                  sx={{
-                    mt: 2,
-                    textAlign: "left",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                  }}
-                >
+                <Box sx={{ mt: 2, textAlign: "left" }}>
                   <img
                     src={imagePreview || modalData.image}
                     alt="Instrument Preview"
@@ -1400,13 +1386,11 @@ const InstrumentsAdmin = () => {
                       setImagePreview(null);
                     }}
                     sx={{
-                      mt: 0,
+                      mt: 1,
                       bgcolor: "#ef4444",
                       "&:hover": { bgcolor: "#dc2626" },
                       fontFamily: "'Inter', sans-serif",
                       color: "#ffffff",
-                      minWidth: "100px",
-                      height: "40px",
                     }}
                   >
                     Remove Image
