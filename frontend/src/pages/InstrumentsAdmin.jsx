@@ -55,7 +55,7 @@ const ToolCard = styled(Paper)(({ theme }) => ({
     transform: "translateY(-2px)",
     boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)",
   },
-  fontFamily: "'Inter', Helvetica, sans-serif",
+  fontFamily: "'Inter', sans-serif",
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -66,7 +66,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.85rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "'Inter', Helvetica, sans-serif",
+  fontFamily: "'Inter', sans-serif",
   "&:hover": {
     backgroundColor: "#2563eb",
     transform: "scale(1.03)",
@@ -83,7 +83,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 
 const CancelButton = styled(Button)(({ theme }) => ({
   color: "#ef4444",
-  fontFamily: "'Inter', Helvetica, sans-serif",
+  fontFamily: "'Inter', sans-serif",
   textTransform: "none",
   "&:hover": {
     color: "#dc2626",
