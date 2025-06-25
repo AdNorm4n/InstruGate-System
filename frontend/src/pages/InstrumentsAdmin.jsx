@@ -2482,7 +2482,7 @@ const InstrumentsAdmin = () => {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       sx={{
-                        width: { xs: "100%", sm: "40%" },
+                        width: { xs: "100%", sm: "50%" }, // Increased search field width
                         "& .MuiOutlinedInput-root": {
                           borderRadius: "8px",
                           fontFamily: "'Inter', sans-serif",
@@ -2508,7 +2508,7 @@ const InstrumentsAdmin = () => {
                         ENTITY_TYPES.CONFIGURABLE_FIELDS ||
                       tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) && (
                       <FormControl
-                        sx={{ width: { xs: "100%", sm: "40%" } }}
+                        sx={{ width: { xs: "100%", sm: "24%" } }} // Reduced filter width to match button
                         size="small"
                       >
                         <InputLabel
@@ -2566,10 +2566,10 @@ const InstrumentsAdmin = () => {
                           MenuProps={{
                             PaperProps: {
                               sx: {
-                                bgcolor: "#000000", // Black background for dropdown
+                                bgcolor: "#000000",
                                 "& .MuiMenuItem-root": {
                                   fontFamily: "'Inter', sans-serif",
-                                  color: "#ffffff", // White text for dropdown items
+                                  color: "#ffffff",
                                   "&:hover": {
                                     bgcolor: "#3b82f61a",
                                     color: "#ffffff",
@@ -2623,7 +2623,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         borderRadius: "8px",
-                        px: 5,
+                        px: 4,
                         py: 1.5,
                         fontSize: "0.9rem",
                         fontWeight: 600,
@@ -2634,7 +2634,7 @@ const InstrumentsAdmin = () => {
                           bgcolor: "#4b5563",
                           color: "#9ca3af",
                         },
-                        width: { xs: "100%", sm: "20%" },
+                        width: { xs: "100%", sm: "24%" }, // Matched button width to filter
                         minWidth: { xs: "100%", sm: "180px" },
                       }}
                     >
@@ -2644,6 +2644,7 @@ const InstrumentsAdmin = () => {
                         : tabs[activeTab].name.slice(0, -1)}
                     </CTAButton>
                   </Box>
+                  Changes Made: Filter Dropdown Width
                   {renderTable()}
                 </>
               )}
