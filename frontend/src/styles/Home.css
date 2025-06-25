@@ -129,7 +129,7 @@
 
 @media (max-width: 600px) {
   .home-hero {
-    padding: 120px 16px;
+    padding: 0px 16px !important;
   }
 
   .home-wrapper .MuiTypography-h5 {
