@@ -261,7 +261,7 @@ export default function Navbar() {
             <Button
               key={item.text}
               startIcon={React.cloneElement(item.icon, {
-                sx: { color: "#ffffff", fontSize: "1.2rem" },
+                sx: { fontSize: "1.2rem" },
               })}
               onClick={item.action || (() => navigate(item.path))}
               sx={{
