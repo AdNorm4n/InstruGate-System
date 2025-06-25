@@ -2798,7 +2798,7 @@ const InstrumentsAdmin = () => {
                   "& .MuiDialog-paper": {
                     bgcolor: "#1e1e1e",
                     borderRadius: "16px",
-                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.8)",
                     fontFamily: "'Inter', sans-serif",
                   },
                 }}
@@ -2822,9 +2822,10 @@ const InstrumentsAdmin = () => {
                   <Typography
                     sx={{
                       fontFamily: "'Inter', sans-serif",
-                      color: "#3b82f6",
+                      color: "#ffffff", // changed to white
                       fontSize: "1rem",
                       fontWeight: 500,
+                      paddingTop: 2,
                     }}
                   >
                     {confirmMessage}
@@ -2857,7 +2858,7 @@ const InstrumentsAdmin = () => {
                     sx={{
                       fontFamily: "'Inter', sans-serif",
                       bgcolor: "#ef4444",
-                      color: "#d6393a",
+                      color: "#ffffff",
                       fontWeight: 600,
                       fontSize: "0.9rem",
                       px: 4,
