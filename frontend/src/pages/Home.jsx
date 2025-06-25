@@ -23,11 +23,12 @@ import testImage from "../assets/test.jpg";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
+  minHeight: "48px !important", // Reduced height for less top spacing
 }));
 
 const Section = styled(Box)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
-  padding: theme.spacing(2),
+  marginBottom: theme.spacing(3), // Reduced from 4
+  padding: theme.spacing(1.5), // Reduced from 2
   backgroundColor: "#ffffff",
   borderRadius: "8px",
   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
@@ -47,7 +48,7 @@ const Section = styled(Box)(({ theme }) => ({
 const CTAButton = styled(Button)(({ theme }) => ({
   backgroundColor: "#1976d2",
   color: "#ffffff",
-  padding: theme.spacing(1, 3),
+  padding: theme.spacing(0.8, 2.5), // Slightly reduced padding
   fontWeight: 600,
   fontSize: "0.9rem",
   textTransform: "none",
@@ -68,7 +69,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
 }));
 
 const RoleCard = styled(Card)(({ theme }) => ({
-  height: "240px",
+  height: "220px", // Slightly reduced height
   display: "flex",
   flexDirection: "column",
   backgroundColor: "#fafafa",
@@ -89,7 +90,7 @@ const RoleCard = styled(Card)(({ theme }) => ({
 }));
 
 const ProductCard = styled(Card)(({ theme }) => ({
-  height: "360px",
+  height: "340px", // Slightly reduced height
   width: "100%",
   maxWidth: "320px",
   display: "flex",
@@ -155,7 +156,7 @@ function Home() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#f8f9fa",
+          bgcolor: "#f5f5f5",
           fontFamily: "Helvetica, sans-serif !important",
         }}
       >
@@ -188,14 +189,16 @@ function Home() {
             </div>
           </section>
 
-          <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Container maxWidth="lg" sx={{ py: 2 }}>
+            {" "}
+            {/* Reduced padding from 4 */}
             <Section>
               <Typography
                 variant="h5"
                 sx={{
                   fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 2,
+                  mb: 1.5, // Reduced from 2
                   color: "#000000",
                   textTransform: "uppercase",
                   fontSize: "1.25rem",
@@ -230,7 +233,7 @@ function Home() {
                             sx={{
                               fontFamily: "Helvetica, sans-serif !important",
                               color: "#333",
-                              mb: 2,
+                              mb: 1.5, // Reduced from 2
                               fontSize: "0.9rem",
                             }}
                           >
@@ -283,7 +286,7 @@ function Home() {
                             sx={{
                               fontFamily: "Helvetica, sans-serif !important",
                               color: "#333",
-                              mb: 2,
+                              mb: 1.5, // Reduced from 2
                               fontSize: "0.9rem",
                             }}
                           >
@@ -338,7 +341,7 @@ function Home() {
                             sx={{
                               fontFamily: "Helvetica, sans-serif !important",
                               color: "#333",
-                              mb: 2,
+                              mb: 1.5, // Reduced from 2
                               fontSize: "0.9rem",
                             }}
                           >
@@ -369,14 +372,13 @@ function Home() {
                 )}
               </Grid>
             </Section>
-
             <Section>
               <Typography
                 variant="h5"
                 sx={{
                   fontFamily: "Helvetica, sans-serif !important",
                   fontWeight: "bold",
-                  mb: 4,
+                  mb: 2, // Reduced from 4
                   color: "#000000",
                   textTransform: "uppercase",
                   fontSize: "1.5rem",
@@ -384,10 +386,16 @@ function Home() {
               >
                 Our Products
               </Typography>
-              <Grid container spacing={3} justifyContent="center">
+              <Grid container spacing={2} justifyContent="center">
+                {" "}
+                {/* Reduced spacing from 3 */}
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
+                    <CardContent
+                      sx={{ flexGrow: 1, overflowY: "auto", p: 2.5 }}
+                    >
+                      {" "}
+                      {/* Reduced padding from 3 */}
                       <Box className="product-image-wrapper">
                         <img
                           src={pressImage}
@@ -400,7 +408,7 @@ function Home() {
                         sx={{
                           fontFamily: "Helvetica, sans-serif !important",
                           fontWeight: "bold",
-                          mb: 2,
+                          mb: 1.5, // Reduced from 2
                           color: "#000000",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
@@ -447,7 +455,11 @@ function Home() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
+                    <CardContent
+                      sx={{ flexGrow: 1, overflowY: "auto", p: 2.5 }}
+                    >
+                      {" "}
+                      {/* Reduced padding from 3 */}
                       <Box className="product-image-wrapper">
                         <img
                           src={tempImage}
@@ -460,7 +472,7 @@ function Home() {
                         sx={{
                           fontFamily: "Helvetica, sans-serif !important",
                           fontWeight: "bold",
-                          mb: 2,
+                          mb: 1.5, // Reduced from 2
                           color: "#000000",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
@@ -491,7 +503,11 @@ function Home() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
+                    <CardContent
+                      sx={{ flexGrow: 1, overflowY: "auto", p: 2.5 }}
+                    >
+                      {" "}
+                      {/* Reduced padding from 3 */}
                       <Box className="product-image-wrapper">
                         <img
                           src={testImage}
@@ -504,7 +520,7 @@ function Home() {
                         sx={{
                           fontFamily: "Helvetica, sans-serif !important",
                           fontWeight: "bold",
-                          mb: 2,
+                          mb: 1.5, // Reduced from 2
                           color: "#000000",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",

@@ -1,5 +1,5 @@
 .about-page {
-  font-family: "Inter, sans-serif";
+  font-family: "Helvetica, sans-serif";
   background-color: #fafafa;
   padding-bottom: 48px;
 }
@@ -58,7 +58,7 @@
 }
 
 .about-page .MuiTypography-h5 {
-  font-family: "Inter, sans-serif";
+  font-family: "Helvetica, sans-serif";
   color: #000000;
   text-transform: uppercase;
   font-weight: bold;
@@ -68,7 +68,7 @@
 
 .about-page .MuiTypography-body1,
 .about-page .MuiTypography-body2 {
-  font-family: "Inter, sans-serif";
+  font-family: "Helvetica, sans-serif";
   color: #333;
   line-height: 1.6;
   font-size: 0.9rem;
@@ -94,7 +94,7 @@
 .about-page .contact-item a {
   text-decoration: none;
   color: #333;
-  font-family: "Inter, sans-serif";
+  font-family: "Helvetica, sans-serif";
 }
 
 .about-page .contact-item a:hover {
