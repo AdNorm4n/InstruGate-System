@@ -2383,7 +2383,7 @@ const InstrumentsAdmin = () => {
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     width: "100%",
-                    bgcolor: "#22c55e",
+                    bgcolor: "#28a745",
                     color: "#ffffff",
                     borderRadius: "8px",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
@@ -2420,7 +2420,7 @@ const InstrumentsAdmin = () => {
                   onClose={() => setError("")}
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#ef4444",
+                    bgcolor: "#d6393a",
                     color: "#ffffff",
                     borderRadius: "8px",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
@@ -2732,7 +2732,7 @@ const InstrumentsAdmin = () => {
                       }
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        bgcolor: "#ef4444",
+                        bgcolor: "#d6393a",
                         color: "#ffffff",
                         borderRadius: "8px",
                         mb: 3,
