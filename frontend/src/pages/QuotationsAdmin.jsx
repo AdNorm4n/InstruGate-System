@@ -16,7 +16,6 @@ import {
   TextField,
   CircularProgress,
   Alert,
-  Paper,
   IconButton,
   Box,
   FormControl,
@@ -25,11 +24,14 @@ import {
   MenuItem,
   TableSortLabel,
   Snackbar,
-  Divider,
   Fade,
-  Link,
+  Add,
+  Edit,
+  Delete,
+  Visibility,
+  Check,
+  Close,
 } from "@mui/material";
-import { Visibility, Delete, Check, Close } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import ErrorBoundary from "../components/ErrorBoundary";
 import { UserContext } from "../contexts/UserContext";
@@ -37,20 +39,12 @@ import api from "../api";
 import "../styles/QuotationsAdmin.css";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme?.mixins?.toolbar,
-}));
-
-const ToolCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
-  backgroundColor: "#1e1e1e",
-  borderRadius: "12px",
-  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
-  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
-  },
-  fontFamily: "'Inter', sans-serif",
+  ...(theme?.mixins?.toolbar || {
+    minHeight: 56,
+    "@media (min-width:600px)": {
+      minHeight: 64,
+    },
+  }),
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
@@ -71,6 +65,9 @@ const CTAButton = styled(Button)(({ theme }) => ({
     color: "#9ca3af",
   },
   transition: "all 0.2s ease",
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
 }));
 
 const CancelButton = styled(Button)(({ theme }) => ({
@@ -154,7 +151,7 @@ const QuotationsAdmin = () => {
       const access = localStorage.getItem("access");
       if (!access) {
         throw new Error(
-          "Please log in to access the quotations management page."
+          "Please log in to access the quotation management page."
         );
       }
       const headers = { Authorization: `Bearer ${access}` };
@@ -201,7 +198,7 @@ const QuotationsAdmin = () => {
     if (contextLoading) return;
 
     if (!userRole) {
-      setError("Please log in to access the quotations management page.");
+      setError("Please log in to access the quotation management page.");
       navigate("/login");
       return;
     }
@@ -461,10 +458,10 @@ const QuotationsAdmin = () => {
     const items = filteredData.quotations || [];
 
     return (
-      <Box sx={{ borderRadius: "12px", p: 3 }}>
+      <Box sx={{ overflowX: "auto", borderRadius: "12px" }}>
         <Table
           sx={{
-            width: "100%", // Full width to avoid scrolling
+            minWidth: 650,
             borderCollapse: "separate",
             borderSpacing: "0 8px",
             bgcolor: "#1a1a1a",
@@ -486,10 +483,22 @@ const QuotationsAdmin = () => {
                     border: "none",
                     width:
                       field === "id"
-                        ? "100px"
-                        : field === "remarks"
-                        ? "150px"
-                        : "1fr", // Smaller remarks column
+                        ? "80px"
+                        : field === "created_by.first_name"
+                        ? "15%"
+                        : field === "company"
+                        ? "20%"
+                        : field === "project_name"
+                        ? "20%"
+                        : field === "status"
+                        ? "15%"
+                        : field === "submitted_at"
+                        ? "15%"
+                        : field === "approved_at"
+                        ? "15%"
+                        : field === "rejected_at"
+                        ? "15%"
+                        : "15%",
                     textAlign: field === "id" ? "center" : "left",
                     "&:first-of-type": {
                       borderTopLeftRadius: "8px",
@@ -530,7 +539,7 @@ const QuotationsAdmin = () => {
                   py: 2,
                   px: 3,
                   border: "none",
-                  width: "150px",
+                  width: "120px",
                   textAlign: "center",
                   borderTopRightRadius: "8px",
                   borderBottomRightRadius: "8px",
@@ -548,14 +557,21 @@ const QuotationsAdmin = () => {
                   align="center"
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    color: "#9ca3af",
+                    color: "#ffffff",
                     py: 4,
                     fontSize: "0.95rem",
                     border: "none",
                     bgcolor: "#1a1a1a",
                   }}
                 >
-                  No quotations found.
+                  <Typography
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                    }}
+                  >
+                    No quotations found.
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -575,16 +591,28 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         fontSize: "0.9rem",
-                        color: "#ffffff",
+                        color: "#ffffff !important",
                         py: 2,
-                        px: 4,
+                        px: 3,
                         border: "none",
                         width:
                           field === "id"
-                            ? "100px"
-                            : field === "remarks"
-                            ? "150px"
-                            : "1fr",
+                            ? "80px"
+                            : field === "created_by.first_name"
+                            ? "15%"
+                            : field === "company"
+                            ? "20%"
+                            : field === "project_name"
+                            ? "20%"
+                            : field === "status"
+                            ? "15%"
+                            : field === "submitted_at"
+                            ? "15%"
+                            : field === "approved_at"
+                            ? "15%"
+                            : field === "rejected_at"
+                            ? "15%"
+                            : "15%",
                         textAlign: field === "id" ? "center" : "left",
                         ...(field === "status" && {
                           color:
@@ -610,7 +638,7 @@ const QuotationsAdmin = () => {
                       {field === "remarks" ? (
                         <span>
                           {truncateRemarks(getField(item, field))}
-                          <Link
+                          <Button
                             component="button"
                             onClick={() =>
                               handleOpenRemarksDialog(getField(item, field))
@@ -618,14 +646,15 @@ const QuotationsAdmin = () => {
                             sx={{
                               ml: 1,
                               color: "#3b82f6",
-                              textDecoration: "underline",
                               fontFamily: "'Inter', sans-serif",
-                              fontSize: "0.85rem",
+                              fontSize: "0.9rem",
+                              fontWeight: 600,
+                              textTransform: "none",
                               "&:hover": { color: "#2563eb" },
                             }}
                           >
                             View More
-                          </Link>
+                          </Button>
                         </span>
                       ) : (
                         getField(item, field)
@@ -633,7 +662,13 @@ const QuotationsAdmin = () => {
                     </TableCell>
                   ))}
                   <TableCell
-                    sx={{ py: 2, px: 3, border: "none", width: "150px" }}
+                    sx={{
+                      py: 2,
+                      px: 3,
+                      border: "none",
+                      width: "120px",
+                      textAlign: "center",
+                    }}
                   >
                     <Box
                       sx={{ display: "flex", flexDirection: "column", gap: 1 }}
@@ -662,7 +697,7 @@ const QuotationsAdmin = () => {
                           title="Delete Quotation"
                         >
                           <Delete
-                            sx={{ fontSize: "1.2rem", color: "#d6393a" }}
+                            sx={{ fontSize: "1.2rem", color: "#ef4444" }}
                           />
                         </IconButton>
                       </Box>
@@ -768,7 +803,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#4b5563",
@@ -821,7 +856,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "#ffffff !important",
@@ -849,7 +884,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "#ffffff !important",
@@ -877,7 +912,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "#ffffff !important",
@@ -909,7 +944,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "#ffffff !important",
@@ -941,7 +976,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "#ffffff !important",
@@ -976,7 +1011,7 @@ const QuotationsAdmin = () => {
             InputProps={{
               sx: {
                 fontFamily: "'Inter', sans-serif",
-                bgcolor: "#252525",
+                bgcolor: "#2a2a2a",
                 "& .MuiInputBase-input": { color: "#ffffff !important" },
                 "& .MuiInputBase-input.Mui-disabled": {
                   color: "#ffffff !important",
@@ -989,7 +1024,6 @@ const QuotationsAdmin = () => {
             }}
           />
         </Box>
-        <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
         <Typography
           variant="h6"
           sx={{
@@ -1111,7 +1145,7 @@ const QuotationsAdmin = () => {
           </Table>
         ) : (
           <Typography
-            sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
+            sx={{ fontFamily: "'Inter', sans-serif", color: "#ffffff" }}
           >
             No instruments submitted for this quotation.
           </Typography>
@@ -1152,7 +1186,7 @@ const QuotationsAdmin = () => {
                   color: "#ffffff",
                 }}
               >
-                Loading data...
+                Loading quotations...
               </Typography>
             </Box>
           </Container>
@@ -1166,14 +1200,25 @@ const QuotationsAdmin = () => {
       <Fade in>
         <Box sx={{ minHeight: "100vh", bgcolor: "#000000" }}>
           <Container maxWidth="lg">
-            <ToolCard sx={{ maxWidth: 800, mx: "auto", mt: 8 }}>
+            <Box
+              sx={{
+                maxWidth: 800,
+                mx: "auto",
+                mt: 8,
+                p: 4,
+                borderRadius: "16px",
+                bgcolor: "#1e1e1e",
+              }}
+            >
               <Alert
                 severity="error"
                 sx={{
                   borderRadius: "8px",
                   fontFamily: "'Inter', sans-serif",
-                  bgcolor: "#1e1e1e",
+                  bgcolor: "#ef4444",
                   color: "#ffffff",
+                  "& .MuiAlert-icon": { color: "#ffffff" },
+                  "& .MuiAlert-action svg": { fill: "#ffffff" },
                 }}
               >
                 <Typography
@@ -1186,7 +1231,7 @@ const QuotationsAdmin = () => {
                   {error}
                 </Typography>
               </Alert>
-            </ToolCard>
+            </Box>
           </Container>
         </Box>
       </Fade>
@@ -1194,20 +1239,26 @@ const QuotationsAdmin = () => {
   }
 
   return (
-    <Fade in timeout={800}>
+    <Fade in timeout={600}>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           bgcolor: "#000000",
-          minHeight: "100vh",
           width: "100%",
+          margin: 0,
+          padding: 0,
+          boxSizing: "border-box",
+          overflowX: "hidden",
         }}
         className="quotations-admin-page"
       >
-        <DrawerHeader />
         <main
-          style={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            minHeight: "100vh",
+          }}
         >
           <ErrorBoundary>
             <Container
@@ -1215,9 +1266,11 @@ const QuotationsAdmin = () => {
               sx={{
                 py: 8,
                 px: { xs: 2, sm: 4 },
+                width: "100%",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                boxSizing: "border-box",
               }}
             >
               <Typography
@@ -1231,6 +1284,7 @@ const QuotationsAdmin = () => {
                   mb: 5,
                   fontSize: { xs: "1.75rem", md: "2.25rem" },
                   letterSpacing: "-0.02em",
+                  textTransform: "none",
                   position: "relative",
                   "&:after": {
                     content: '""',
@@ -1246,8 +1300,9 @@ const QuotationsAdmin = () => {
                   },
                 }}
               >
-                Quotations Management
+                Quotation Management
               </Typography>
+              <Box sx={{ mt: 4 }} />
               <Snackbar
                 open={!!success}
                 autoHideDuration={3000}
@@ -1258,11 +1313,18 @@ const QuotationsAdmin = () => {
                   severity="success"
                   onClose={() => setSuccess("")}
                   sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#22c55e",
+                    fontFamily: "'Inter', sans-serif !important",
+                    width: "100%",
                     color: "#ffffff",
-                    "& .MuiAlert-icon": { color: "#ffffff" },
-                    "& .MuiAlert-action svg": { fill: "#ffffff" },
+                    backgroundColor: "#28a745",
+                    "& .MuiAlert-icon": {
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
+                    },
                   }}
                 >
                   {success}
@@ -1278,30 +1340,36 @@ const QuotationsAdmin = () => {
                   severity="error"
                   onClose={() => setError("")}
                   sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#ef4444",
+                    fontFamily: "'Inter', sans-serif !important",
                     color: "#ffffff",
-                    "& .MuiAlert-icon": { color: "#ffffff" },
-                    "& .MuiAlert-action svg": { fill: "#ffffff" },
+                    backgroundColor: "#ef4444",
+                    "& .MuiAlert-icon": {
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
+                    },
+                    "& .MuiAlert-action": {
+                      color: "#ffffff !important",
+                      svg: { fill: "#ffffff !important" },
+                    },
                   }}
                 >
                   {error}
                 </Alert>
               </Snackbar>
-              <ToolCard sx={{ width: "100%" }}>
+              <Box sx={{ width: "100%", mb: 4 }}>
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
                     gap: 2,
                     mb: 4,
-                    alignItems: { xs: "stretch", sm: "center" },
+                    alignItems: "center",
                     justifyContent: "space-between",
                     flexWrap: { xs: "wrap", sm: "nowrap" },
+                    width: "100%",
                   }}
                 >
                   <TextField
-                    label={`Search by ${tabs[0].searchFields.join(" or ")}`}
+                    label="Search by Company or Project Name"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{
@@ -1309,13 +1377,12 @@ const QuotationsAdmin = () => {
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "8px",
                         fontFamily: "'Inter', sans-serif",
-                        bgcolor: "#252525",
-                        "& .MuiInputBase-input": {
-                          color: "#ffffff !important",
-                        },
+                        bgcolor: "#2a2a2a",
+                        color: "#ffffff",
                         "& fieldset": { borderColor: "#4b5563" },
                         "&:hover fieldset": { borderColor: "#3b82f6" },
                         "&.Mui-focused fieldset": { borderColor: "#3b82f6" },
+                        "& input": { color: "#ffffff !important" },
                       },
                       "& .MuiInputLabel-root": {
                         fontFamily: "'Inter', sans-serif",
@@ -1326,7 +1393,7 @@ const QuotationsAdmin = () => {
                     size="small"
                   />
                   <FormControl
-                    sx={{ width: { xs: "100%", sm: "50%" } }}
+                    sx={{ width: { xs: "100%", sm: "24%" } }}
                     size="small"
                   >
                     <InputLabel
@@ -1344,8 +1411,8 @@ const QuotationsAdmin = () => {
                       sx={{
                         borderRadius: "8px",
                         fontFamily: "'Inter', sans-serif",
-                        bgcolor: "#252525",
-                        "& .MuiSelect-select": { color: "#ffffff !important" },
+                        bgcolor: "#2a2a2a",
+                        color: "#ffffff !important",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
                         },
@@ -1355,16 +1422,25 @@ const QuotationsAdmin = () => {
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
                         },
+                        "& .MuiSelect-select": {
+                          color: "#ffffff !important",
+                        },
                       }}
                       MenuProps={{
                         PaperProps: {
                           sx: {
-                            bgcolor: "#1a1a1a",
+                            bgcolor: "#000000",
                             "& .MuiMenuItem-root": {
                               fontFamily: "'Inter', sans-serif",
                               color: "#ffffff",
-                              "&:hover": { bgcolor: "#333333" },
-                              "&.Mui-selected": { bgcolor: "#3b82f61a" },
+                              "&:hover": {
+                                bgcolor: "#3b82f61a",
+                                color: "#ffffff",
+                              },
+                              "&.Mui-selected": {
+                                bgcolor: "#3b82f61a",
+                                color: "#ffffff",
+                              },
                             },
                           },
                         },
@@ -1395,159 +1471,286 @@ const QuotationsAdmin = () => {
                       )}
                     </Select>
                   </FormControl>
+                  <CTAButton
+                    variant="contained"
+                    startIcon={<Add sx={{ color: "#ffffff" }} />}
+                    disabled={userRole !== "admin"}
+                    sx={{
+                      borderRadius: "8px",
+                      px: 4,
+                      py: 1.5,
+                      fontSize: "0.9rem",
+                      fontWeight: 600,
+                      fontFamily: "'Inter', sans-serif",
+                      bgcolor: "#3b82f6",
+                      "&:hover": { bgcolor: "#2563eb" },
+                      "&.Mui-disabled": {
+                        bgcolor: "#4b5563",
+                        color: "#9ca3af",
+                      },
+                      width: { xs: "100%", sm: "24%" },
+                      minWidth: { xs: "100%", sm: "180px" },
+                    }}
+                  >
+                    Add Quotation
+                  </CTAButton>
                 </Box>
                 {renderTable()}
-              </ToolCard>
-            </Container>
-            <Dialog
-              open={openModal}
-              onClose={handleModalClose}
-              maxWidth={modalAction === "reject" ? "sm" : "lg"}
-              fullWidth
-              sx={{
-                "& .MuiDialog-paper": {
-                  bgcolor: "#1e1e1e",
-                  borderRadius: "16px",
-                },
-              }}
-            >
-              <DialogTitle
+              </Box>
+              <Dialog
+                open={openModal}
+                onClose={handleModalClose}
+                maxWidth={modalAction === "reject" ? "sm" : "lg"}
+                fullWidth
                 sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 600,
-                  color: "#3b82f6",
-                  bgcolor: "#1e1e1e",
-                  py: 2.5,
-                  px: 4,
-                  fontSize: "1.25rem",
-                  borderBottom: "1px solid #4b5563",
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
+                    borderRadius: "16px",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
+                    fontFamily: "'Inter', sans-serif",
+                  },
                 }}
               >
-                {modalAction === "reject"
-                  ? "Reject Quotation"
-                  : "View Quotation"}
-              </DialogTitle>
-              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
-                {renderModalContent()}
-              </DialogContent>
-              <DialogActions
-                sx={{
-                  bgcolor: "#1e1e1e",
-                  borderTop: "1px solid #4b5563",
-                  py: 2.5,
-                  px: 4,
-                }}
-              >
-                <CancelButton onClick={handleModalClose}>Close</CancelButton>
-                {modalAction === "reject" && (
-                  <CTAButton type="submit" form="reject-form">
-                    Submit
-                  </CTAButton>
-                )}
-              </DialogActions>
-            </Dialog>
-            <Dialog
-              open={openRemarksDialog}
-              onClose={handleCloseRemarksDialog}
-              maxWidth="sm"
-              fullWidth
-              sx={{
-                "& .MuiDialog-paper": {
-                  bgcolor: "#1e1e1e",
-                  borderRadius: "16px",
-                },
-              }}
-            >
-              <DialogTitle
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 600,
-                  color: "#3b82f6",
-                  bgcolor: "#1e1e1e",
-                  py: 2.5,
-                  px: 4,
-                  fontSize: "1.25rem",
-                  borderBottom: "1px solid #4b5563",
-                }}
-              >
-                Full Remarks
-              </DialogTitle>
-              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
-                <Typography
+                <DialogTitle
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    color: "#ffffff",
-                    whiteSpace: "pre-wrap",
+                    fontWeight: 600,
+                    color: "#3b82f6",
+                    bgcolor: "#1e1e1e",
+                    py: 2.5,
+                    px: 4,
+                    fontSize: "1.25rem",
+                    textAlign: "center",
+                    borderBottom: "1px solid #4b5563",
                   }}
                 >
-                  {selectedRemarks}
-                </Typography>
-              </DialogContent>
-              <DialogActions
-                sx={{
-                  bgcolor: "#1e1e1e",
-                  borderTop: "1px solid #4b5563",
-                  py: 2.5,
-                  px: 4,
-                }}
-              >
-                <CancelButton onClick={handleCloseRemarksDialog}>
-                  Close
-                </CancelButton>
-              </DialogActions>
-            </Dialog>
-            <Dialog
-              open={openConfirmDialog}
-              onClose={handleCloseConfirmDialog}
-              maxWidth="xs"
-              fullWidth
-              sx={{
-                "& .MuiDialog-paper": {
-                  bgcolor: "#1e1e1e",
-                  borderRadius: "16px",
-                },
-              }}
-            >
-              <DialogTitle
-                sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 600,
-                  color: "#3b82f6",
-                  bgcolor: "#1e1e1e",
-                  py: 2.5,
-                  px: 4,
-                  fontSize: "1.25rem",
-                  borderBottom: "1px solid #4b5563",
-                }}
-              >
-                Confirm Deletion
-              </DialogTitle>
-              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
-                <Typography
-                  sx={{ fontFamily: "'Inter', sans-serif", color: "#ffffff" }}
+                  {modalAction === "reject"
+                    ? "Reject Quotation"
+                    : "View Quotation"}
+                </DialogTitle>
+                <DialogContent
+                  sx={{
+                    py: 4,
+                    px: 4,
+                    bgcolor: "#1e1e1e",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                  }}
                 >
-                  {confirmMessage}
-                </Typography>
-              </DialogContent>
-              <DialogActions
+                  {renderModalContent()}
+                </DialogContent>
+                <DialogActions
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2.5,
+                    px: 4,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CancelButton
+                    onClick={handleModalClose}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ef4444",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      "&:hover": { color: "#dc2626" },
+                    }}
+                  >
+                    Cancel
+                  </CancelButton>
+                  {modalAction === "reject" && (
+                    <CTAButton
+                      type="submit"
+                      form="reject-form"
+                      sx={{
+                        fontFamily: "'Inter', sans-serif",
+                        bgcolor: "#3b82f6",
+                        color: "#ffffff",
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "8px",
+                        "&:hover": { bgcolor: "#2563eb" },
+                      }}
+                    >
+                      Submit
+                    </CTAButton>
+                  )}
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openRemarksDialog}
+                onClose={handleCloseRemarksDialog}
+                maxWidth="sm"
+                fullWidth
                 sx={{
-                  bgcolor: "#1e1e1e",
-                  borderTop: "1px solid #4b5563",
-                  py: 2.5,
-                  px: 4,
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
+                    borderRadius: "16px",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
+                    fontFamily: "'Inter', sans-serif",
+                  },
                 }}
               >
-                <CancelButton onClick={handleCloseConfirmDialog}>
-                  Cancel
-                </CancelButton>
-                <CTAButton
-                  sx={{ bgcolor: "#ef4444", "&:hover": { bgcolor: "#dc2626" } }}
-                  onClick={handleConfirmAction}
+                <DialogTitle
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#3b82f6",
+                    bgcolor: "#1e1e1e",
+                    py: 2.5,
+                    px: 4,
+                    fontSize: "1.25rem",
+                    textAlign: "center",
+                    borderBottom: "1px solid #4b5563",
+                  }}
                 >
-                  Delete
-                </CTAButton>
-              </DialogActions>
-            </Dialog>
+                  Full Remarks
+                </DialogTitle>
+                <DialogContent
+                  sx={{
+                    py: 4,
+                    px: 4,
+                    bgcolor: "#1e1e1e",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                      fontSize: "1rem",
+                      fontWeight: 500,
+                      paddingTop: 2,
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {selectedRemarks}
+                  </Typography>
+                </DialogContent>
+                <DialogActions
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2.5,
+                    px: 4,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CancelButton
+                    onClick={handleCloseRemarksDialog}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ef4444",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      "&:hover": { color: "#dc2626" },
+                    }}
+                  >
+                    Cancel
+                  </CancelButton>
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openConfirmDialog}
+                onClose={handleCloseConfirmDialog}
+                maxWidth="xs"
+                fullWidth
+                sx={{
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1e1e1e",
+                    borderRadius: "16px",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
+                    fontFamily: "'Inter', sans-serif",
+                  },
+                }}
+              >
+                <DialogTitle
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#3b82f6",
+                    bgcolor: "#1e1e1e",
+                    py: 2.5,
+                    px: 4,
+                    fontSize: "1.25rem",
+                    textAlign: "center",
+                    borderBottom: "1px solid #4b5563",
+                  }}
+                >
+                  Confirm Deletion
+                </DialogTitle>
+                <DialogContent
+                  sx={{
+                    py: 4,
+                    px: 4,
+                    bgcolor: "#1e1e1e",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                      fontSize: "1rem",
+                      fontWeight: 500,
+                      paddingTop: 2,
+                    }}
+                  >
+                    {confirmMessage}
+                  </Typography>
+                </DialogContent>
+                <DialogActions
+                  sx={{
+                    bgcolor: "#1e1e1e",
+                    borderTop: "1px solid #4b5563",
+                    py: 2.5,
+                    px: 4,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <CancelButton
+                    onClick={handleCloseConfirmDialog}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ef4444",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      "&:hover": { color: "#dc2626" },
+                    }}
+                  >
+                    Cancel
+                  </CancelButton>
+                  <CTAButton
+                    variant="contained"
+                    onClick={handleConfirmAction}
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      bgcolor: "#ef4444",
+                      color: "#ffffff",
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: "8px",
+                      "&:hover": { bgcolor: "#dc2626" },
+                    }}
+                  >
+                    Delete
+                  </CTAButton>
+                </DialogActions>
+              </Dialog>
+            </Container>
           </ErrorBoundary>
         </main>
       </Box>
