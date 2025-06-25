@@ -3,13 +3,15 @@
   background-color: #f8f9fa;
   box-sizing: border-box;
   margin-top: 30px;
+  min-height: 100vh; /* ensures it fills the full screen height */
+  overflow-y: auto; /* enables scrolling if content exceeds viewport */
   display: flex;
   flex-direction: column;
 }
 
 .home-hero {
   text-align: center;
-  padding: 120px;
+  padding: 80px 24px;
   background-image: url("../assets/gas.jpg");
   background-size: contain;
   background-position: center;
