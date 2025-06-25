@@ -124,6 +124,16 @@ const TYPE_CHOICES = [
   { value: "Thermowells", label: "Thermowells" },
 ];
 
+// Helper function to convert string to title case
+const toTitleCase = (str) => {
+  return str
+    .replace("_id", "")
+    .replace("_", " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
 const InstrumentsAdmin = () => {
   const { userRole } = useContext(UserContext);
   const [data, setData] = useState({
