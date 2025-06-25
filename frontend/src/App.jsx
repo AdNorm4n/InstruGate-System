@@ -29,7 +29,7 @@ import ChatComponent from "./components/ChatComponent";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import { UserProvider } from "./contexts/UserContext";
-import Appbar from "./components/MenuBar";
+import Appbar from "./components/Menubar";
 import ToolbarMenu from "./components/ToolbarMenu";
 
 const Layout = () => {
