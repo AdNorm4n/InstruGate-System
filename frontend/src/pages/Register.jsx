@@ -3,7 +3,7 @@ import React from "react";
 import Form from "../components/Form";
 import { Stack, Box, Paper } from "@mui/material";
 import "../styles/Form.css"; // shared styles
-import logo from "../assets/instrugate.png";
+import logo from "../assets/instrugate1.png";
 import companylogo from "../assets/companylogo.png"; // optional, like in login
 
 function Register() {

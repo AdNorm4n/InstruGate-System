@@ -1,7 +1,7 @@
 import React from "react";
 import Form from "../components/Form";
 import { Stack, Box, Paper, Typography } from "@mui/material";
-import logo from "../assets/instrugate.png";
+import logo from "../assets/instrugate1.png";
 import companylogo from "../assets/companylogo.png"; // Ensure this logo is correct
 
 function Login() {
