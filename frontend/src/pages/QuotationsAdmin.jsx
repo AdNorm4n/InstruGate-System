@@ -34,7 +34,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ErrorBoundary from "../components/ErrorBoundary";
-import { Visibility } from "@mui/icons-material";
 import { UserContext } from "../contexts/UserContext";
 import api from "../api";
 import "../styles/QuotationsAdmin.css";
