@@ -1777,7 +1777,6 @@ const InstrumentsAdmin = () => {
                   <InputLabel
                     sx={{ fontFamily: "'Inter', sans-serif", color: "#d1d5db" }}
                   >
-                    Instruments
                     {toTitleCase(field.replace("_ids", "s"))}
                   </InputLabel>
                   <Select
