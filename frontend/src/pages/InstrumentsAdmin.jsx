@@ -1646,9 +1646,9 @@ const InstrumentsAdmin = () => {
                         <TableCell>
                           <IconButton
                             onClick={() => handleDeleteFieldOption(option.id)}
-                            sx={{ color: "#ef4444" }}
+                            sx={{ color: "#d6393a" }}
                           >
-                            <Delete sx={{ color: "#ef4444" }} />
+                            <Delete sx={{ color: "#d6393a" }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -1973,9 +1973,9 @@ const InstrumentsAdmin = () => {
                         <TableCell>
                           <IconButton
                             onClick={() => handleDeleteAddon(addon.id)}
-                            sx={{ color: "#ef4444" }}
+                            sx={{ color: "#d6393a" }}
                           >
-                            <Delete sx={{ color: "#ef4444" }} />
+                            <Delete sx={{ color: "#d6393a" }} />
                           </IconButton>
                         </TableCell>
                       </TableRow>
@@ -2265,7 +2265,7 @@ const InstrumentsAdmin = () => {
                       onClick={() => openEditModal(item)}
                       disabled={userRole !== "admin"}
                       sx={{
-                        color: "#3b82f6",
+                        color: "#ffffff",
                         "&:hover": { color: "#2563eb", bgcolor: "#3b82f61a" },
                         mr: 1,
                       }}
@@ -2276,7 +2276,7 @@ const InstrumentsAdmin = () => {
                       onClick={() => handleDelete(item.id)}
                       disabled={userRole !== "admin"}
                       sx={{
-                        color: "#ef4444",
+                        color: "#d6393a",
                         "&:hover": { color: "#dc2626", bgcolor: "#ef44441a" },
                       }}
                     >
@@ -2857,7 +2857,7 @@ const InstrumentsAdmin = () => {
                     sx={{
                       fontFamily: "'Inter', sans-serif",
                       bgcolor: "#ef4444",
-                      color: "#ffffff",
+                      color: "#d6393a",
                       fontWeight: 600,
                       fontSize: "0.9rem",
                       px: 4,
