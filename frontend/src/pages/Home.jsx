@@ -189,7 +189,7 @@ function Home() {
             </div>
           </section>
 
-          <Container maxWidth="lg">
+          <Container maxWidth="lg" sx={{ py: 0 }}>
             <Section>
               <Typography
                 variant="h5"
