@@ -374,56 +374,67 @@ function Home() {
               <Typography
                 variant="h5"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif !important",
-                  fontWeight: "bold",
+                  fontFamily: "'Inter', sans-serif !important",
+                  fontWeight: 600,
                   mb: 4,
-                  color: "#000000",
-                  textTransform: "uppercase",
-                  fontSize: "1.5rem",
+                  color: "#ffffff !important",
+                  fontSize: "2.5rem",
+                  letterSpacing: "0.02em",
                 }}
               >
-                Our Products
+                Products and Services
               </Typography>
               <Grid container spacing={3} justifyContent="center">
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-                      <Box className="product-image-wrapper">
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box
+                        className="product-image-wrapper"
+                        sx={{
+                          width: "100%",
+                          height: "400px",
+                          mb: 2,
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #4b5563",
+                        }}
+                      >
                         <img
                           src={pressImage}
                           alt="Pressure Instruments"
-                          className="product-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            transition: "transform 0.3s ease",
+                          }}
                         />
                       </Box>
                       <Typography
-                        variant="h5"
+                        variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
+                          fontFamily: "'Inter', sans-serif !important",
+                          fontWeight: 600,
                           mb: 2,
-                          color: "#000000",
-                          textTransform: "uppercase",
-                          fontSize: "1.25rem",
+                          color: "#000000 !important",
+                          fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
                       >
-                        Pressure
-                        <br />
-                        Instruments
+                        Pressure Instruments
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
+                          fontFamily: "'Inter', sans-serif !important",
+                          color: "#000000 !important",
                           lineHeight: 1.6,
-                          fontSize: "0.9rem",
+                          fontSize: "1.25rem",
+                          textAlign: "justify",
                         }}
                       >
                         • Pressure Gauges
                         <br />
                         • Digital Gauges
-                        <br />
-                        • High-Purity
                         <br />
                         • Differential Gauges
                         <br />
@@ -431,15 +442,13 @@ function Home() {
                         <br />
                         • Pressure Sensors
                         <br />
-                        • Diaphragm Seals - Isolators
+                        • Diaphragm Seals
                         <br />
                         • Threaded Seals
                         <br />
                         • Isolation Rings
                         <br />
                         • Flanged Seals
-                        <br />
-                        • In-Line
                         <br />• Accessories
                       </Typography>
                     </CardContent>
@@ -447,36 +456,49 @@ function Home() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-                      <Box className="product-image-wrapper">
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box
+                        className="product-image-wrapper"
+                        sx={{
+                          width: "100%",
+                          height: "400px",
+                          mb: 2,
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #4b5563",
+                        }}
+                      >
                         <img
                           src={tempImage}
                           alt="Temperature Instruments"
-                          className="product-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            transition: "transform 0.3s ease",
+                          }}
                         />
                       </Box>
                       <Typography
-                        variant="h5"
+                        variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
+                          fontFamily: "'Inter', sans-serif !important",
+                          fontWeight: 600,
                           mb: 2,
-                          color: "#000000",
-                          textTransform: "uppercase",
-                          fontSize: "1.25rem",
+                          color: "#000000 !important",
+                          fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
                       >
-                        Temperature
-                        <br />
-                        Instruments
+                        Temperature Instruments
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
+                          fontFamily: "'Inter', sans-serif !important",
+                          color: "#000000 !important",
                           lineHeight: 1.6,
-                          fontSize: "0.9rem",
+                          fontSize: "1.25rem",
+                          textAlign: "justify",
                         }}
                       >
                         • Thermometers
@@ -491,36 +513,49 @@ function Home() {
                 </Grid>
                 <Grid item xs={12} sm={6} md={4}>
                   <ProductCard className="product-card">
-                    <CardContent sx={{ flexGrow: 1, overflowY: "auto", p: 3 }}>
-                      <Box className="product-image-wrapper">
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Box
+                        className="product-image-wrapper"
+                        sx={{
+                          width: "100%",
+                          height: "400px",
+                          mb: 2,
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #4b5563",
+                        }}
+                      >
                         <img
                           src={testImage}
                           alt="Test Instruments"
-                          className="product-image"
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            transition: "transform 0.3s ease",
+                          }}
                         />
                       </Box>
                       <Typography
-                        variant="h5"
+                        variant="h6"
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          fontWeight: "bold",
+                          fontFamily: "'Inter', sans-serif !important",
+                          fontWeight: 600,
                           mb: 2,
-                          color: "#000000",
-                          textTransform: "uppercase",
-                          fontSize: "1.25rem",
+                          color: "#000000 !important",
+                          fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
                       >
-                        Test
-                        <br />
-                        Instruments
+                        Test Instruments
                       </Typography>
                       <Typography
                         sx={{
-                          fontFamily: "Helvetica, sans-serif !important",
-                          color: "#333",
+                          fontFamily: "'Inter', sans-serif !important",
+                          color: "#000000 !important",
                           lineHeight: 1.6,
-                          fontSize: "0.9rem",
+                          fontSize: "1.25rem",
+                          textAlign: "justify",
                         }}
                       >
                         • Test Gauges
@@ -532,6 +567,21 @@ function Home() {
                   </ProductCard>
                 </Grid>
               </Grid>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "'Inter', sans-serif !important",
+                  mt: 3,
+                  display: "block",
+                  color: "#ffffff !important",
+                  fontSize: "1.25rem",
+                  lineHeight: 1.6,
+                  textAlign: "justify",
+                }}
+              >
+                Applications: Chemical, petrochemical, oil & gas, power,
+                shipbuilding, food, HVAC, and more.
+              </Typography>
             </Section>
           </Container>
         </main>

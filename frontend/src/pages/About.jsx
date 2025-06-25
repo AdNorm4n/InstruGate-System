@@ -142,7 +142,7 @@ function About() {
                 sx={{
                   maxWidth: { xs: 300, md: 400 },
                   mt: 2,
-                  mb: 4,
+                  mb: 6,
                   display: "block",
                   margin: "0 auto",
                   filter: "brightness(1.1)",
