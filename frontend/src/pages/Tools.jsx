@@ -24,7 +24,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const ToolButton = styled(Button)(({ theme, active }) => ({
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
   fontWeight: 600,
   textTransform: "uppercase",
   padding: theme.spacing(1, 3),
@@ -49,7 +49,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
+  fontFamily: "Inter, sans-serif",
   "&:hover": {
     backgroundColor: "#1565c0",
     transform: "scale(1.05)",
@@ -71,7 +71,7 @@ const ResetButton = styled(Button)(({ theme }) => ({
   fontWeight: 600,
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
   "&:hover": {
     backgroundColor: "#d0d0d0",
     transform: "scale(1.05)",
@@ -81,12 +81,12 @@ const ResetButton = styled(Button)(({ theme }) => ({
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
-    fontFamily: "Helvetica, sans-serif !important",
+    fontFamily: "Inter, sans-serif !important",
     fontSize: "0.9rem",
     height: "48px",
   },
   "& .MuiInputLabel-root": {
-    fontFamily: "Helvetica, sans-serif !important",
+    fontFamily: "Inter, sans-serif !important",
     fontSize: "0.9rem",
     transform: "translate(14px, 14px) scale(1)",
     "&.MuiInputLabel-shrink": {
@@ -120,7 +120,7 @@ const ToolCard = styled(Box)(({ theme }) => ({
     transform: "translateY(-4px)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
   },
-  fontFamily: "Helvetica, sans-serif !important",
+  fontFamily: "Inter, sans-serif !important",
 }));
 
 function Tools() {
@@ -560,7 +560,7 @@ function Tools() {
           flexDirection: "column",
           minHeight: "100vh",
           backgroundColor: "#f8f9fa",
-          fontFamily: "Helvetica, sans-serif !important",
+          fontFamily: "Inter, sans-serif !important",
         }}
       >
         <DrawerHeader />
@@ -571,7 +571,7 @@ function Tools() {
               align="center"
               gutterBottom
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 fontWeight: "bold",
                 textTransform: "uppercase",
                 color: "#000000",
@@ -585,7 +585,7 @@ function Tools() {
               variant="body1"
               align="center"
               sx={{
-                fontFamily: "Helvetica, sans-serif !important",
+                fontFamily: "Inter, sans-serif !important",
                 color: "#333",
                 mb: 6,
                 fontSize: "0.9rem",
@@ -621,7 +621,7 @@ function Tools() {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
                       color: "#000000",
@@ -713,7 +713,7 @@ function Tools() {
                     <Typography
                       sx={{
                         mt: 3,
-                        fontFamily: "Helvetica, sans-serif !important",
+                        fontFamily: "Inter, sans-serif !important",
                         fontWeight: "bold",
                         color: "#333",
                         fontSize: "0.9rem",
@@ -728,7 +728,7 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontSize: "0.85rem",
                       backgroundColor: "#e3f2fd",
                     }}
@@ -743,7 +743,7 @@ function Tools() {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
                       color: "#000000",
@@ -877,7 +877,7 @@ function Tools() {
                         <Typography
                           color="error"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "Inter, sans-serif !important",
                             fontSize: "0.9rem",
                           }}
                         >
@@ -886,7 +886,7 @@ function Tools() {
                       ) : (
                         <Typography
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "Inter, sans-serif !important",
                             fontWeight: "bold",
                             color: "#333",
                             fontSize: "0.9rem",
@@ -910,7 +910,7 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontSize: "0.85rem",
                       backgroundColor: "#e3f2fd",
                     }}
@@ -925,7 +925,7 @@ function Tools() {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
                       color: "#000000",
@@ -949,7 +949,7 @@ function Tools() {
                           PaperProps: {
                             sx: {
                               minWidth: "200px !important",
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                             },
                           },
                         }}
@@ -983,7 +983,7 @@ function Tools() {
                           PaperProps: {
                             sx: {
                               minWidth: "200px !important",
-                              fontFamily: "Helvetica, sans-serif !important",
+                              fontFamily: "Inter, sans-serif !important",
                             },
                           },
                         }}
@@ -1017,7 +1017,7 @@ function Tools() {
                         <Typography
                           color="error"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "Inter, sans-serif !important",
                             fontSize: "0.9rem",
                           }}
                         >
@@ -1029,8 +1029,7 @@ function Tools() {
                             <TableRow>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   fontWeight: "bold",
                                 }}
                               >
@@ -1038,8 +1037,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   fontWeight: "bold",
                                 }}
                               >
@@ -1060,7 +1058,7 @@ function Tools() {
                                   <TableCell
                                     sx={{
                                       fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                        "Inter, sans-serif !important",
                                       padding: "12px",
                                     }}
                                   >
@@ -1069,7 +1067,7 @@ function Tools() {
                                   <TableCell
                                     sx={{
                                       fontFamily:
-                                        "Helvetica, sans-serif !important",
+                                        "Inter, sans-serif !important",
                                       padding: "12px",
                                     }}
                                   >
@@ -1087,7 +1085,7 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontSize: "0.85rem",
                       backgroundColor: "#e3f2fd",
                     }}
@@ -1102,7 +1100,7 @@ function Tools() {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontWeight: "bold",
                       mb: 3,
                       color: "#000000",
@@ -1232,7 +1230,7 @@ function Tools() {
                         <Typography
                           color="error"
                           sx={{
-                            fontFamily: "Helvetica, sans-serif !important",
+                            fontFamily: "Inter, sans-serif !important",
                             fontSize: "0.9rem",
                           }}
                         >
@@ -1244,8 +1242,7 @@ function Tools() {
                             <TableRow>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   fontWeight: "bold",
                                 }}
                               >
@@ -1253,8 +1250,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   fontWeight: "bold",
                                 }}
                               >
@@ -1266,8 +1262,7 @@ function Tools() {
                             <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1275,8 +1270,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1286,8 +1280,7 @@ function Tools() {
                             <TableRow>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1295,8 +1288,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1307,8 +1299,7 @@ function Tools() {
                             <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1316,8 +1307,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1327,8 +1317,7 @@ function Tools() {
                             <TableRow>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1336,8 +1325,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1347,8 +1335,7 @@ function Tools() {
                             <TableRow sx={{ backgroundColor: "#f9f9f9" }}>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1356,8 +1343,7 @@ function Tools() {
                               </TableCell>
                               <TableCell
                                 sx={{
-                                  fontFamily:
-                                    "Helvetica, sans-serif !important",
+                                  fontFamily: "Inter, sans-serif !important",
                                   padding: "12px",
                                 }}
                               >
@@ -1375,7 +1361,7 @@ function Tools() {
                     severity="info"
                     sx={{
                       mt: 3,
-                      fontFamily: "Helvetica, sans-serif !important",
+                      fontFamily: "Inter, sans-serif !important",
                       fontSize: "0.85rem",
                       backgroundColor: "#e3f2fd",
                     }}
