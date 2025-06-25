@@ -41,7 +41,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(3),
+  padding: theme.spacing(4),
   backgroundColor: "#1e1e1e",
   borderRadius: "12px",
   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
@@ -56,9 +56,9 @@ const ToolCard = styled(Paper)(({ theme }) => ({
 const CTAButton = styled(Button)(({ theme }) => ({
   backgroundColor: "#3b82f6",
   color: "#ffffff",
-  padding: theme.spacing(1, 2.5),
+  padding: theme.spacing(1.5, 3),
   fontWeight: 500,
-  fontSize: "0.85rem",
+  fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
   fontFamily: "'Inter', sans-serif",
@@ -461,12 +461,12 @@ const QuotationsAdmin = () => {
     const items = filteredData.quotations || [];
 
     return (
-      <Box sx={{ overflowX: "auto", borderRadius: "12px", p: 3 }}>
+      <Box sx={{ overflowX: "auto", borderRadius: "12px", p: 4 }}>
         <Table
           sx={{
-            minWidth: 650,
+            minWidth: 1200,
             borderCollapse: "separate",
-            borderSpacing: "0 8px",
+            borderSpacing: "0 12px",
             bgcolor: "#1a1a1a",
           }}
         >
@@ -480,16 +480,12 @@ const QuotationsAdmin = () => {
                     fontFamily: "'Inter', sans-serif",
                     bgcolor: "#252525",
                     color: "#ffffff",
-                    fontSize: "0.9rem",
-                    py: 2,
-                    px: 3,
+                    fontSize: "0.95rem",
+                    py: 2.5,
+                    px: 4,
                     border: "none",
-                    width:
-                      field === "id"
-                        ? "80px"
-                        : field === "remarks"
-                        ? "200px"
-                        : "auto",
+                    minWidth:
+                      field === "id" ? 100 : field === "remarks" ? 250 : 180,
                     textAlign: field === "id" ? "center" : "left",
                     "&:first-of-type": {
                       borderTopLeftRadius: "8px",
@@ -526,11 +522,11 @@ const QuotationsAdmin = () => {
                   fontFamily: "'Inter', sans-serif",
                   bgcolor: "#252525",
                   color: "#ffffff",
-                  fontSize: "0.9rem",
-                  py: 2,
-                  px: 3,
+                  fontSize: "0.95rem",
+                  py: 2.5,
+                  px: 4,
                   border: "none",
-                  width: "120px",
+                  minWidth: 150,
                   textAlign: "center",
                   borderTopRightRadius: "8px",
                   borderBottomRightRadius: "8px",
@@ -549,8 +545,8 @@ const QuotationsAdmin = () => {
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     color: "#9ca3af",
-                    py: 4,
-                    fontSize: "0.95rem",
+                    py: 5,
+                    fontSize: "1rem",
                     border: "none",
                     bgcolor: "#1a1a1a",
                   }}
@@ -576,15 +572,15 @@ const QuotationsAdmin = () => {
                         fontFamily: "'Inter', sans-serif",
                         fontSize: "0.9rem",
                         color: "#ffffff",
-                        py: 2,
-                        px: 3,
+                        py: 2.5,
+                        px: 4,
                         border: "none",
-                        width:
+                        minWidth:
                           field === "id"
-                            ? "80px"
+                            ? 100
                             : field === "remarks"
-                            ? "200px"
-                            : "auto",
+                            ? 250
+                            : 180,
                         textAlign: field === "id" ? "center" : "left",
                         ...(field === "status" && {
                           color:
@@ -600,7 +596,7 @@ const QuotationsAdmin = () => {
                           fontWeight: 500,
                         }),
                         ...(field === "remarks" && {
-                          maxWidth: "200px",
+                          maxWidth: 250,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }),
@@ -633,12 +629,16 @@ const QuotationsAdmin = () => {
                     </TableCell>
                   ))}
                   <TableCell
-                    sx={{ py: 2, px: 3, border: "none", width: "120px" }}
+                    sx={{ py: 2.5, px: 4, border: "none", minWidth: 150 }}
                   >
                     <Box
-                      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 1.5,
+                      }}
                     >
-                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                      <Box sx={{ display: "flex", gap: 1 }}>
                         <IconButton
                           onClick={() => openViewModal(item)}
                           disabled={!tab.permissions.includes(userRole)}
@@ -646,7 +646,7 @@ const QuotationsAdmin = () => {
                           title="View Quotation"
                         >
                           <Visibility
-                            sx={{ fontSize: "1.2rem", color: "#2563eb" }}
+                            sx={{ fontSize: "1.3rem", color: "#2563eb" }}
                           />
                         </IconButton>
                         <IconButton
@@ -656,11 +656,11 @@ const QuotationsAdmin = () => {
                           title="Delete Quotation"
                         >
                           <Delete
-                            sx={{ fontSize: "1.2rem", color: "#d6393a" }}
+                            sx={{ fontSize: "1.3rem", color: "#d6393a" }}
                           />
                         </IconButton>
                       </Box>
-                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                      <Box sx={{ display: "flex", gap: 1 }}>
                         {tab.actions.includes("approve") && (
                           <IconButton
                             onClick={() =>
@@ -671,7 +671,7 @@ const QuotationsAdmin = () => {
                             title="Approve Quotation"
                           >
                             <Check
-                              sx={{ fontSize: "1.2rem", color: "#388e3c" }}
+                              sx={{ fontSize: "1.3rem", color: "#388e3c" }}
                             />
                           </IconButton>
                         )}
@@ -687,7 +687,7 @@ const QuotationsAdmin = () => {
                             title="Reject Quotation"
                           >
                             <Close
-                              sx={{ fontSize: "1.2rem", color: "#d32f2f" }}
+                              sx={{ fontSize: "1.3rem", color: "#d32f2f" }}
                             />
                           </IconButton>
                         )}
@@ -722,7 +722,8 @@ const QuotationsAdmin = () => {
         <Box
           component="form"
           onSubmit={handleRejectSubmit}
-          sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}
+          sx={{ display: "flex", flexDirection: "column", gap: 3, py: 3 }}
+          id="reject-form"
         >
           <Typography
             variant="subtitle1"
@@ -747,7 +748,7 @@ const QuotationsAdmin = () => {
             rows={4}
             required
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -771,7 +772,7 @@ const QuotationsAdmin = () => {
     }
 
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, py: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, py: 3 }}>
         <Typography
           variant="subtitle1"
           sx={{
@@ -786,7 +787,7 @@ const QuotationsAdmin = () => {
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            gap: 2,
+            gap: 3,
           }}
         >
           <TextField
@@ -797,7 +798,7 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -818,7 +819,7 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -839,7 +840,7 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -864,7 +865,7 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -889,7 +890,7 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -917,7 +918,7 @@ const QuotationsAdmin = () => {
             size="small"
             disabled
             InputLabelProps={{
-              sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
+              sx: { fontFamily: "'Inter', sans-serif", color: "#ffffff" },
             }}
             InputProps={{
               sx: {
@@ -931,11 +932,11 @@ const QuotationsAdmin = () => {
             }}
           />
         </Box>
-        <Divider sx={{ my: 2, bgcolor: "#4b5563" }} />
+        <Divider sx={{ my: 3, bgcolor: "#4b5563" }} />
         <Typography
           variant="h6"
           sx={{
-            mb: 2,
+            mb: 3,
             fontFamily: "'Inter', sans-serif",
             fontWeight: 600,
             color: "#ffffff",
@@ -952,6 +953,9 @@ const QuotationsAdmin = () => {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
                     bgcolor: "#252525",
+                    fontSize: "0.9rem",
+                    py: 2,
+                    px: 3,
                   }}
                 >
                   ID
@@ -961,6 +965,9 @@ const QuotationsAdmin = () => {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
                     bgcolor: "#252525",
+                    fontSize: "0.9rem",
+                    py: 2,
+                    px: 3,
                   }}
                 >
                   Product Code
@@ -970,6 +977,9 @@ const QuotationsAdmin = () => {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
                     bgcolor: "#252525",
+                    fontSize: "0.9rem",
+                    py: 2,
+                    px: 3,
                   }}
                 >
                   Instrument
@@ -979,6 +989,9 @@ const QuotationsAdmin = () => {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
                     bgcolor: "#252525",
+                    fontSize: "0.9rem",
+                    py: 2,
+                    px: 3,
                   }}
                 >
                   Quantity
@@ -988,6 +1001,9 @@ const QuotationsAdmin = () => {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
                     bgcolor: "#252525",
+                    fontSize: "0.9rem",
+                    py: 2,
+                    px: 3,
                   }}
                 >
                   Price (RM)
@@ -1005,6 +1021,8 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         color: "#ffffff",
+                        py: 2,
+                        px: 3,
                       }}
                     >
                       {item.id}
@@ -1013,6 +1031,8 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         color: "#ffffff",
+                        py: 2,
+                        px: 3,
                       }}
                     >
                       {item.product_code || "N/A"}
@@ -1021,14 +1041,18 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         color: "#ffffff",
+                        py: 2,
+                        px: 3,
                       }}
                     >
-                      {instrument?.name || "Unknown Instrument"}
+                      {instrument?.name || "N/A"}
                     </TableCell>
                     <TableCell
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         color: "#ffffff",
+                        py: 2,
+                        px: 3,
                       }}
                     >
                       {item.quantity || "N/A"}
@@ -1037,6 +1061,8 @@ const QuotationsAdmin = () => {
                       sx={{
                         fontFamily: "'Inter', sans-serif",
                         color: "#ffffff",
+                        py: 2,
+                        px: 3,
                       }}
                     >
                       {typeof item.total_price === "number"
@@ -1053,7 +1079,11 @@ const QuotationsAdmin = () => {
           </Table>
         ) : (
           <Typography
-            sx={{ fontFamily: "'Inter', sans-serif", color: "#9ca3af" }}
+            sx={{
+              fontFamily: "'Inter', sans-serif",
+              color: "#ffffff",
+              fontSize: "0.95rem",
+            }}
           >
             No instruments submitted for this quotation.
           </Typography>
@@ -1153,10 +1183,10 @@ const QuotationsAdmin = () => {
         >
           <ErrorBoundary>
             <Container
-              maxWidth="lg"
+              maxWidth="xl"
               sx={{
                 py: 8,
-                px: { xs: 2, sm: 4 },
+                px: { xs: 3, sm: 6 },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -1170,18 +1200,18 @@ const QuotationsAdmin = () => {
                   fontWeight: 700,
                   color: "#ffffff",
                   fontFamily: "'Inter', sans-serif",
-                  mb: 5,
-                  fontSize: { xs: "1.75rem", md: "2.25rem" },
+                  mb: 6,
+                  fontSize: { xs: "1.8rem", md: "2.5rem" },
                   letterSpacing: "-0.02em",
                   position: "relative",
                   "&:after": {
                     content: '""',
                     display: "block",
-                    width: "60px",
+                    width: 80,
                     height: "4px",
                     bgcolor: "#3b82f6",
                     position: "absolute",
-                    bottom: "-8px",
+                    bottom: "-12px",
                     left: "50%",
                     transform: "translateX(-50%)",
                     borderRadius: "2px",
@@ -1201,7 +1231,7 @@ const QuotationsAdmin = () => {
                   onClose={() => setSuccess("")}
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#22c55e",
+                    bgcolor: "#28a745",
                     color: "#ffffff",
                     "& .MuiAlert-icon": { color: "#ffffff" },
                     "& .MuiAlert-action svg": { fill: "#ffffff" },
@@ -1221,7 +1251,7 @@ const QuotationsAdmin = () => {
                   onClose={() => setError("")}
                   sx={{
                     fontFamily: "'Inter', sans-serif",
-                    bgcolor: "#ef4444",
+                    bgcolor: "#d6393a",
                     color: "#ffffff",
                     "& .MuiAlert-icon": { color: "#ffffff" },
                     "& .MuiAlert-action svg": { fill: "#ffffff" },
@@ -1235,8 +1265,8 @@ const QuotationsAdmin = () => {
                   sx={{
                     display: "flex",
                     flexDirection: { xs: "column", sm: "row" },
-                    gap: 2,
-                    mb: 4,
+                    gap: 3,
+                    mb: 5,
                     alignItems: { xs: "stretch", sm: "center" },
                     justifyContent: "space-between",
                   }}
@@ -1247,6 +1277,7 @@ const QuotationsAdmin = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     sx={{
                       flex: 1,
+                      minWidth: { xs: "100%", sm: 300 },
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "8px",
                         fontFamily: "'Inter', sans-serif",
@@ -1258,21 +1289,24 @@ const QuotationsAdmin = () => {
                       },
                       "& .MuiInputLabel-root": {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                         "&.Mui-focused": { color: "#3b82f6" },
                       },
                     }}
                     variant="outlined"
-                    size="small"
+                    size="medium"
                   />
                   <FormControl
-                    sx={{ width: { xs: "100%", sm: "200px" } }}
-                    size="small"
+                    sx={{
+                      flex: 1,
+                      minWidth: { xs: "100%", sm: 300 },
+                    }}
+                    size="medium"
                   >
                     <InputLabel
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                         "&.Mui-focused": { color: "#3b82f6" },
                       }}
                     >
@@ -1358,9 +1392,9 @@ const QuotationsAdmin = () => {
                   fontWeight: 600,
                   color: "#3b82f6",
                   bgcolor: "#1e1e1e",
-                  py: 2.5,
-                  px: 4,
-                  fontSize: "1.25rem",
+                  py: 3,
+                  px: 5,
+                  fontSize: "1.3rem",
                   borderBottom: "1px solid #4b5563",
                 }}
               >
@@ -1368,15 +1402,15 @@ const QuotationsAdmin = () => {
                   ? "Reject Quotation"
                   : "View Quotation"}
               </DialogTitle>
-              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
+              <DialogContent sx={{ py: 5, px: 5, bgcolor: "#1e1e1e" }}>
                 {renderModalContent()}
               </DialogContent>
               <DialogActions
                 sx={{
                   bgcolor: "#1e1e1e",
                   borderTop: "1px solid #4b5563",
-                  py: 2.5,
-                  px: 4,
+                  py: 3,
+                  px: 5,
                 }}
               >
                 <CancelButton onClick={handleModalClose}>Close</CancelButton>
@@ -1405,20 +1439,21 @@ const QuotationsAdmin = () => {
                   fontWeight: 600,
                   color: "#3b82f6",
                   bgcolor: "#1e1e1e",
-                  py: 2.5,
-                  px: 4,
-                  fontSize: "1.25rem",
+                  py: 3,
+                  px: 5,
+                  fontSize: "1.3rem",
                   borderBottom: "1px solid #4b5563",
                 }}
               >
                 Full Remarks
               </DialogTitle>
-              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
+              <DialogContent sx={{ py: 5, px: 5, bgcolor: "#1e1e1e" }}>
                 <Typography
                   sx={{
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
                     whiteSpace: "pre-wrap",
+                    fontSize: "0.95rem",
                   }}
                 >
                   {selectedRemarks}
@@ -1428,8 +1463,8 @@ const QuotationsAdmin = () => {
                 sx={{
                   bgcolor: "#1e1e1e",
                   borderTop: "1px solid #4b5563",
-                  py: 2.5,
-                  px: 4,
+                  py: 3,
+                  px: 5,
                 }}
               >
                 <CancelButton onClick={handleCloseRemarksDialog}>
@@ -1453,19 +1488,23 @@ const QuotationsAdmin = () => {
                 sx={{
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 600,
-                  color: "#3b82f6",
+                  color: "#ffffff",
                   bgcolor: "#1e1e1e",
-                  py: 2.5,
-                  px: 4,
-                  fontSize: "1.25rem",
+                  py: 3,
+                  px: 5,
+                  fontSize: "1.3rem",
                   borderBottom: "1px solid #4b5563",
                 }}
               >
                 Confirm Deletion
               </DialogTitle>
-              <DialogContent sx={{ py: 4, px: 4, bgcolor: "#1e1e1e" }}>
+              <DialogContent sx={{ py: 5, px: 5, bgcolor: "#1e1e1e" }}>
                 <Typography
-                  sx={{ fontFamily: "'Inter', sans-serif", color: "#ffffff" }}
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
+                    fontSize: "0.95rem",
+                  }}
                 >
                   {confirmMessage}
                 </Typography>
@@ -1474,15 +1513,15 @@ const QuotationsAdmin = () => {
                 sx={{
                   bgcolor: "#1e1e1e",
                   borderTop: "1px solid #4b5563",
-                  py: 2.5,
-                  px: 4,
+                  py: 3,
+                  px: 5,
                 }}
               >
                 <CancelButton onClick={handleCloseConfirmDialog}>
                   Cancel
                 </CancelButton>
                 <CTAButton
-                  sx={{ bgcolor: "#ef4444", "&:hover": { bgcolor: "#dc2626" } }}
+                  sx={{ bgcolor: "#d6393a", "&:hover": { bgcolor: "#b02b2b" } }}
                   onClick={handleConfirmAction}
                 >
                   Delete
