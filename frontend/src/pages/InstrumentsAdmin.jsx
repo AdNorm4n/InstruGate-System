@@ -2270,7 +2270,7 @@ const InstrumentsAdmin = () => {
                         mr: 1,
                       }}
                     >
-                      <Edit sx={{ fontSize: "1.2rem" }} />
+                      <Edit sx={{ fontSize: "1.2rem", color: "#ffffff" }} />
                     </IconButton>
                     <IconButton
                       onClick={() => handleDelete(item.id)}
@@ -2280,7 +2280,7 @@ const InstrumentsAdmin = () => {
                         "&:hover": { color: "#d6393a", bgcolor: "#ef44441a" },
                       }}
                     >
-                      <Delete sx={{ fontSize: "1.2rem" }} />
+                      <Edit sx={{ fontSize: "1.2rem", color: "#d6393a" }} />
                     </IconButton>
                   </TableCell>
                 </TableRow>
