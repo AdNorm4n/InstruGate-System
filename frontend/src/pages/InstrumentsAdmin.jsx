@@ -1059,6 +1059,7 @@ const InstrumentsAdmin = () => {
             variant="h6"
             sx={{
               fontFamily: "'Inter', sans-serif",
+              paddingTop: 2,
               mb: 2,
               fontWeight: 600,
               color: "#ffffff",
@@ -2266,7 +2267,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         color: "#ffffff",
-                        "&:hover": { color: "#2563eb", bgcolor: "#3b82f61a" },
+                        "&:hover": { color: "#ffffff", bgcolor: "#3b82f61a" },
                         mr: 1,
                       }}
                     >
@@ -2277,7 +2278,7 @@ const InstrumentsAdmin = () => {
                       disabled={userRole !== "admin"}
                       sx={{
                         color: "#d6393a",
-                        "&:hover": { color: "#dc2626", bgcolor: "#ef44441a" },
+                        "&:hover": { color: "#d6393a", bgcolor: "#ef44441a" },
                       }}
                     >
                       <Delete sx={{ fontSize: "1.2rem" }} />
