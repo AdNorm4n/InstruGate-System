@@ -70,7 +70,7 @@ const Section = styled(Box)(({ theme }) => ({
 
 const HeaderSection = styled(Box)(({ theme }) => ({
   textAlign: "center",
-  padding: theme.spacing(8, 0),
+  padding: theme.spacing(4, 0),
   marginBottom: theme.spacing(4),
   fontFamily: "'Inter', sans-serif !important",
   width: "100%",
@@ -250,7 +250,7 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "350px",
+                          height: "400px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
@@ -263,11 +263,8 @@ function About() {
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
+                            objectFit: "contain",
                             transition: "transform 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.05)",
-                            },
                           }}
                         />
                       </Box>
@@ -277,7 +274,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           fontWeight: 600,
                           mb: 2,
-                          color: "#ffffff !important",
+                          color: "#000000 !important",
                           fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
@@ -324,7 +321,7 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "350px",
+                          height: "400px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
@@ -337,11 +334,8 @@ function About() {
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
+                            objectFit: "contain",
                             transition: "transform 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.05)",
-                            },
                           }}
                         />
                       </Box>
@@ -351,7 +345,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           fontWeight: 600,
                           mb: 2,
-                          color: "#ffffff !important",
+                          color: "#000000 !important",
                           fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
@@ -382,7 +376,7 @@ function About() {
                         className="product-image-wrapper"
                         sx={{
                           width: "100%",
-                          height: "350px",
+                          height: "400px",
                           mb: 2,
                           borderRadius: "8px",
                           overflow: "hidden",
@@ -395,11 +389,8 @@ function About() {
                           style={{
                             width: "100%",
                             height: "100%",
-                            objectFit: "cover",
+                            objectFit: "contain",
                             transition: "transform 0.3s ease",
-                            "&:hover": {
-                              transform: "scale(1.05)",
-                            },
                           }}
                         />
                       </Box>
@@ -409,7 +400,7 @@ function About() {
                           fontFamily: "'Inter', sans-serif !important",
                           fontWeight: 600,
                           mb: 2,
-                          color: "#ffffff !important",
+                          color: "#000000 !important",
                           fontSize: "2.25rem",
                           lineHeight: 1.2,
                         }}
