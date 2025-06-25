@@ -102,7 +102,7 @@ function About() {
       >
         <DrawerHeader />
         <main>
-          <Container maxWidth="lg" sx={{ py: 4, mt: 8 }}>
+          <Container maxWidth="lg" sx={{ py: 4, mt: 2 }}>
             <HeaderSection>
               <Box
                 component="img"
