@@ -11,7 +11,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import HomeRepairServiceIcon from "@mui/icons-material/HomeRepairService";
 import PersonIcon from "@mui/icons-material/Person";
 import api from "../api";
-import headerBanner from "../assets/companylogo.png";
+import headerBanner from "../assets/menu.png";
 import logo from "../assets/ashcroft.png";
 import centerLogo from "../assets/instrugate.png";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
@@ -261,7 +261,7 @@ export default function Navbar() {
             <Button
               key={item.text}
               startIcon={React.cloneElement(item.icon, {
-                sx: { fontSize: "1.2rem" },
+                sx: { color: "#ffffff", fontSize: "1.2rem" },
               })}
               onClick={item.action || (() => navigate(item.path))}
               sx={{
