@@ -31,7 +31,7 @@ import {
   Legend,
 } from "chart.js";
 import { UserContext } from "../contexts/UserContext";
-import api from "../api"; // Import the shared api module
+import api from "../api";
 
 ChartJS.register(
   CategoryScale,
@@ -50,10 +50,10 @@ const barShadowPlugin = {
     chart.data.datasets.forEach((dataset, datasetIndex) => {
       chart.getDatasetMeta(datasetIndex).data.forEach((bar) => {
         ctx.save();
-        ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowColor = "rgba(255, 255, 255, 0.1)";
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
         bar.draw(ctx);
         ctx.restore();
       });
@@ -64,20 +64,19 @@ const barShadowPlugin = {
 ChartJS.register(barShadowPlugin);
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
+  height: "16px", // Reduced height (adjust as needed, e.g., 16px or 0px)
 }));
 
 const ToolCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  backgroundColor: "#1e293b",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(255, 255, 255, 0.05)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 24px rgba(255, 255, 255, 0.1)",
   },
-  fontFamily: "Helvetica, sans-serif",
   width: "240px",
   height: "160px",
   minWidth: "240px",
@@ -98,15 +97,14 @@ const ToolCard = styled(Paper)(({ theme }) => ({
 
 const ManagementCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  backgroundColor: "#1e293b",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(255, 255, 255, 0.05)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 24px rgba(255, 255, 255, 0.1)",
   },
-  fontFamily: "Helvetica, sans-serif",
   width: "100%",
   maxWidth: "320px",
   minHeight: "240px",
@@ -126,15 +124,14 @@ const ManagementCard = styled(Paper)(({ theme }) => ({
 
 const ChartCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
-  backgroundColor: "#ffffff",
-  borderRadius: "16px",
-  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
+  backgroundColor: "#1e293b",
+  borderRadius: "12px",
+  boxShadow: "0 4px 20px rgba(255, 255, 255, 0.05)",
   transition: "transform 0.3s ease, box-shadow 0.3s ease",
   "&:hover": {
     transform: "translateY(-4px)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 8px 24px rgba(255, 255, 255, 0.1)",
   },
-  fontFamily: "Helvetica, sans-serif",
   width: "100%",
   maxWidth: "1000px",
   mx: "auto",
@@ -145,21 +142,20 @@ const ChartCard = styled(Paper)(({ theme }) => ({
 }));
 
 const CTAButton = styled(Button)(({ theme }) => ({
-  backgroundColor: "#1976d2",
+  backgroundColor: "#3b82f6",
   color: "#ffffff",
   padding: theme.spacing(1, 3),
   fontWeight: 600,
   fontSize: "0.9rem",
   textTransform: "none",
   borderRadius: "8px",
-  fontFamily: "Helvetica, sans-serif",
   "&:hover": {
-    backgroundColor: "#1565c0",
+    backgroundColor: "#2563eb",
     transform: "scale(1.05)",
   },
   "&.Mui-disabled": {
-    backgroundColor: "#e0e0e0",
-    color: "#999",
+    backgroundColor: "#4b5563",
+    color: "#9ca3af",
   },
   transition: "all 0.3s ease",
   "& .MuiCircularProgress-root": {
@@ -180,15 +176,19 @@ class ErrorBoundary extends React.Component {
       return (
         <Box sx={{ textAlign: "center", mt: "20vh" }}>
           <ToolCard sx={{ maxWidth: 800, mx: "auto", textAlign: "center" }}>
-            <Alert severity="error" sx={{ borderRadius: 2 }}>
+            <Alert
+              severity="error"
+              sx={{ borderRadius: 2, bgcolor: "#7f1d1d" }}
+            >
               <Typography
                 variant="h6"
-                fontFamily="Helvetica, sans-serif"
+                fontFamily="Inter, sans-serif"
                 fontWeight="bold"
+                color="#ffffff"
               >
                 Something went wrong.
               </Typography>
-              <Typography fontFamily="Helvetica, sans-serif">
+              <Typography fontFamily="Inter, sans-serif" color="#ffffff">
                 {this.state.error?.message || "An unexpected error occurred."}
               </Typography>
             </Alert>
@@ -215,16 +215,8 @@ const AdminPanel = () => {
     quotationStatuses: { pending: 0, approved: 0, rejected: 0, submitted: 0 },
   });
 
-  console.log(
-    "AdminPanel: userRole:",
-    userRole,
-    "contextLoading:",
-    contextLoading
-  );
-
   useEffect(() => {
     if (contextLoading) {
-      console.log("AdminPanel: Waiting for UserContext to finish loading");
       return;
     }
 
@@ -240,11 +232,6 @@ const AdminPanel = () => {
         }
         const headers = { Authorization: `Bearer ${access}` };
 
-        console.log(
-          "AdminPanel: Fetching metrics with token:",
-          access ? "Present" : "Missing"
-        );
-
         const endpoints = [
           { url: "/api/users/list/", key: "users" },
           { url: "/api/quotations/review/", key: "quotations" },
@@ -258,10 +245,6 @@ const AdminPanel = () => {
         const responses = await Promise.all(
           endpoints.map(({ url, params }) =>
             api.get(url, { headers, params }).catch((err) => {
-              console.error(
-                `AdminPanel: Error fetching ${url}:`,
-                err.response?.data || err.message
-              );
               return {
                 error: err.response?.data?.detail || err.message,
                 data: [],
@@ -320,13 +303,11 @@ const AdminPanel = () => {
           }
         });
 
-        console.log("AdminPanel: Fetched Metrics:", newMetrics);
         setMetrics(newMetrics);
         if (errors.length > 0) {
           setMetricErrors(errors);
         }
       } catch (err) {
-        console.error("AdminPanel: fetchData Error:", err, err.response?.data);
         setError(
           `Error loading dashboard: ${
             err.response?.data?.detail || err.message
@@ -334,12 +315,10 @@ const AdminPanel = () => {
         );
       } finally {
         setLoading(false);
-        console.log("AdminPanel: Metrics fetch complete, loading:", false);
       }
     };
 
     if (userRole === null || userRole === undefined) {
-      console.log("AdminPanel: No userRole, redirecting to login");
       setError("Please log in to access the admin panel.");
       setLoading(false);
       navigate("/login");
@@ -347,7 +326,6 @@ const AdminPanel = () => {
     }
 
     if (userRole !== "admin") {
-      console.log("AdminPanel: User is not admin, redirecting to home");
       setError("You do not have permission to access the admin panel.");
       setLoading(false);
       navigate("/");
@@ -358,7 +336,6 @@ const AdminPanel = () => {
   }, [contextLoading, userRole, navigate]);
 
   const handleNavigation = (path) => {
-    console.log("AdminPanel: Navigating to:", path, "with userRole:", userRole);
     navigate(path);
   };
 
@@ -368,21 +345,21 @@ const AdminPanel = () => {
       path: "/admin/users",
       disabled: userRole !== "admin",
       description: "Create, update, or delete user accounts",
-      icon: <People sx={{ fontSize: 40, color: "#1976d2" }} />,
+      icon: <People sx={{ fontSize: 40, color: "#60a5fa" }} />,
     },
     {
       title: "Manage Instruments",
       path: "/admin/instruments",
       disabled: !["admin", "proposal_engineer"].includes(userRole),
       description: "Manage categories, types, instruments, and add-ons",
-      icon: <Speed sx={{ fontSize: 40, color: "#1976d2" }} />,
+      icon: <Speed sx={{ fontSize: 40, color: "#60a5fa" }} />,
     },
     {
       title: "Manage Quotations",
       path: "/admin/quotations",
       disabled: !["admin", "proposal_engineer", "client"].includes(userRole),
       description: "Review and manage quotations and their items",
-      icon: <RequestQuote sx={{ fontSize: 40, color: "#1976d2" }} />,
+      icon: <RequestQuote sx={{ fontSize: 40, color: "#60a5fa" }} />,
     },
   ];
 
@@ -397,10 +374,11 @@ const AdminPanel = () => {
           metrics.quotationStatuses.rejected || 0,
           metrics.quotationStatuses.submitted || 0,
         ],
-        backgroundColor: ["#FFE082", "#66BB6A", "#F06292", "#64B5F6"],
-        borderColor: ["#B8860B", "#2E7D32", "#AD1457", "#1565C0"],
+        backgroundColor: ["#f59e0b", "#22c55e", "#ef4444", "#3b82f6"],
+        borderColor: ["#d97706", "#16a34a", "#dc2626", "#2563eb"],
         borderWidth: 1,
-        borderRadius: 4,
+        borderRadius: 8,
+        hoverBackgroundColor: ["#fbbf24", "#4ade80", "#f87171", "#60a5fa"],
       },
     ],
   };
@@ -408,31 +386,35 @@ const AdminPanel = () => {
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    barPercentage: 0.3,
-    categoryPercentage: 0.6,
+    barPercentage: 0.4,
+    categoryPercentage: 0.8,
     layout: {
-      padding: { left: 30, right: 30 },
+      gastronomical: { left: 20, right: 20, top: 20, bottom: 20 },
     },
     plugins: {
       legend: {
-        position: "right",
+        position: "top",
         labels: {
-          font: { family: "Helvetica, sans-serif", size: 16 },
-          color: "#000000",
-          padding: 25,
+          font: { family: "Inter, sans-serif", size: 14 },
+          color: "#ffffff",
+          padding: 20,
+          boxWidth: 20,
+          usePointStyle: true,
         },
       },
       title: {
         display: true,
         text: "Quotation Status Distribution",
-        font: { family: "Helvetica, sans-serif", size: 22, weight: "bold" },
-        color: "#000000",
-        padding: { top: 15, bottom: 35 },
+        font: { family: "Inter, sans-serif", size: 20, weight: "600" },
+        color: "#ffffff",
+        padding: { top: 10, bottom: 30 },
       },
       tooltip: {
-        backgroundColor: "#333",
-        titleFont: { family: "Helvetica, sans-serif", size: 16 },
-        bodyFont: { family: "Helvetica, sans-serif", size: 14 },
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        titleFont: { family: "Inter, sans-serif", size: 14 },
+        bodyFont: { family: "Inter, sans-serif", size: 12 },
+        cornerRadius: 8,
+        padding: 12,
       },
     },
     scales: {
@@ -441,32 +423,30 @@ const AdminPanel = () => {
         title: {
           display: true,
           text: "Number of Quotations",
-          font: { family: "Helvetica, sans-serif", size: 18 },
-          color: "#000000",
+          font: { family: "Inter, sans-serif", size: 16 },
+          color: "#ffffff",
           padding: { top: 10, bottom: 10 },
         },
-        grid: { color: "rgba(0, 0, 0, 0.03)" },
+        grid: { color: "rgba(255, 255, 255, 0.1)" },
         ticks: {
-          color: "#000000",
-          font: { family: "Helvetica, sans-serif", size: 16 },
+          color: "#ffffff",
+          font: { family: "Inter, sans-serif", size: 14 },
           stepSize: 1,
         },
-        backgroundColor: "#FAFAFA",
       },
       x: {
         title: {
           display: true,
           text: "Status",
-          font: { family: "Helvetica, sans-serif", size: 18 },
-          color: "#000000",
+          font: { family: "Inter, sans-serif", size: 16 },
+          color: "#ffffff",
           padding: { top: 10, bottom: 10 },
         },
-        grid: { color: "rgba(0, 0, 0, 0.03)" },
+        grid: { display: false },
         ticks: {
-          color: "#000000",
-          font: { family: "Helvetica, sans-serif", size: 16 },
+          color: "#ffffff",
+          font: { family: "Inter, sans-serif", size: 14 },
         },
-        backgroundColor: "#FAFAFA",
       },
     },
   };
@@ -474,7 +454,7 @@ const AdminPanel = () => {
   if (contextLoading || loading) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#0f172a" }}>
           <Container maxWidth="xl">
             <ToolCard
               sx={{
@@ -485,7 +465,7 @@ const AdminPanel = () => {
                 mt: 8,
               }}
             >
-              <CircularProgress size={48} sx={{ color: "#1976d2" }} />
+              <CircularProgress size={48} sx={{ color: "#60a5fa" }} />
             </ToolCard>
           </Container>
         </Box>
@@ -496,15 +476,19 @@ const AdminPanel = () => {
   if (error) {
     return (
       <Fade in>
-        <Box sx={{ minHeight: "100vh", bgcolor: "#f8f9fa" }}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "#0f172a" }}>
           <Container maxWidth="xl">
             <ToolCard sx={{ p: 3, mx: "auto", maxWidth: "800px", mt: 8 }}>
-              <Alert severity="error" sx={{ borderRadius: 2 }}>
+              <Alert
+                severity="error"
+                sx={{ borderRadius: 2, bgcolor: "#7f1d1d" }}
+              >
                 <Typography
                   variant="body1"
                   sx={{
-                    fontFamily: "Helvetica, sans-serif",
+                    fontFamily: "Inter, sans-serif",
                     fontSize: "0.9rem",
+                    color: "#ffffff",
                   }}
                 >
                   {error}
@@ -524,11 +508,10 @@ const AdminPanel = () => {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          bgcolor: "#f8f9fa",
+          bgcolor: "#0f172a",
         }}
         className="admin-panel-page"
       >
-        <DrawerHeader />
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
             <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
@@ -537,13 +520,12 @@ const AdminPanel = () => {
                 align="center"
                 gutterBottom
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
-                  fontWeight: "bold",
-                  color: "#000000",
+                  fontFamily: "Inter, sans-serif",
+                  fontWeight: "600",
+                  color: "#ffffff",
                   textTransform: "uppercase",
                   mb: 4,
                   fontSize: { xs: "1.5rem", md: "2rem" },
-                  textShadow: "1px 1px 4px rgba(0, 0, 0, 0.1)",
                 }}
               >
                 Admin Dashboard
@@ -552,8 +534,8 @@ const AdminPanel = () => {
                 variant="body1"
                 align="center"
                 sx={{
-                  fontFamily: "Helvetica, sans-serif",
-                  color: "#333",
+                  fontFamily: "Inter, sans-serif",
+                  color: "#d1d5db",
                   mb: 6,
                   fontSize: "0.9rem",
                 }}
@@ -562,13 +544,17 @@ const AdminPanel = () => {
               </Typography>
               {metricErrors.length > 0 && (
                 <ToolCard sx={{ mb: 4, mx: "auto", maxWidth: "800px" }}>
-                  <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                  <Alert
+                    severity="warning"
+                    sx={{ borderRadius: 2, bgcolor: "#7c2d12" }}
+                  >
                     <Typography
                       variant="body1"
                       sx={{
-                        fontFamily: "Helvetica, sans-serif",
+                        fontFamily: "Inter, sans-serif",
                         fontSize: "0.9rem",
                         lineHeight: 1.6,
+                        color: "#ffffff",
                       }}
                     >
                       Some metrics could not be loaded:
@@ -579,9 +565,10 @@ const AdminPanel = () => {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
+                              fontFamily: "Inter, sans-serif",
                               fontSize: "0.9rem",
                               lineHeight: 1.6,
+                              color: "#ffffff",
                             }}
                           >
                             {err}
@@ -598,9 +585,9 @@ const AdminPanel = () => {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      fontWeight: "bold",
-                      color: "#000000",
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: "600",
+                      color: "#ffffff",
                       mb: 3,
                       textTransform: "uppercase",
                       fontSize: "1.25rem",
@@ -612,21 +599,21 @@ const AdminPanel = () => {
                     {[
                       {
                         icon: (
-                          <People sx={{ fontSize: 40, color: "#1976d2" }} />
+                          <People sx={{ fontSize: 40, color: "#60a5fa" }} />
                         ),
                         value: metrics.totalUsers,
                         label: "Total Users",
                       },
                       {
                         icon: (
-                          <Business sx={{ fontSize: 40, color: "#1976d2" }} />
+                          <Business sx={{ fontSize: 40, color: "#60a5fa" }} />
                         ),
                         value: metrics.totalCompanies,
                         label: "Total Companies",
                       },
                       {
                         icon: (
-                          <Archive sx={{ fontSize: 40, color: "#1976d2" }} />
+                          <Archive sx={{ fontSize: 40, color: "#60a5fa" }} />
                         ),
                         value: metrics.totalProjects,
                         label: "Total Projects",
@@ -634,14 +621,14 @@ const AdminPanel = () => {
                       {
                         icon: (
                           <RequestQuote
-                            sx={{ fontSize: 40, color: "#1976d2" }}
+                            sx={{ fontSize: 40, color: "#60a5fa" }}
                           />
                         ),
                         value: metrics.totalQuotations,
                         label: "Total Quotations",
                       },
                       {
-                        icon: <Speed sx={{ fontSize: 40, color: "#1976d2" }} />,
+                        icon: <Speed sx={{ fontSize: 40, color: "#60a5fa" }} />,
                         value: metrics.totalInstrumentsAvailable,
                         label: "Instruments Available",
                       },
@@ -659,9 +646,9 @@ const AdminPanel = () => {
                           <Typography
                             variant="h4"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
-                              fontWeight: "bold",
-                              color: "#000000",
+                              fontFamily: "Inter, sans-serif",
+                              fontWeight: "600",
+                              color: "#ffffff",
                               mt: 1,
                               fontSize: "1.75rem",
                             }}
@@ -671,8 +658,8 @@ const AdminPanel = () => {
                           <Typography
                             variant="body1"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
-                              color: "#333",
+                              fontFamily: "Inter, sans-serif",
+                              color: "#d1d5db",
                               mt: 0.5,
                               fontSize: "0.9rem",
                               lineHeight: 1.6,
@@ -691,9 +678,9 @@ const AdminPanel = () => {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      fontWeight: "bold",
-                      color: "#000000",
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: "600",
+                      color: "#ffffff",
                       mb: 3,
                       textTransform: "uppercase",
                       fontSize: "1.25rem",
@@ -716,18 +703,16 @@ const AdminPanel = () => {
                       >
                         <ManagementCard
                           sx={{
-                            bgcolor: section.disabled ? "#e0e0e0" : "white",
+                            bgcolor: section.disabled ? "#4b5563" : "#1e293b",
                           }}
                         >
                           {section.icon}
                           <Typography
                             variant="h6"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
-                              fontWeight: "bold",
-                              color: section.disabled
-                                ? "text.disabled"
-                                : "#000000",
+                              fontFamily: "Inter, sans-serif",
+                              fontWeight: "600",
+                              color: section.disabled ? "#9ca3af" : "#ffffff",
                               mt: 1.5,
                               textTransform: "uppercase",
                               fontSize: "1.25rem",
@@ -739,8 +724,8 @@ const AdminPanel = () => {
                           <Typography
                             variant="body2"
                             sx={{
-                              fontFamily: "Helvetica, sans-serif",
-                              color: section.disabled ? "#ccc" : "#333",
+                              fontFamily: "Inter, sans-serif",
+                              color: section.disabled ? "#9ca3af" : "#d1d5db",
                               mb: 2,
                               mt: 1,
                               fontSize: "0.95rem",
@@ -768,9 +753,9 @@ const AdminPanel = () => {
                   <Typography
                     variant="h6"
                     sx={{
-                      fontFamily: "Helvetica, sans-serif",
-                      fontWeight: "bold",
-                      color: "#000000",
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: "600",
+                      color: "#ffffff",
                       mb: 3,
                       textTransform: "uppercase",
                       fontSize: "1.25rem",

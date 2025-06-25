@@ -8,7 +8,7 @@
 
 .home-hero {
   text-align: center;
-  padding: 120px;
+  padding: 24px; /* Reduced from 120px to 24px for less top/bottom spacing */
   background-image: url("../assets/gas.jpg");
   background-size: contain;
   background-position: center;
@@ -16,7 +16,7 @@
   background-color: rgba(0, 0, 0, 0.3);
   color: white;
   border-radius: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 0; /* Removed margin-bottom to reduce spacing */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   position: relative;
 }
@@ -35,6 +35,7 @@
   z-index: 1;
 }
 
+/* Rest of the role-card and product-card styles remain unchanged */
 .role-card {
   height: 240px;
   border: none;
@@ -129,7 +130,7 @@
 
 @media (max-width: 600px) {
   .home-hero {
-    padding: 0px 16px !important;
+    padding: 16px !important; /* Further reduced for mobile */
   }
 
   .home-wrapper .MuiTypography-h5 {
