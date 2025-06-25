@@ -927,19 +927,18 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff !important",
                         bgcolor: "#252525",
+                        "& .MuiInputBase-input": {
+                          color: "#ffffff !important",
+                        },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -965,19 +964,18 @@ const UsersAdmin = () => {
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff !important",
                         bgcolor: "#252525",
+                        "& .MuiInputBase-input": {
+                          color: "#ffffff !important",
+                        },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1002,25 +1000,24 @@ const UsersAdmin = () => {
                         InputLabelProps={{
                           sx: {
                             fontFamily: "'Inter', sans-serif",
-                            color: "#d1d5db",
+                            color: "#ffffff",
                           },
                         }}
                         InputProps={{
                           sx: {
                             fontFamily: "'Inter', sans-serif",
-                            color: "#ffffff !important",
                             bgcolor: "#252525",
+                            "& .MuiInputBase-input": {
+                              color: "#ffffff !important",
+                            },
                             "& .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#4b5563",
-                              "& input": { color: "#ffffff !important" },
                             },
                             "&:hover .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
-                              "& input": { color: "#ffffff !important" },
                             },
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
-                              "& input": { color: "#ffffff !important" },
                             },
                           },
                         }}
@@ -1043,25 +1040,24 @@ const UsersAdmin = () => {
                         InputLabelProps={{
                           sx: {
                             fontFamily: "'Inter', sans-serif",
-                            color: "#d1d5db",
+                            color: "#ffffff",
                           },
                         }}
                         InputProps={{
                           sx: {
                             fontFamily: "'Inter', sans-serif",
-                            color: "#ffffff !important",
                             bgcolor: "#252525",
+                            "& .MuiInputBase-input": {
+                              color: "#ffffff !important",
+                            },
                             "& .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#4b5563",
-                              "& input": { color: "#ffffff !important" },
                             },
                             "&:hover .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
-                              "& input": { color: "#ffffff !important" },
                             },
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
-                              "& input": { color: "#ffffff !important" },
                             },
                           },
                         }}
@@ -1081,25 +1077,24 @@ const UsersAdmin = () => {
                     InputLabelProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                       },
                     }}
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff !important",
                         bgcolor: "#252525",
+                        "& .MuiInputBase-input": {
+                          color: "#ffffff !important",
+                        },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1117,25 +1112,24 @@ const UsersAdmin = () => {
                     InputLabelProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                       },
                     }}
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff !important",
                         bgcolor: "#252525",
+                        "& .MuiInputBase-input": {
+                          color: "#ffffff !important",
+                        },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1154,25 +1148,24 @@ const UsersAdmin = () => {
                     InputLabelProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                       },
                     }}
                     InputProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff !important",
                         bgcolor: "#252525",
+                        "& .MuiInputBase-input": {
+                          color: "#ffffff !important",
+                        },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1195,22 +1188,16 @@ const UsersAdmin = () => {
                       required
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        color: "#ffffff !important",
                         bgcolor: "#252525",
+                        "& .MuiSelect-select": { color: "#ffffff !important" },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
-                          "& input": { color: "#ffffff !important" },
-                        },
-                        "& .MuiSelect-select": {
-                          color: "#ffffff !important",
                         },
                       }}
                       MenuProps={{
