@@ -36,6 +36,141 @@ import ErrorBoundary from "../components/ErrorBoundary";
 import "../styles/InstrumentsAdmin.css";
 
 // ... (All other imports, styled components, constants, and initial state remain unchanged)
+const DrawerHeader = styled("div")(({ theme }) => ({
+  ...(theme?.mixins?.toolbar || {
+    minHeight: 56,
+
+    "@media (min-width:600px)": {
+      minHeight: 64,
+    },
+  }),
+}));
+
+const ToolCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(3),
+
+  backgroundColor: "#1e1e1e",
+
+  borderRadius: "12px",
+
+  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+
+  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+
+  "&:hover": {
+    transform: "translateY(-2px)",
+
+    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)",
+  },
+
+  fontFamily: "'Inter', sans-serif",
+}));
+
+const CTAButton = styled(Button)(({ theme }) => ({
+  backgroundColor: "#3b82f6",
+
+  color: "#ffffff",
+
+  padding: theme.spacing(1, 2.5),
+
+  fontWeight: 500,
+
+  fontSize: "0.85rem",
+
+  textTransform: "none",
+
+  borderRadius: "8px",
+
+  fontFamily: "'Inter', sans-serif",
+
+  "&:hover": {
+    backgroundColor: "#2563eb",
+
+    transform: "scale(1.03)",
+  },
+
+  "&.Mui-disabled": {
+    backgroundColor: "#4b5563",
+
+    color: "#9ca3af",
+  },
+
+  transition: "all 0.2s ease",
+
+  "& .MuiCircularProgress-root": {
+    color: "#ffffff",
+  },
+}));
+
+const CancelButton = styled(Button)(({ theme }) => ({
+  color: "#ef4444",
+
+  fontFamily: "'Inter', sans-serif",
+
+  textTransform: "none",
+
+  "&:hover": {
+    color: "#dc2626",
+
+    backgroundColor: "#1f2937",
+  },
+}));
+
+const ENTITY_TYPES = {
+  CATEGORIES: "Categories",
+
+  INSTRUMENT_TYPES: "Instrument Types",
+
+  INSTRUMENTS: "Instruments",
+
+  CONFIGURABLE_FIELDS: "Configurable Fields",
+
+  ADDON_TYPES: "AddOn Types",
+};
+
+const CATEGORY_CHOICES = [
+  { value: "Pressure Instruments", label: "Pressure Instruments" },
+
+  { value: "Temperature Instruments", label: "Temperature Instruments" },
+
+  { value: "Test Instruments", label: "Test Instruments" },
+];
+
+const TYPE_CHOICES = [
+  { value: "Pressure Gauges", label: "Pressure Gauges" },
+
+  { value: "Digital Gauges", label: "Digital Gauges" },
+
+  { value: "High-Purity", label: "High-Purity" },
+
+  { value: "Test Gauges", label: "Test Gauges" },
+
+  { value: "Differential Gauges", label: "Differential Gauges" },
+
+  { value: "Pressure Switches", label: "Pressure Switches" },
+
+  { value: "Pressure Sensors", label: "Pressure Sensors" },
+
+  { value: "Diaphragm Seals - isolates", label: "Diaphragm Seals - Isolators" },
+
+  { value: "Threaded Seals", label: "Threaded Seals" },
+
+  { value: "Isolation Rings", label: "Isolation Rings" },
+
+  { value: "Flanged Seals", label: "Flanged Seals" },
+
+  { value: "In-Line", label: "In-Line" },
+
+  { value: "Accessories", label: "Accessories" },
+
+  { value: "Thermometers", label: "Thermometers" },
+
+  { value: "Bimetals Thermometers", label: "Bimetals Thermometers" },
+
+  { value: "Gas Actuated Thermometers", label: "Gas Actuated Thermometers" },
+
+  { value: "Thermowells", label: "Thermowells" },
+];
 
 // InstrumentsAdmin Component
 const InstrumentsAdmin = () => {
@@ -84,6 +219,25 @@ const InstrumentsAdmin = () => {
   const [confirmMessage, setConfirmMessage] = useState("");
 
   // ... (validateImage function remains unchanged)
+  const validateImage = (file) => {
+    const validTypes = ["image/jpeg", "image/png"];
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (!validTypes.includes(file.type)) {
+      setModalError("Only JPEG or PNG images are allowed.");
+
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      setModalError("Image size must be less than 5MB.");
+
+      return false;
+    }
+
+    return true;
+  };
 
   const handleModalClose = () => {
     setOpenModal(false);
@@ -101,6 +255,510 @@ const InstrumentsAdmin = () => {
   };
 
   // ... (tabs array, fetchData, useEffect, getField, filteredItems, useEffect for filteredData, handleSort, openAddModal, openEditModal remain unchanged)
+  const tabs = [
+    {
+      name: ENTITY_TYPES.CATEGORIES,
+
+      endpoint: "/api/admin/categories/",
+
+      fields: ["id", "name"],
+
+      writableFields: ["name"],
+
+      searchFields: ["name"],
+
+      lookups: {},
+
+      displayFields: { id: "ID", name: "Name" },
+
+      dataKey: "categories",
+    },
+
+    {
+      name: ENTITY_TYPES.INSTRUMENT_TYPES,
+
+      endpoint: "/api/admin/instrument-types/",
+
+      fields: ["id", "name", "category.name"],
+
+      writableFields: ["name", "category_id"],
+
+      searchFields: ["name"],
+
+      lookups: { category_id: "categories" },
+
+      displayFields: { id: "ID", name: "Name", "category.name": "Category" },
+
+      dataKey: "types",
+    },
+
+    {
+      name: ENTITY_TYPES.INSTRUMENTS,
+
+      endpoint: "/api/admin/instruments/",
+
+      fields: [
+        "id",
+
+        "name",
+
+        "type.name",
+
+        "category.name",
+
+        "base_price",
+
+        "image",
+
+        "is_available",
+      ],
+
+      writableFields: [
+        "name",
+
+        "type_id",
+
+        "base_price",
+
+        "description",
+
+        "specifications",
+
+        "image",
+
+        "is_available",
+      ],
+
+      searchFields: ["name"],
+
+      lookups: { type_id: "types" },
+
+      displayFields: {
+        id: "ID",
+
+        name: "Name",
+
+        "type.name": "Type",
+
+        "category.name": "Category",
+
+        base_price: "Base Price (RM)",
+
+        image: "Image",
+
+        is_available: "Available",
+      },
+
+      dataKey: "instruments",
+    },
+
+    {
+      name: ENTITY_TYPES.CONFIGURABLE_FIELDS,
+
+      endpoint: "/api/admin/configurable-fields/",
+
+      fields: ["id", "instrument.name", "name", "order"],
+
+      writableFields: [
+        "instrument_id",
+
+        "name",
+
+        "order",
+
+        "parent_field_id",
+
+        "trigger_value",
+      ],
+
+      searchFields: ["name"],
+
+      lookups: {
+        instrument_id: "instruments",
+
+        parent_field_id: "configurablefields",
+      },
+
+      displayFields: {
+        id: "ID",
+
+        "instrument.name": "Instrument",
+
+        name: "Field Name",
+
+        order: "Order",
+      },
+
+      dataKey: "configurablefields",
+    },
+
+    {
+      name: ENTITY_TYPES.ADDON_TYPES,
+
+      endpoint: "/api/admin/addon-types/",
+
+      fields: ["id", "instruments", "name"],
+
+      writableFields: ["name", "instrument_ids"],
+
+      searchFields: ["name"],
+
+      lookups: { instrument_ids: "instruments" },
+
+      displayFields: {
+        id: "ID",
+
+        instruments: "Instruments",
+
+        name: "Name",
+      },
+
+      dataKey: "addontypes",
+    },
+  ];
+
+  const fetchData = async () => {
+    setLoading(true);
+
+    setError("");
+
+    try {
+      const access = localStorage.getItem("access");
+
+      if (!access) {
+        setError("Please log in to access the admin panel.");
+
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${access}` };
+
+      const endpoints = [
+        "/api/admin/instruments/",
+
+        "/api/admin/configurable-fields/",
+
+        "/api/admin/addon-types/",
+
+        "/api/admin/instrument-types/",
+
+        "/api/admin/categories/",
+      ];
+
+      const responses = await Promise.all(
+        endpoints.map((endpoint) =>
+          api.get(endpoint, { headers }).catch((err) => ({
+            error: err.response?.data?.detail || "Network error",
+
+            data: [],
+          }))
+        )
+      );
+
+      const newData = {
+        instruments: Array.isArray(responses[0].data) ? responses[0].data : [],
+
+        configurablefields: Array.isArray(responses[1].data)
+          ? responses[1].data
+          : [],
+
+        addontypes: Array.isArray(responses[2].data) ? responses[2].data : [],
+
+        types: Array.isArray(responses[3].data) ? responses[3].data : [],
+
+        categories: Array.isArray(responses[4].data) ? responses[4].data : [],
+      };
+
+      setData(newData);
+
+      setFilteredData({
+        instruments: newData.instruments,
+
+        configurablefields: newData.configurablefields,
+
+        addontypes: newData.addontypes,
+
+        types: newData.types,
+
+        categories: newData.categories,
+      });
+
+      if (responses.some((res) => res.error)) {
+        setError("Some data could not be loaded. Please try again.");
+      }
+    } catch (err) {
+      setError(`Error loading data: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, []);
+
+  const getField = (obj, field) => {
+    if (!obj) return "";
+
+    if (field === "instruments") {
+      const instrumentIds = obj.instrument_ids || [];
+
+      const instrumentNames = instrumentIds
+
+        .map((id) => data.instruments.find((inst) => inst.id === id)?.name)
+
+        .filter(Boolean)
+
+        .join(", ");
+
+      return instrumentNames || "N/A";
+    }
+
+    if (field === "base_price") {
+      return obj[field] ? `RM ${parseFloat(obj[field]).toFixed(2)}` : "N/A";
+    }
+
+    if (field.includes(".")) {
+      const [key, subKey] = field.split(".");
+
+      if (key === "instrument" && subKey === "name") {
+        const instrumentId =
+          obj.instrument_id || (obj.instrument && obj.instrument.id);
+
+        if (instrumentId) {
+          const instrument = data.instruments.find(
+            (inst) => inst.id === instrumentId
+          );
+
+          return instrument?.name || "N/A";
+        }
+
+        return obj.instrument?.name || "N/A";
+      }
+
+      if (key === "category" && subKey === "name") {
+        const categoryId = obj.category_id || (obj.category && obj.category.id);
+
+        if (categoryId) {
+          const category = data.categories.find((cat) => cat.id === categoryId);
+
+          return category?.name || "N/A";
+        }
+
+        return obj.category?.name || "N/A";
+      }
+
+      if (key === "type" && subKey === "name") {
+        const typeId = obj.type_id || (obj.type && obj.type.id);
+
+        if (typeId) {
+          const type = data.types.find((t) => t.id === typeId);
+
+          return type?.name || "N/A";
+        }
+
+        return obj.type?.name || "N/A";
+      }
+
+      return obj[key]?.[subKey] || "N/A";
+    }
+
+    return obj[field] || "N/A";
+  };
+
+  const filteredItems = useMemo(() => {
+    const tab = tabs[activeTab];
+
+    const key = tab.dataKey;
+
+    let filtered = [...(data[key] || [])];
+
+    if (tab.name === ENTITY_TYPES.INSTRUMENTS && filterCategoryId) {
+      filtered = filtered.filter(
+        (item) =>
+          item.category_id === parseInt(filterCategoryId) ||
+          (item.category && item.category.id === parseInt(filterCategoryId))
+      );
+    } else if (
+      tab.name === ENTITY_TYPES.INSTRUMENT_TYPES &&
+      filterTypeCategoryId
+    ) {
+      filtered = filtered.filter(
+        (item) =>
+          item.category_id === parseInt(filterTypeCategoryId) ||
+          (item.category && item.category.id === parseInt(filterTypeCategoryId))
+      );
+    } else if (
+      tab.name === ENTITY_TYPES.CONFIGURABLE_FIELDS &&
+      filterInstrumentId
+    ) {
+      filtered = filtered.filter(
+        (item) =>
+          item.instrument_id === parseInt(filterInstrumentId) ||
+          (item.instrument &&
+            item.instrument.id === parseInt(filterInstrumentId))
+      );
+    } else if (tab.name === ENTITY_TYPES.ADDON_TYPES && filterInstrumentId) {
+      filtered = filtered.filter((item) =>
+        item.instrument_ids?.includes(parseInt(filterInstrumentId))
+      );
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        tab.searchFields.some((field) =>
+          getField(item, field)
+            ?.toString()
+
+            .toLowerCase()
+
+            .includes(searchTerm.toLowerCase())
+        )
+      );
+    }
+
+    filtered.sort((a, b) => {
+      const fieldA = getField(a, sortConfig.field) || "";
+
+      const fieldB = getField(b, sortConfig.field) || "";
+
+      const multiplier = sortConfig.direction === "asc" ? 1 : -1;
+
+      if (sortConfig.field === "id" || sortConfig.field === "base_price") {
+        return (
+          multiplier *
+          ((a?.[sortConfig.field] || 0) - (b?.[sortConfig.field] || 0))
+        );
+      }
+
+      return multiplier * fieldA.toString().localeCompare(fieldB.toString());
+    });
+
+    return filtered;
+  }, [
+    activeTab,
+
+    data,
+
+    searchTerm,
+
+    sortConfig,
+
+    filterCategoryId,
+
+    filterInstrumentId,
+
+    filterTypeCategoryId,
+  ]);
+
+  useEffect(() => {
+    const tab = tabs[activeTab];
+
+    const key = tab.dataKey;
+
+    setFilteredData((prev) => ({ ...prev, [key]: filteredItems }));
+  }, [filteredItems, activeTab]);
+
+  const handleSort = (field) => {
+    setSortConfig((prev) => ({
+      field,
+
+      direction:
+        prev.field === field && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const openAddModal = () => {
+    if (userRole !== "admin") {
+      setError("You do not have permission to add items.");
+
+      return;
+    }
+
+    setModalAction("add");
+
+    setModalData({ is_available: true });
+
+    setModalType(tabs[activeTab].name);
+
+    setFieldOptions([]);
+
+    setAddonOptions([]);
+
+    setNewOption({ label: "", code: "", price: "" });
+
+    setImagePreview(null);
+
+    setModalError("");
+
+    setOpenModal(true);
+  };
+
+  const openEditModal = async (item) => {
+    if (userRole !== "admin") {
+      setError("You do not have permission to edit items.");
+
+      return;
+    }
+
+    setModalAction("edit");
+
+    setModalData({ ...item, image: item.image || null });
+
+    setModalType(tabs[activeTab].name);
+
+    setImagePreview(item.image || null);
+
+    setModalError("");
+
+    try {
+      const access = localStorage.getItem("access");
+
+      const headers = { Authorization: `Bearer ${access}` };
+
+      if (tabs[activeTab].name === ENTITY_TYPES.CONFIGURABLE_FIELDS) {
+        const response = await api.get(`/api/admin/field-options/`, {
+          headers,
+
+          params: { field_id: item.id },
+        });
+
+        setFieldOptions(
+          Array.isArray(response.data)
+            ? response.data.filter((opt) => opt.field_id === item.id)
+            : []
+        );
+      } else if (tabs[activeTab].name === ENTITY_TYPES.ADDON_TYPES) {
+        const response = await api.get(`/api/admin/addons/`, {
+          headers,
+
+          params: { addon_type_id: item.id },
+        });
+
+        setAddonOptions(
+          Array.isArray(response.data)
+            ? response.data.filter((addon) => addon.addon_type_id === item.id)
+            : []
+        );
+      }
+    } catch (err) {
+      setModalError(
+        `Failed to load options: ${
+          err.response?.data?.detail || "Network error"
+        }`
+      );
+    }
+
+    setNewOption({ label: "", code: "", price: "" });
+
+    setOpenModal(true);
+  };
 
   const handleSave = async () => {
     if (userRole !== "admin") {
@@ -331,6 +989,103 @@ const InstrumentsAdmin = () => {
   };
 
   // ... (handleOpenConfirmDialog, handleCloseConfirmDialog, handleConfirmAction, handleDeleteFieldOption, handleDeleteAddon, handleDelete remain unchanged)
+  const handleOpenConfirmDialog = (action, message) => {
+    setConfirmAction(() => action);
+
+    setConfirmMessage(message);
+
+    setOpenConfirmDialog(true);
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false);
+
+    setConfirmAction(null);
+
+    setConfirmMessage("");
+  };
+
+  const handleConfirmAction = async () => {
+    if (confirmAction) {
+      await confirmAction();
+    }
+
+    handleCloseConfirmDialog();
+  };
+
+  const handleDeleteFieldOption = async (optionId) => {
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+
+        await api.delete(`/api/admin/field-options/${optionId}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+
+        setFieldOptions(fieldOptions.filter((opt) => opt.id !== optionId));
+
+        setSuccess("Field option deleted successfully!");
+      } catch (err) {
+        setError(
+          `Failed to delete field option: ${
+            err.response?.data?.detail || "Network error"
+          }`
+        );
+      }
+    }, "Are you sure you want to delete this field option?");
+  };
+
+  const handleDeleteAddon = async (addonId) => {
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+
+        await api.delete(`/api/admin/addons/${addonId}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+
+        setAddonOptions(addonOptions.filter((opt) => opt.id !== addonId));
+
+        setSuccess("Addon deleted successfully!");
+      } catch (err) {
+        setError(
+          `Failed to delete addon: ${
+            err.response?.data?.detail || "Network error"
+          }`
+        );
+      }
+    }, "Are you sure you want to delete this addon?");
+  };
+
+  const handleDelete = async (id) => {
+    if (userRole !== "admin") {
+      setError("You do not have permission to delete items.");
+
+      return;
+    }
+
+    handleOpenConfirmDialog(async () => {
+      try {
+        const access = localStorage.getItem("access");
+
+        const tab = tabs[activeTab];
+
+        await api.delete(`${tab.endpoint}${id}/`, {
+          headers: { Authorization: `Bearer ${access}` },
+        });
+
+        setSuccess(`${tab.name} deleted successfully!`);
+
+        await fetchData();
+      } catch (err) {
+        setError(
+          `Failed to delete ${tab.name}: ${
+            err.response?.data?.detail || "Network error"
+          }`
+        );
+      }
+    }, `Are you sure you want to delete this ${tabs[activeTab].name.toLowerCase().slice(0, -1)}?`);
+  };
 
   const renderModalContent = () => {
     if (!modalType) {
