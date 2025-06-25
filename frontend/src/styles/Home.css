@@ -8,7 +8,7 @@
 
 .home-hero {
   text-align: center;
-  padding: 24px; /* Reduced from 120px to 24px for less top/bottom spacing */
+  padding: 60px; /* Reduced from 120px to 24px for less top/bottom spacing */
   background-image: url("../assets/gas.jpg");
   background-size: contain;
   background-position: center;
