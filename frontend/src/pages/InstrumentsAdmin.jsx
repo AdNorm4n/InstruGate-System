@@ -1330,81 +1330,74 @@ const InstrumentsAdmin = () => {
           >
             Media
           </Typography>
-          <Box sx={{ mb: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: "0.875rem",
-                mb: 1,
-                fontFamily: "'Inter', sans-serif",
-                color: "#d1d5db",
-              }}
-            >
-              Image
-            </Typography>
-            <input
-              type="file"
-              accept="image/jpeg,image/png"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file && validateImage(file)) {
-                  if (imagePreview) URL.revokeObjectURL(imagePreview);
-                  setModalData({ ...modalData, image: file });
-                  setImagePreview(URL.createObjectURL(file));
-                } else if (!file) {
-                  setModalData({ ...modalData, image: null });
-                  setImagePreview(null);
-                }
-              }}
-              style={{ width: "100%", marginBottom: "8px", color: "#ffffff" }}
-            />
-            {(imagePreview ||
-              (modalData.image && typeof modalData.image === "string")) && (
-              <Box sx={{ mt: 2, textAlign: "center" }}>
-                <img
-                  src={imagePreview || modalData.image}
-                  alt="Instrument Preview"
-                  style={{
-                    maxWidth: "150px",
-                    maxHeight: "150px",
-                    objectFit: "contain",
-                    borderRadius: "8px",
-                    border: "1px solid #4b5563",
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "block";
-                  }}
-                />
-                <Typography
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    color: "#9ca3af",
-                    display: "none",
-                    mt: 1,
-                  }}
-                >
-                  Image unavailable
-                </Typography>
-                <CTAButton
-                  size="small"
-                  onClick={() => {
+          <Box
+            sx={{ mb: 2, display: "flex", alignItems: "flex-start", gap: 2 }}
+          >
+            <Box>
+              <input
+                type="file"
+                accept="image/jpeg,image/png"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file && validateImage(file)) {
                     if (imagePreview) URL.revokeObjectURL(imagePreview);
+                    setModalData({ ...modalData, image: file });
+                    setImagePreview(URL.createObjectURL(file));
+                  } else if (!file) {
                     setModalData({ ...modalData, image: null });
                     setImagePreview(null);
-                  }}
-                  sx={{
-                    mt: 1,
-                    bgcolor: "#ef4444",
-                    "&:hover": { bgcolor: "#dc2626" },
-                    fontFamily: "'Inter', sans-serif",
-                    color: "#ffffff",
-                  }}
-                >
-                  Remove Image
-                </CTAButton>
-              </Box>
-            )}
+                  }
+                }}
+                style={{ width: "100%", marginBottom: "8px", color: "#ffffff" }}
+              />
+              {(imagePreview ||
+                (modalData.image && typeof modalData.image === "string")) && (
+                <Box sx={{ mt: 2, textAlign: "left" }}>
+                  <img
+                    src={imagePreview || modalData.image}
+                    alt="Instrument Preview"
+                    style={{
+                      maxWidth: "150px",
+                      maxHeight: "150px",
+                      objectFit: "contain",
+                      borderRadius: "8px",
+                      border: "1px solid #4b5563",
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "block";
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#9ca3af",
+                      display: "none",
+                      mt: 1,
+                    }}
+                  >
+                    Image unavailable
+                  </Typography>
+                  <CTAButton
+                    size="small"
+                    onClick={() => {
+                      if (imagePreview) URL.revokeObjectURL(imagePreview);
+                      setModalData({ ...modalData, image: null });
+                      setImagePreview(null);
+                    }}
+                    sx={{
+                      mt: 1,
+                      bgcolor: "#ef4444",
+                      "&:hover": { bgcolor: "#dc2626" },
+                      fontFamily: "'Inter', sans-serif",
+                      color: "#ffffff",
+                    }}
+                  >
+                    Remove Image
+                  </CTAButton>
+                </Box>
+              )}
+            </Box>
           </Box>
         </Box>
       );
