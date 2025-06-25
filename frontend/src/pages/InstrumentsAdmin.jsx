@@ -52,7 +52,7 @@ const ToolCard = styled(Paper)(({ theme }) => ({
   transition: "transform 0.2s ease, box-shadow 0.2s ease",
   "&:hover": {
     transform: "translateY(-2px)",
-    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)",
+    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
   },
   fontFamily: "'Inter', sans-serif",
 }));
@@ -2668,7 +2668,7 @@ const InstrumentsAdmin = () => {
                   "& .MuiDialog-paper": {
                     bgcolor: "#1e1e1e",
                     borderRadius: "16px",
-                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.6)",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
                     fontFamily: "'Inter', sans-serif",
                   },
                 }}
@@ -2746,7 +2746,7 @@ const InstrumentsAdmin = () => {
                   "& .MuiDialog-paper": {
                     bgcolor: "#1e1e1e",
                     borderRadius: "16px",
-                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.8)",
+                    boxShadow: "0 6px 24px rgba(0, 0, 0, 0.10)",
                     fontFamily: "'Inter', sans-serif",
                   },
                 }}
@@ -2816,6 +2816,58 @@ const InstrumentsAdmin = () => {
                     }}
                   >
                     Delete
+                  </CTAButton>
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openModal}
+                onClose={handleModalClose}
+                maxWidth={modalType === ENTITY_TYPES.ADDON_TYPES ? "lg" : "md"} // Larger for addons
+                fullWidth
+                sx={{
+                  "& .MuiDialog-paper": {
+                    bgcolor: "#1a1a1a",
+                    color: "#ffffff",
+                    borderRadius: "12px",
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+                    p: 2,
+                  },
+                }}
+              >
+                <DialogTitle
+                  sx={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    bgcolor: "#252525",
+                    borderRadius: "8px 8px 0 0",
+                    py: 2,
+                    px: 3,
+                  }}
+                >
+                  {modalAction === "add"
+                    ? `Add ${modalType}`
+                    : `Edit ${modalType}`}
+                </DialogTitle>
+                <DialogContent sx={{ mt: 2, px: 3, py: 2, bgcolor: "#1a1a1a" }}>
+                  {modalError && (
+                    <Alert
+                      severity="error"
+                      sx={{ mb: 2, fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {modalError}
+                    </Alert>
+                  )}
+                  {renderModalContent()}
+                </DialogContent>
+                <DialogActions sx={{ px: 3, py: 2, bgcolor: "#1a1a1a" }}>
+                  <CancelButton onClick={handleModalClose}>Cancel</CancelButton>
+                  <CTAButton
+                    onClick={handleSave}
+                    disabled={userRole !== "admin"}
+                    sx={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    Save
                   </CTAButton>
                 </DialogActions>
               </Dialog>
