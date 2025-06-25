@@ -887,7 +887,27 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    bgcolor: "#1a1a1a",
+                    "& .MuiMenuItem-root": {
+                      color: "#ffffff",
+                      "&:hover": { bgcolor: "#333333" },
+                    },
+                  },
+                },
               }}
             >
               <MenuItem
@@ -929,7 +949,27 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    bgcolor: "#1a1a1a",
+                    "& .MuiMenuItem-root": {
+                      color: "#ffffff",
+                      "&:hover": { bgcolor: "#333333" },
+                    },
+                  },
+                },
               }}
             >
               <MenuItem
@@ -967,7 +1007,27 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    bgcolor: "#1a1a1a",
+                    "& .MuiMenuItem-root": {
+                      color: "#ffffff",
+                      "&:hover": { bgcolor: "#333333" },
+                    },
+                  },
+                },
               }}
             >
               <MenuItem
@@ -1024,7 +1084,16 @@ const InstrumentsAdmin = () => {
               sx: {
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
               },
             }}
           />
@@ -1048,7 +1117,16 @@ const InstrumentsAdmin = () => {
               sx: {
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
               },
             }}
           />
@@ -1070,7 +1148,27 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    bgcolor: "#1a1a1a",
+                    "& .MuiMenuItem-root": {
+                      color: "#ffffff",
+                      "&:hover": { bgcolor: "#333333" },
+                    },
+                  },
+                },
               }}
             >
               <MenuItem
@@ -1108,7 +1206,27 @@ const InstrumentsAdmin = () => {
               sx={{
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    bgcolor: "#1a1a1a",
+                    "& .MuiMenuItem-root": {
+                      color: "#ffffff",
+                      "&:hover": { bgcolor: "#333333" },
+                    },
+                  },
+                },
               }}
             >
               <MenuItem value="true" sx={{ fontFamily: "'Inter', sans-serif" }}>
@@ -1154,7 +1272,16 @@ const InstrumentsAdmin = () => {
               sx: {
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
               },
             }}
           />
@@ -1177,7 +1304,16 @@ const InstrumentsAdmin = () => {
               sx: {
                 fontFamily: "'Inter', sans-serif",
                 color: "#ffffff",
-                bgcolor: "#374151",
+                bgcolor: "#252525",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#4b5563",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#3b82f6",
+                },
               },
             }}
           />
@@ -1224,7 +1360,7 @@ const InstrumentsAdmin = () => {
             />
             {(imagePreview ||
               (modalData.image && typeof modalData.image === "string")) && (
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{ mt: 2, textAlign: "center" }}>
                 <img
                   src={imagePreview || modalData.image}
                   alt="Instrument Preview"
@@ -1261,6 +1397,8 @@ const InstrumentsAdmin = () => {
                     mt: 1,
                     bgcolor: "#ef4444",
                     "&:hover": { bgcolor: "#dc2626" },
+                    fontFamily: "'Inter', sans-serif",
+                    color: "#ffffff",
                   }}
                 >
                   Remove Image
@@ -1298,7 +1436,27 @@ const InstrumentsAdmin = () => {
                     sx={{
                       fontFamily: "'Inter', sans-serif",
                       color: "#ffffff",
-                      bgcolor: "#374151",
+                      bgcolor: "#252525",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#4b5563",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#3b82f6",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#3b82f6",
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: "#1a1a1a",
+                          "& .MuiMenuItem-root": {
+                            color: "#ffffff",
+                            "&:hover": { bgcolor: "#333333" },
+                          },
+                        },
+                      },
                     }}
                   >
                     <MenuItem
@@ -1341,7 +1499,16 @@ const InstrumentsAdmin = () => {
                   sx: {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   },
                 }}
               />
@@ -1364,7 +1531,7 @@ const InstrumentsAdmin = () => {
               {fieldOptions.length > 0 ? (
                 <Table
                   size="small"
-                  sx={{ bgcolor: "#1e1e1e", borderRadius: "8px" }}
+                  sx={{ bgcolor: "#2d2d2d", borderRadius: "8px" }}
                 >
                   <TableHead>
                     <TableRow>
@@ -1372,7 +1539,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         ID
@@ -1381,7 +1548,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Label
@@ -1390,7 +1557,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Code
@@ -1399,7 +1566,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Price (RM)
@@ -1408,7 +1575,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Actions
@@ -1482,8 +1649,17 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
                     "& .MuiInputBase-input": { color: "#ffffff" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   }}
                   InputLabelProps={{
                     sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
@@ -1500,8 +1676,17 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
                     "& .MuiInputBase-input": { color: "#ffffff" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   }}
                   InputLabelProps={{
                     sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
@@ -1518,8 +1703,17 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
                     "& .MuiInputBase-input": { color: "#ffffff" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   }}
                   type="number"
                   inputProps={{ min: 0, step: "0.01" }}
@@ -1573,7 +1767,27 @@ const InstrumentsAdmin = () => {
                     sx={{
                       fontFamily: "'Inter', sans-serif",
                       color: "#ffffff",
-                      bgcolor: "#374151",
+                      bgcolor: "#252525",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#4b5563",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#3b82f6",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#3b82f6",
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: "#1a1a1a",
+                          "& .MuiMenuItem-root": {
+                            color: "#ffffff",
+                            "&:hover": { bgcolor: "#333333" },
+                          },
+                        },
+                      },
                     }}
                   >
                     {lookupItems.map((item) => (
@@ -1612,7 +1826,16 @@ const InstrumentsAdmin = () => {
                   sx: {
                     fontFamily: "'Inter', sans-serif",
                     color: "#ffffff",
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   },
                 }}
               />
@@ -1635,7 +1858,7 @@ const InstrumentsAdmin = () => {
               {addonOptions.length > 0 ? (
                 <Table
                   size="small"
-                  sx={{ bgcolor: "#1e1e1e", borderRadius: "8px" }}
+                  sx={{ bgcolor: "#2d2d2d", borderRadius: "8px" }}
                 >
                   <TableHead>
                     <TableRow>
@@ -1643,7 +1866,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         ID
@@ -1652,7 +1875,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Label
@@ -1661,7 +1884,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Code
@@ -1670,7 +1893,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Price (RM)
@@ -1679,7 +1902,7 @@ const InstrumentsAdmin = () => {
                         sx={{
                           fontFamily: "'Inter', sans-serif",
                           color: "#ffffff",
-                          bgcolor: "#2a2a2a",
+                          bgcolor: "#252525",
                         }}
                       >
                         Actions
@@ -1753,8 +1976,17 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
                     "& .MuiInputBase-input": { color: "#ffffff" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   }}
                   InputLabelProps={{
                     sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
@@ -1771,8 +2003,17 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
                     "& .MuiInputBase-input": { color: "#ffffff" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   }}
                   InputLabelProps={{
                     sx: { fontFamily: "'Inter', sans-serif", color: "#d1d5db" },
@@ -1789,8 +2030,17 @@ const InstrumentsAdmin = () => {
                   variant="outlined"
                   sx={{
                     flex: 1,
-                    bgcolor: "#374151",
+                    bgcolor: "#252525",
                     "& .MuiInputBase-input": { color: "#ffffff" },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#4b5563",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#3b82f6",
+                    },
                   }}
                   type="number"
                   inputProps={{ min: 0, step: "0.01" }}
@@ -2082,6 +2332,7 @@ const InstrumentsAdmin = () => {
               >
                 Instruments Management
               </Typography>
+              <Box sx={{ mt: 4 }} />
               <Snackbar
                 open={!!success}
                 autoHideDuration={3000}
