@@ -921,7 +921,7 @@ const UsersAdmin = () => {
                     InputLabelProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                       },
                     }}
                     InputProps={{
@@ -931,12 +931,15 @@ const UsersAdmin = () => {
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -956,7 +959,7 @@ const UsersAdmin = () => {
                     InputLabelProps={{
                       sx: {
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                       },
                     }}
                     InputProps={{
@@ -966,12 +969,15 @@ const UsersAdmin = () => {
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1006,12 +1012,15 @@ const UsersAdmin = () => {
                             bgcolor: "#252525",
                             "& .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#4b5563",
+                              "& input": { color: "#ffffff !important" },
                             },
                             "&:hover .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
+                              "& input": { color: "#ffffff !important" },
                             },
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
+                              "& input": { color: "#ffffff !important" },
                             },
                           },
                         }}
@@ -1044,12 +1053,15 @@ const UsersAdmin = () => {
                             bgcolor: "#252525",
                             "& .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#4b5563",
+                              "& input": { color: "#ffffff !important" },
                             },
                             "&:hover .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
+                              "& input": { color: "#ffffff !important" },
                             },
                             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                               borderColor: "#3b82f6",
+                              "& input": { color: "#ffffff !important" },
                             },
                           },
                         }}
@@ -1079,12 +1091,15 @@ const UsersAdmin = () => {
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1112,12 +1127,15 @@ const UsersAdmin = () => {
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1146,12 +1164,15 @@ const UsersAdmin = () => {
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                       },
                     }}
@@ -1160,7 +1181,7 @@ const UsersAdmin = () => {
                     <InputLabel
                       sx={{
                         fontFamily: "'Inter', sans-serif",
-                        color: "#d1d5db",
+                        color: "#ffffff",
                       }}
                     >
                       Role
@@ -1178,12 +1199,15 @@ const UsersAdmin = () => {
                         bgcolor: "#252525",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#4b5563",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&:hover .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#3b82f6",
+                          "& input": { color: "#ffffff !important" },
                         },
                         "& .MuiSelect-select": {
                           color: "#ffffff !important",
