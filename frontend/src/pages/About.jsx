@@ -43,7 +43,7 @@ const HeaderSection = styled(Box)(({ theme }) => ({
 
 const CTAButton = styled(Button)(({ theme }) => ({
   backgroundColor: "#1976d2",
-  color: "#ffffff",
+  color: "#333333",
   padding: theme.spacing(1, 3),
   fontWeight: 600,
   fontSize: "0.9rem",
@@ -60,7 +60,7 @@ const CTAButton = styled(Button)(({ theme }) => ({
   },
   transition: "all 0.3s ease",
   "& .MuiCircularProgress-root": {
-    color: "#ffffff",
+    color: "#333333",
   },
 }));
 
@@ -70,7 +70,7 @@ const ProductCard = styled(Card)(({ theme }) => ({
   maxWidth: "320px",
   display: "flex",
   flexDirection: "column",
-  backgroundColor: "#ffffff",
+  backgroundColor: "#333333",
   border: "none",
   borderRadius: "8px",
   boxShadow: "0 6px 16px rgba(0, 0, 0, 0.2)",
@@ -119,7 +119,7 @@ function About() {
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 3,
-                  color: "#000000",
+                  color: "#ffffff",
                   textTransform: "uppercase",
                   fontSize: "1.25rem",
                 }}
@@ -130,7 +130,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "Inter, sans-serif !important",
-                  color: "#333",
+                  color: "#ffffff",
                   fontSize: "0.9rem",
                   lineHeight: 1.6,
                 }}
@@ -157,7 +157,7 @@ function About() {
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 3,
-                  color: "#000000",
+                  color: "#ffffff",
                   textTransform: "uppercase",
                   fontSize: "1.25rem",
                 }}
@@ -168,7 +168,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "Inter, sans-serif !important",
-                  color: "#333",
+                  color: "#ffffff",
                   fontSize: "0.9rem",
                   lineHeight: 1.6,
                 }}
@@ -196,7 +196,7 @@ function About() {
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 4,
-                  color: "#000000",
+                  color: "#ffffff",
                   textTransform: "uppercase",
                   fontSize: "1.5rem",
                 }}
@@ -220,7 +220,7 @@ function About() {
                           fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
                           mb: 2,
-                          color: "#000000",
+                          color: "#ffffff",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
@@ -233,7 +233,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "Inter, sans-serif !important",
-                          color: "#333",
+                          color: "#ffffff",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -280,7 +280,7 @@ function About() {
                           fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
                           mb: 2,
-                          color: "#000000",
+                          color: "#ffffff",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
@@ -293,7 +293,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "Inter, sans-serif !important",
-                          color: "#333",
+                          color: "#ffffff",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -324,7 +324,7 @@ function About() {
                           fontFamily: "Inter, sans-serif !important",
                           fontWeight: "bold",
                           mb: 2,
-                          color: "#000000",
+                          color: "#ffffff",
                           textTransform: "uppercase",
                           fontSize: "1.25rem",
                           lineHeight: 1.2,
@@ -337,7 +337,7 @@ function About() {
                       <Typography
                         sx={{
                           fontFamily: "Inter, sans-serif !important",
-                          color: "#333",
+                          color: "#ffffff",
                           lineHeight: 1.6,
                           fontSize: "0.9rem",
                         }}
@@ -357,7 +357,7 @@ function About() {
                   fontFamily: "Inter, sans-serif !important",
                   mt: 3,
                   display: "block",
-                  color: "#333",
+                  color: "#ffffff",
                   fontSize: "0.9rem",
                   lineHeight: 1.6,
                 }}
@@ -374,7 +374,7 @@ function About() {
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 3,
-                  color: "#000000",
+                  color: "#ffffff",
                   textTransform: "uppercase",
                   fontSize: "1.25rem",
                 }}
@@ -385,7 +385,7 @@ function About() {
                 variant="body1"
                 sx={{
                   fontFamily: "Inter, sans-serif !important",
-                  color: "#333",
+                  color: "#ffffff",
                   fontSize: "0.9rem",
                   lineHeight: 1.6,
                 }}
@@ -404,7 +404,7 @@ function About() {
                   fontFamily: "Inter, sans-serif !important",
                   fontWeight: "bold",
                   mb: 4,
-                  color: "#000000",
+                  color: "#ffffff",
                   textTransform: "uppercase",
                   fontSize: "1.25rem",
                 }}
@@ -418,7 +418,7 @@ function About() {
                     alignItems="center"
                     justifyContent="center"
                     sx={{
-                      backgroundColor: "#fff",
+                      backgroundColor: "#333333",
                       borderRadius: "12px",
                       p: 2,
                       boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
@@ -437,7 +437,7 @@ function About() {
                       variant="body1"
                       sx={{
                         fontFamily: "Inter, sans-serif !important",
-                        color: "#333",
+                        color: "#ffffff",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textAlign: "left",
                       }}
@@ -453,7 +453,7 @@ function About() {
                     alignItems="center"
                     justifyContent="center"
                     sx={{
-                      backgroundColor: "#fff",
+                      backgroundColor: "#333333",
                       borderRadius: "12px",
                       p: 2,
                       boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
@@ -472,7 +472,7 @@ function About() {
                       href="tel:+60341423808"
                       sx={{
                         fontFamily: "Inter, sans-serif !important",
-                        color: "#333",
+                        color: "#ffffff",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textDecoration: "none",
                         "&:hover": { color: "#d4a017" },
@@ -489,7 +489,7 @@ function About() {
                     alignItems="center"
                     justifyContent="center"
                     sx={{
-                      backgroundColor: "#fff",
+                      backgroundColor: "#333333",
                       borderRadius: "12px",
                       p: 2,
                       boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
@@ -508,7 +508,7 @@ function About() {
                       href="mailto:my_sales@rueger.com"
                       sx={{
                         fontFamily: "Inter, sans-serif !important",
-                        color: "#333",
+                        color: "#ffffff",
                         fontSize: { xs: "0.9rem", sm: "1rem" },
                         textDecoration: "none",
                         "&:hover": { color: "#d4a017" },
@@ -546,7 +546,7 @@ function About() {
                   aria-label="LinkedIn"
                   sx={{
                     color: "#0077b5",
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#333333",
                     "&:hover": {
                       color: "#0077b5",
                       backgroundColor: "#f5f5f5",
