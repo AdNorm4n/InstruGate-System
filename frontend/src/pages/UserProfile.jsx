@@ -20,10 +20,6 @@ import { UserContext } from "../contexts/UserContext";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 import "../styles/UserProfile.css";
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
-}));
-
 const ProfileCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   backgroundColor: "#ffffff",
@@ -339,9 +335,8 @@ function UserProfile() {
           fontFamily: "Helvetica, sans-serif !important",
         }}
       >
-        <DrawerHeader />
         <main style={{ flex: 1 }}>
-          <Container maxWidth="md" sx={{ py: 6, mt: 8 }}>
+          <Container maxWidth="md" sx={{ py: 2, mt: 4 }}>
             <Typography
               variant="h5"
               align="center"
