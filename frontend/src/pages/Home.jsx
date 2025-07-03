@@ -22,7 +22,7 @@ import tempImage from "../assets/temp.jpg";
 import testImage from "../assets/test.jpg";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
-  minHeight: "24px !important", // Reduced from 48px to 24px
+  minHeight: "24px !important",
 }));
 
 const Section = styled(Box)(({ theme }) => ({
