@@ -54,10 +54,6 @@ const formatPrice = (price) => {
   })}`;
 };
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
-}));
-
 const QuotationCard = styled(Card)(({ theme }) => ({
   borderRadius: "16px",
   backgroundColor: "#ffffff",
@@ -717,7 +713,6 @@ function SubmittedQuotations() {
           bgcolor: "#f8f9fa",
         }}
       >
-        <DrawerHeader />
         <main style={{ flex: 1 }}>
           <Container
             maxWidth="lg"

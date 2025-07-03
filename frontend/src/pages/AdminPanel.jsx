@@ -63,10 +63,6 @@ const barShadowPlugin = {
 
 ChartJS.register(barShadowPlugin);
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  height: "8px", // Reduced height (adjust as needed, e.g., 16px or 0px)
-}));
-
 const ToolCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
   backgroundColor: "#1e293b",
@@ -510,7 +506,7 @@ const AdminPanel = () => {
       >
         <main style={{ flex: 1 }}>
           <ErrorBoundary>
-            <Container maxWidth="xl" sx={{ py: 6, mt: 8 }}>
+            <Container maxWidth="xl" sx={{ py: 2, mt: 4 }}>
               <Typography
                 variant="h6"
                 align="center"

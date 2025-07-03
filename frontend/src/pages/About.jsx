@@ -20,10 +20,6 @@ import tempImage from "../assets/temp.jpg";
 import testImage from "../assets/test.jpg";
 import "../styles/About.css";
 
-const DrawerHeader = styled("div")(({ theme }) => ({
-  ...theme.mixins.toolbar,
-}));
-
 const Section = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(6),
   padding: theme.spacing(4),
@@ -100,9 +96,8 @@ function About() {
           fontFamily: "Inter, sans-serif !important",
         }}
       >
-        <DrawerHeader />
         <main>
-          <Container maxWidth="lg" sx={{ py: 2 }}>
+          <Container maxWidth="lg" sx={{ py: 2, mt: 4 }}>
             <HeaderSection>
               <Box
                 component="img"
